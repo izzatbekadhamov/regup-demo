@@ -1,0 +1,814 @@
+{
+ "source": "FR V0.3 pilot manbalari",
+ "competencies": [
+  {
+   "code": "KOR-01",
+   "name": "Mas'uliyatlilik",
+   "layer": "Korporativ",
+   "definition": "Vazifa, qaror va muammolar uchun javobgarlikni o‘z zimmasiga oladi, xatosini tan oladi va masalani oxiriga yetkazadi.",
+   "levels": {
+    "1": "Topshirilgan vazifa uchun javobgarlikni qabul qiladi\n- Topshiriqni eslatma bilan bajaradi va holatini rahbarga bildiradi.\n- Xato ko‘rsatilganda tan oladi va tuzatadi.\n- Muammo yoki kechikish yuzaga kelganda, bu haqda rahbariga xabar beradi va ko‘rsatma asosida uni bartaraf etishda ishtirok etadi.",
+    "2": "O‘z vazifasi va xatolari uchun javobgarlikni oladi\n- O‘z vazifasini muddatida bajaradi va kechikish xavfini oldindan aytadi.\n- Xatosini yashirmaydi, sababini va tuzatish choralarini aytadi.\n- Vakolati doirasidagi muammoni boshqalarga o‘tkazmay hal qiladi.",
+    "3": "Kelishilgan natijaga erishishni ta’minlaydi\n- Muammoni oxirigacha kuzatib, natija uchun shaxsiy javobgarlik oladi.\n- Takroriy xatoning oldini oladigan chorani joriy qiladi.\n- Resurs cheklovida ham muqobil yechim topib, kelishilgan natijani beradi.",
+    "4": "Jamoaviy natija uchun javobgarlikni muvofiqlashtiradi\n- Bo‘limlararo masalalarda egalikni belgilab, bajarilishini nazorat qiladi.\n- Jamoada xatolardan o‘rganish va javobgarlik me’yorini shakllantiradi.\n- Murakkab vaziyatlarda javobgarlik chegaralarini aniqlashtirib, umumiy natijani himoya qiladi.",
+    "5": "Tashkilotda mas’uliyat va hisobdorlik tizimini shakllantiradi\n- Tashkilot miqyosida mas’uliyat madaniyatini va hisobdorlik tizimini yaratadi.\n- Tizimli xatolarning ildiz sabablarini bartaraf etadigan mexanizm yaratadi.\n- Yuqori noaniqlikda ham tashkilot manfaatini ko‘zlab javobgarlikni o‘z zimmasiga oladi."
+   },
+   "negative": "- Vazifa yoki muddatni aniqlashtirmasdan ishni qabul qiladi, keyin tushunmovchilikni bahona qiladi.\n- Ish kechikishini bilsa ham, bu haqda manfaatdor tomonlarga vaqtida xabar bermaydi.\n- Muammo yuzaga kelganda yechim izlash o‘rniga aybni boshqalarga yuklaydi.\n- O‘z xatosini yashiradi yoki uning oqibatlarini bartaraf etishda ishtirok etmaydi.\n- Vazifani boshqaga topshirgach, uning bajarilishini kuzatmaydi.\n- «Mening qismim tugadi» deb, kelishilgan yakuniy natija ta’minlanganini tekshirmaydi.\n- Bajarishga ulgurmasligi ayon bo‘lsa ham, yordam so‘ramaydi yoki masalani vaqtida yuqoriga ko‘tarmaydi.\n- Faqat tashqi sabablarni keltirib, o‘z ta’siri doirasidagi choralarni ko‘rmaydi"
+  },
+  {
+   "code": "KOR-02",
+   "name": "Adolatlilik",
+   "layer": "Korporativ",
+   "definition": "Qaror va munosabatlarda xolis, ochiq va bir xil mezonga amal qiladi.",
+   "levels": {
+    "1": "Asosiy etik qoidalarga amal qiladi\n- Asosiy etik qoidalarga ko‘rsatma asosida rioya qiladi.\n- Maxfiy ma’lumotni kimga berish mumkinligini aniqlashtiradi.\n- Qaror mezoni yoki maxfiylik talabi noaniq bo‘lsa, uni rahbaridan aniqlashtiradi va berilgan ko‘rsatmaga amal qiladi.",
+    "2": "Xolislik va maxfiylik talablariga rioya qiladi\n- Manfaatlar to‘qnashuvini yashirmaydi va rahbarga bildiradi.\n- Shaxsiy va maxfiy ma’lumotlarni belgilangan tartibda saqlaydi.\n- Xodimlarni shaxsiy yaqinlikdan qat’i nazar bir xil standartda baholaydi.\n- Boshqalarning ishga qo‘shgan hissasini e’tirof etadi.",
+    "3": "Qarorlarda bir xil mezonni qo‘llaydi\n- Qaror mezonlarini ochiq tushuntiradi va bir xil holatga bir xil mezon qo‘llaydi.\n- Jamoaga maxfiylik talabini tushuntiradi va buzilishning oldini oladi.\n- Noqulay faktlarni yashirmasdan rahbariyat va jamoaga yetkazadi.",
+    "4": "Murakkab vaziyatlarda xolis jarayonni ta’minlaydi\n- Murakkab manfaatlar to‘qnashuvida xolis jarayon va tekshiruvni tashkil qiladi.\n- Maxfiylik xavflarini tizimli nazorat qilib, buzilishlarga xolis munosabat bildiradi.\n- Bosim ostida ham adolatli qarorni dalillar bilan himoya qiladi.",
+    "5": "Tashkilotda adolatli boshqaruv standartlarini shakllantiradi\n- Etik boshqaruv standartlari va ishonch muhitini tashkilot miqyosida mustahkamlaydi.\n- Ma’lumot etikasi va maxfiylik bo‘yicha tashkilot amaliyotini takomillashtiradi.\n- Tashkilot obro‘siga qisqa muddatli foydadan ustun qaraydigan etik mezon yaratadi."
+   },
+   "negative": "- Xodimlarga bir xil vaziyatda turlicha mezon qo‘llaydi yoki ayrimlarga asossiz imtiyoz beradi.\n- Qarorga shaxsiy yaqinlik, yoqtirish yoki kelishmovchilikning ta’sir qilishiga yo‘l qo‘yadi.\n- Manfaatlar to‘qnashuvini yashiradi yoki u haqida vaqtida xabar bermaydi.\n- Qaror sababini tushuntira olmaydi, qo‘llangan mezonlarni izchil ko‘rsatmaydi.\n- Noqulay faktlarni yashiradi yoki qarorni oqlash uchun ma’lumotni tanlab taqdim etadi.\n- Xodimlarning shaxsiy yoki maxfiy ma’lumotlarini ruxsatsiz ulashadi.\n- Shikoyat yoki xatoni tekshirishda bir tomonning fikriga tayanib xulosa chiqaradi.\n- Bosim ostida dalillarga zid qaror qabul qiladi yoki adolatsiz qarorga ko‘z yumadi.\n- Qaroriga shaxsiy munosabat ta’sir qilayotganini anglamaydi yoki ko‘rsatilganda ham mezonni qayta ko‘rib chiqmaydi."
+  },
+  {
+   "code": "KOR-03",
+   "name": "Jamoaviylik",
+   "layer": "Korporativ",
+   "definition": "Boshqa xodim va bo‘limlar bilan ma’lumot, tajriba va resurslarni baham ko‘rib, umumiy natijaga erishadi.",
+   "levels": {
+    "1": "Jamoaviy ishning asosiy qoidalariga amal qiladi (yangi)\n- O‘ziga biriktirilgan vazifani va uning jamoa ishiga qanday bog‘liqligini aniqlashtiradi.\n- Kelishilgan vazifani bajaradi; kechikish yoki qiyinchilik tug‘ilsa, bu haqda jamoani xabardor qiladi.\n- O‘z ishiga taalluqli zarur ma’lumotni so‘ralganda tegishli hamkasblariga yetkazadi.\n- Kelishmovchilikni aniqlashtirishga harakat qiladi; masala vakolatidan oshsa, rahbar yordamiga murojaat qiladi.",
+    "2": "Samarali hamkorlik qiladi\n- Boshqalar bilan bajonidil hamkorlik qiladi. Boshqa bo’lim so’roviga kelishilgan muddatda javob beradi; ulgurmasa, sababini aytadi\n- Bilmagan masalada hamkasbidan maslahat so’raydi.\n- Turli bo‘lim, tashkilot va jamoalarda vazifalarni bajarish usullari farqlanishini tan oladi. Boshqa bo’lim bilan ishlashdan oldin ularning tartibi va muddatlarini aniqlashtiradi",
+    "3": "Boshqalarni jalb qiladi\n- Turli qatlam vakillarini jamoa ishiga faol jalb qiladi.\n- Turli ko‘nikma va g‘oyalardan samarali foydalanadi. Boshqalarga eng yaxshi yechimni topishda yordam berish uchun vaqt ajratadi.\n- Boshqalar haqida ijobiy fikr bildiradi.\n- Foydali tajriba, ma’lumot va resursni so‘ralmasdan o‘z tashabbusi boshqa filial yoki bo‘limlar bilan ulashadi.\n- Jamoa ichidagi nizolar yoki muammolarni ochiq va konstruktiv yo‘l bilan hal qiladi.",
+    "4": "Murakkab bo‘limlararo hamkorlik va nizolarni boshqaradi\n- Murakkab bo‘limlararo vazifalarda tomonlarning harakatlarini muvofiqlashtiradi.  \n- Manfaatlar to‘qnashuvini aniqlab, tomonlar uchun maqbul kelishuvga erishadi.  \n- Bir nechta jamoani umumiy maqsad va natija atrofida birlashtiradi.\n- Manfaatlari zid tomonlarni (masalan, filial va markaziy marketing) umumiy maqsad atrofida kelishtiradi.",
+    "5": "Filiallar yoki tashkilot bo‘ylab hamkorlik standartlari va mexanizmlarini yaratadi\n- tashkilot miqyosidagi hamkorlik standartlarini belgilaydi;\n- bo‘limlararo ishlash mexanizmlarini yaratadi;\n- hamkorlikka to‘sqinlik qiluvchi tizimli sabablarni bartaraf etadi;\n- hamkorlik samaradorligini kuzatish mezonlarini joriy qiladi."
+   },
+   "negative": "- O‘zini boshqalardan ustun qo‘yadi va ularning hissasini hurmat qilmaydi.\n- Muhim ma’lumotni o‘zida yoki faqat o‘z bo‘limida saqlab qoladi.\n- Hamkorlarning ish sharoiti va ehtiyojlaridagi muhim farqlarni hisobga olmaydi.\n- Faqat shaxsiy manfaatiga mos kelgandagina hamkorlik qiladi.\n- Boshqalar bilan yuqoridan turib gaplashadi yoki boshqa bo‘limlar haqida mensimay fikr bildiradi."
+  },
+  {
+   "code": "KOR-04",
+   "name": "O'z ustida ishlash",
+   "layer": "Korporativ",
+   "definition": "Kuchli va rivojlantirishi kerak bo‘lgan tomonlarini biladi, bilim va ish usullarini muntazam yaxshilaydi.",
+   "levels": {
+    "1": "Fikr-mulohazani qabul qiladi va tavsiya etilgan rivojlanish vazifalarini bajaradi.\n- O‘rganish va doimiy rivojlanish imkoniyatlaridan foydalanadi.\n- Fikr-mulohazani qabul qiladi, rahbar ko‘magida rivojlanish ehtiyojini aniqlaydi va tavsiya etilgan o‘rganish vazifalarini bajaradi\n- O‘rganishda tushunmagan masalalarini aniqlashtiradi va berilgan tavsiyalarni ishda qo‘llashga harakat qiladi.",
+    "2": "Hozirgi ishida samaradorligini oshirishga intiladi\n- Joriy vaziyatdan ko‘proq o‘rganish uchun yangi yondashuvlarni sinab ko‘radi.\n- Barcha o‘rganish imkoniyatlaridan foydalanadi: masalan, kurslar, boshqalar ishini kuzatish va loyiha vazifalari.\n- Yangi bilimlarini ishda qo‘llaydi.\n- Kuchli va zaif tomonlarini, yaxshilanish yo‘llarini aniqlash uchun o‘zini muntazam baholaydi va boshqalardan fikr-mulohaza so‘raydi.",
+    "3": "Mavjud talablar doirasidan tashqarida ham o‘rganish imkoniyatlarini izlaydi\n- Oldiga murakkab maqsadlar qo‘yadi. Hozirgi va kelgusi faoliyatida o‘sishni ko‘zlab, o‘ziga yuqori sifat mezonlarini belgilaydi.\n- Kasbiy va shaxsiy jihatdan muntazam rivojlanadi.\n- Qobiliyatlarini sinovdan o‘tkazadigan vazifalarni izlaydi.",
+    "4": "Shaxsiy rivojlanishini tashkilot maqsadlari bilan bog‘laydi\n- Tanish bo‘lmagan va bir nechta yo‘nalish bilan bog‘liq murakkab vazifani bajarish uchun zarur ko‘nikmalarni mustaqil o‘zlashtiradi, amalda qo‘llaydi va natijaga qarab o‘rganish yondashuvini moslashtiradi.\n- Tashkilotdagi o‘zgarishlardan yangi ko‘nikma va bilimlarni rivojlantirish imkoniyati sifatida foydalanadi.",
+    "5": "O‘rganishini tashkilot strategiyasidagi kutilayotgan o‘zgarishlarga moslaydi\n- Kelajakda zarur bo‘ladigan bilim va ko‘nikmalarni oldindan aniqlaydi, shaxsiy rivojlanish rejasini moslashtiradi va samarali o‘rganish amaliyotini boshqalarga tarqatadi.\n- Ish faoliyatiga kengroq ta’sir qiladigan yangiliklardan xabardor bo‘lish uchun tashqi muhitni muntazam kuzatadi."
+   },
+   "negative": "- Asosli fikr-mulohazani tahlil qilmasdan rad etadi.\n- Kelishilgan rivojlanish harakatlarini asosli sababsiz bajarmaydi.\n- Yangi bilimni ishda qo‘llash imkoniyati bo‘lsa ham, sinab ko‘rmaydi.\n- Takroriy xatolar sababini tahlil qilmaydi va ish usulini o‘zgartirmaydi."
+  },
+  {
+   "code": "LDR-01",
+   "name": "Natijaga erishish",
+   "layer": "Umumiy kasbiy",
+   "definition": "Aniq maqsad qo‘yadi, ustuvorlik va resurslarni boshqaradi, to‘siqlarni bartaraf etib, kelishilgan natijani belgilangan muddat va standart asosida ta’minlaydi.",
+   "levels": {
+    "1": "O‘z ishini yaxshi bajarishga intiladi va taslim bo‘lmaydi\n- Undan nima kutilayotganini aniqlashtiradi.\n- Ijobiy kayfiyat va ishtiyoq bilan ishlaydi. Birinchi to‘siqdayoq taslim bo‘lmaydi va yordam asosida bajarishni davom ettiradi.\n- Boshqalarning huquqlarini hurmat qilgan holda o‘z maqsadlariga erishadi.",
+    "2": "Natijaga ishlaydi va to‘siqlarni yengadi\n- Boshqalar belgilagan maqsadlarni tushunadi va ularga erishish yo‘lida ishlaydi.\n- Erishilgan natijani belgilangan maqsadlar bilan solishtirib boradi.\n- To‘siqlar sababini tushunishga va ularni yengish yo‘lini topishga harakat qiladi.\n- Natijadagi og‘ishni aniqlasa, sababini tekshiradi va vakolati doirasida tuzatish choralarini ko‘radi.",
+    "3": "Takrorlanadigan to‘siqlarga qaramay, ishni yaxshilashga intiladi\n- To‘siqlar tez-tez uchrasa ham qat’iyat bilan harakat qiladi.\n- Murakkab muammolarni hal qilish mas’uliyatini o‘z zimmasiga oladi.\n- Jamoa maqsadini vazifalar, mas’ullar va muddatlarga ajratadi; bajarilishni muntazam kuzatadi va og‘ish yuzaga kelganda rejani mustaqil moslashtiradi.",
+    "4": "Murakkab maqsadlarni belgilaydi va ularga erishadi\n- Murakkab maqsadlarni bosqichlarga ajratadi, resurslarni ustuvorliklar bo‘yicha taqsimlaydi va natija og‘ishiga qarab rejani o‘z vaqtida o‘zgartiradi.\n- Boshqalarga namuna bo‘ladi; o‘z ish mahorati mezonini belgilab, unga erishish uchun harakat qiladi.\n- Ishni yaxshilash bo’yicha taklif kiritadi va uni joriy qiladi",
+    "5": "Tashkilot miqyosida barqaror natijadorlik tizimini shakllantiradi\n- Xarajatlar, kutilayotgan natijalar va xavf oqibatlarini taroziga solib qaror qabul qiladi.\n- Samaradorlikni oshirish uchun tadbirkorlik ruhida harakat qiladi. Pul topish yoki tejash imkoniyatini topadi, hisob-kitob bilan taklif qiladi va kichik sinovda tekshiradi\n- Bir nechta bo‘linma yoki tashkilot miqyosida barqaror natijadorlik tizimini shakllantiradi, resurslarni strategik ustuvorliklar bo‘yicha yo‘naltiradi va natija standartlarini takomillashtiradi."
+   },
+   "negative": "- Birinchi to‘siqdayoq to‘xtaydi va taslim bo‘ladi.\n- Yechim izlash o‘rniga bahona qidiradi.\n- To‘siq yuzaga kelganda vakolati doirasidagi muqobil yo‘llarni tekshirmasdan ishni to‘xtatadi\n- O‘z hissasini bo‘rttiradi yoki boshqalarning ishi yoxud g‘oyasini o‘ziniki qilib ko‘rsatadi; ularning hissasini tan olmaydi.\n- Vazifaning umumiy maqsad bilan qanday bog‘liqligini ko‘rmaydi.\n- Asosli sababsiz belgilangan muddatga yoki budjetga sig‘maydi.\n- Ishni o‘z vaqtida tugatishi uchun uni doim undab turish kerak bo‘ladi."
+  },
+  {
+   "code": "LDR-02",
+   "name": "Analitik fikrlash",
+   "layer": "Umumiy kasbiy",
+   "definition": "Ma’lumotlarni tartibga soladi, sabab va oqibatlarni aniqlaydi hamda dalillarga asoslangan xulosa chiqaradi.",
+   "levels": {
+    "1": "Vaziyatga oid ma’lumotlarni yig‘adi\n- Berilgan masala bo‘yicha asosiy faktlarni aniqlaydi.\n- Qaysi ma’lumot kerakligini ko‘rsatma asosida aniqlaydi. Mavjud faktlarni yig‘ib, ularni taxmin va shaxsiy fikrdan ajratib qayd etadi. Yetishmayotgan yoki tushunarsiz ma’lumot bo‘lsa, aniqlashtiruvchi savol beradi.",
+    "2": "Vaziyatni tarkibiy qismlarga ajratadi\n- Vaziyatni alohida qismlarga (A, B, C) ajratadi.\n- Masalalar, vazifalar yoki ish turlarini sanab chiqadi, ammo ularning ustuvorligini belgilamaydi.",
+    "3": "Bir nechta manbani solishtirib, asosiy sababni aniqlaydi\n- Bir nechta manbadan olingan ma’lumotlarni solishtiradi.\n- Faktlarni taxmin va shaxsiy fikrlardan ajratadi.\n- Asosiy va ikkilamchi sabablarni farqlaydi.\n- Taxminlarini mavjud dalillar bilan tekshiradi.\n- Tahlil natijasida aniq va asoslangan xulosa chiqaradi.",
+    "4": "Murakkab va noaniq vaziyatlarni tizimli tahlil qiladi\n- To‘liq bo‘lmagan yoki bir-biriga zid ma’lumotlarni solishtirib tahlil qiladi.\n- Muammoga ta’sir qilayotgan bir nechta o‘zaro bog‘liq sabablarni aniqlaydi.\n- Turli rivojlanish ssenariylarini va ularning ehtimoliy oqibatlarini tahlil qiladi.\n- Bo‘limlar yoki jarayonlar o‘rtasidagi bog‘liqlikni hisobga oladi.\n- Muammoning tashqi belgilarini emas, tizimli ildiz sabablarini aniqlaydi.",
+    "5": "Tashkilot miqyosida analitik yondashuv va standartlarni shakllantiradi\n- Tashkilot yoki bir nechta bo‘linma ma’lumotlaridan uzoq muddatli tendensiyalarni aniqlaydi.\n- Murakkab biznes muammolarini tahlil qilish uchun model, mezon va usullar yaratadi.\n- Turli strategik ssenariylarning tashkilotga ta’sirini baholaydi.\n- Rahbarlarning tahlil sifati va ma’lumotdan foydalanish amaliyotini rivojlantiradi.\n- Tashkilotda dalillarga asoslangan tahlil standartlarini shakllantiradi."
+   },
+   "negative": "- Muhim ma’lumotlarning ishonchliligini tekshirmasdan xulosa chiqaradi. Taxminni fakt sifatida qabul qiladi\n- Muammo oldida o‘zini yo‘qotadi, uni boshqarish mumkin bo‘lgan qismlarga ajrata olmaydi.\n- Har bir vaziyatni keragidan ortiq batafsil tahlil qilib, mayda tafsilotlarga o‘ralashib qoladi.\n- Harakatga o‘tishdan oldin taklif etilgan yo‘lning ijobiy va salbiy tomonlarini baholay olmaydi.\n- Ayni paytdagi ustuvorliklarni hisobga olmasdan «ha» deydi."
+  },
+  {
+   "code": "LDR-03",
+   "name": "Qaror qabul qilish",
+   "layer": "Umumiy kasbiy",
+   "definition": "Mavjud variantlar, xavf va oqibatlarni solishtirib, o‘z vaqtida asosli qaror qabul qiladi va uning natijasini kuzatadi.",
+   "levels": {
+    "1": "Belgilangan qoidalarga asoslanib qaror qabul qiladi\n- Oldindan belgilangan variantlar orasidan aniq mezon yoki tartibga tayanib oddiy qarorlar qabul qiladi.\n- Mezonlar noaniq bo‘lsa, boshqalar bilan maslahatlashadi yoki masalani muhokamaga olib chiqadi.\n- Istisno holatlarni belgilangan chegaralar va aniq qoidalar doirasida hal qiladi.\n- Qabul qilgan qarori yoki xulosasi to‘g‘riligini tekshiradi.",
+    "2": "Qoidalarni talqin qilib qaror qabul qiladi\n- Istisno holatlarda talqin qilishni talab etadigan yo‘riqnoma va tartiblarni qo‘llaydi.\n- Odatda aniq va yetarli ma’lumotga tayanib, sodda qarorlar qabul qiladi.\n- Harakat yoki qarorning xavf va oqibatlarini oldindan hisoblaydi.\n- Ehtimoliy xatolari katta bo‘lmagan masalalarda qaror qabul qiladi.\n- Vaziyat noaniq bo‘lsa, zaruratga qarab yordam va yo‘l-yo‘riq so‘raydi.",
+    "3": "Qoidalarni talqin qilish imkoniyati keng bo‘lgan vaziyatlarda qaror qabul qiladi\n- Talqin qilishga keng imkon qoldiradigan tavsiya va tartiblarni qo‘llaydi.\n- Bir nechta omilni taroziga soladi; ayrim omillar qisman ma’lum bo‘lsa yoki muhim ma’lumot yetishmasa ham qaror qabul qiladi.\n- Zaruratga qarab, kerakli odamlarni qaror qabul qilish jarayoniga jalb qiladi.\n- Turli masalalarda qarorlarning xavf va oqibatlarini muvozanatlaydi.\n- Muammoning tub sabablarini bartaraf etishga va uning qaytalanishini oldini olishga qaratilgan yechimlar ishlab chiqadi.",
+    "4": "Qoidalar mavjud bo‘lmagan vaziyatlarda murakkab qarorlar qabul qiladi\n- Muammoni hal qilish uchun turli manbalardan olingan murakkab ma’lumotlarni tushunarli shaklga keltiradi.\n- Tayyor tartiblar mavjud bo‘lmagan masalalarda murakkab qarorlar qabul qiladi.\n- Ma’lumotlari to‘liq bo‘lmagan yoki bir-biriga zid bo‘lgan ko‘plab o‘zaro bog‘liq omillarni ko‘rib chiqadi.\n- Raqobatlashuvchi ustuvorliklarni muvozanatlaydi va xavf hamda noaniqlik sharoitida yechim tavsiya qiladi.",
+    "5": "Murakkab va noaniq vaziyatlarda yuqori xavfli qarorlar qabul qiladi\n- Jiddiy oqibatlarga olib kelishi mumkin bo‘lgan yuqori xavfli strategik qarorlar qabul qiladi.\n- Qaror qabul qilishda mukammallikka intilishni mijozlar va tashkilot manfaatlari bilan muvozanatlaydi.\n- Maqbul qaror topish uchun tamoyillar, qadriyatlar va oqilona biznes yondashuvlariga tayanadi.\n- Ayrim omillarning ahamiyati tez o‘zgaradigan beqaror sharoitda qaror qabul qiladi.\n- Puxta asoslangan qaror uchun tashqi va ichki muhitni baholaydi.\n- Ko‘p sonli, ba’zan murakkab va bir-biriga zid omillarga tayangan holda muammoni aniqlaydi. Masalan, moliyaviy javobgarlikni hisobga oladi."
+   },
+   "negative": "- Vakolati doirasidagi qarorni asosli sababsiz kechiktiradi yoki mas’uliyatni boshqalarga o‘tkazadi.\n- Vaziyat noaniq bo‘lsa ham, qaysi ma’lumot zarurligini va kim bilan maslahatlashish kerakligini aniqlamaydi.\n- Muqobil yechimlarni ko‘rib chiqmasdan birinchi taklif qilingan variantni tanlaydi.\n- Qarorning ehtimoliy xavfi va oqibatlarini hisobga olmaydi.\n- Qoidalar yetarli bo‘lmagan vaziyatda qaror sababini tushuntira olmaydi.\n- O‘zaro zid ustuvorliklar yuzaga kelganda tanlov mezonini belgilamaydi.\n- Qabul qilgan qarorining ijrosini kuzatmaydi; kutilmagan oqibat paydo bo‘lsa, qarorni qayta ko‘rib chiqmaydi.\n- Vakolatidan tashqaridagi yoki jiddiy xavf tug‘diradigan masalani tegishli rahbarga o‘z vaqtida olib chiqmaydi."
+  },
+  {
+   "code": "LDR-04",
+   "name": "Rahbarlik qilish(jamoani boshqarish) va rivojlantirish",
+   "layer": "Umumiy kasbiy",
+   "definition": "Jamoaga aniq yo‘nalish beradi, vazifalarni xodimlarning roli va tayyorgarligiga mos taqsimlaydi, muntazam fikr-mulohaza va rivojlanish imkoniyatlari orqali ularning natijasi hamda salohiyatini oshiradi.",
+   "levels": {
+    "1": "Rahbar ko‘magida kichik jamoaviy vazifani muvofiqlashtiradi\n- O‘ziga topshirilgan kichik jamoaviy vazifaning maqsadi va muddatini aniqlashtiradi.\n- Kelishilgan reja asosida kim nima qilishi kerakligini ishtirokchilarga yetkazadi.\n- Ish davomida holatni so‘rab turadi; to‘siq yoki kechikishni payqasa, tegishli rahbarga xabar beradi.",
+    "2": "Tanish ishda maqsad, vazifa va kutilmani tushuntiradi, bajarilishni kuzatadi\n- Aniq yo‘nalish belgilaydi va ishni bosqichma-bosqich boshqaradi. Odamlarga ulardan nima kutilayotganini tushunishga yordam beradi.\n- Boshqalarning ishonchini qozonadi: ularda o‘z ishini bajarishga tayyor va qodir ekaniga ishonch uyg‘otadi.\n- Qaror qabul qilishda har bir kishining fikri eshitilishiga imkon yaratadi.\n- Xodim bilan yakka tartibda ishlash va uni rivojlantirish haqidagi o‘z taxminlarini tekshirish uchun boshqalardan fikr-mulohaza so‘raydi.",
+    "3": "Jamoani mustaqil boshqaradi: delegatsiya, nazorat, feedback va rivojlantirish\n- Vazifalarni xodimning tajribasi va tayyorgarligiga mos delegatsiya qiladi.\n- Kutilayotgan natija, vakolat va nazorat nuqtalarini aniq belgilaydi.\n- Muntazam va dalilga asoslangan fikr-mulohaza beradi.\n- Xodim uchun rivojlanish vazifalari va amaliy imkoniyatlar yaratadi.\n- Jamoaning uzoq muddatli samaradorligi uchun ish va shaxsiy hayot muvozanatini qo‘llab-quvvatlaydi.",
+    "4": "Murakkab odamlar masalalarini hal qiladi, yuqori samarali va mustaqil jamoa shakllantiradi, vorislarni rivojlantiradi\n- Past samaradorlik, murakkab konflikt va motivatsiya pasayishini konstruktiv hal qiladi.\n- Jamoaning rahbar ishtirokisiz ham samarali ishlash mexanizmlarini yaratadi.\n- Salohiyatli xodimlarni aniqlaydi va voris sifatida rivojlantiradi.\n- Boshqa rahbarlarga odamlarni boshqarish bo‘yicha murabbiylik qiladi.",
+    "5": "Tashkilot miqyosida rahbarlik standartlari, rahbarlar zaxirasi va yetakchilarni rivojlantirish tizimini yaratadi\n- Tashkilot miqyosida rahbarlik standartlarini belgilaydi.\n- Rahbarlar zaxirasi va vorislik tizimini shakllantiradi.\n- Rahbarlarni rivojlantirish amaliyotini yaratadi va samaradorligini kuzatadi.\n- Turli bo‘linmalardagi rahbarlik sifatini bir xil standartga olib keladi.\n- Jamoaviy ruh va jamoaga mansublikdan faxrlanish hissini asraydi hamda rivojlantiradi. Jamoa kayfiyatini so’rovnoma yoki ketayotgan xodimlar soni orqali kuzatadi va pasaysa chora ko’radi"
+   },
+   "negative": "- Vakolat topshiradi, lekin zarur yordam yoki resurslarni bermaydi.\n- Boshqalarni qo‘llab-quvvatlay olmaydi yoki xatolar uchun aybni ularga yuklaydi.\n- Odamlarda ishni bajarish uchun yetarli bilim va ko‘nikma bor deb doim taxmin qiladi.\n- Boshqalardan muayyan xulq-atvorni kutadi, ammo o‘zi unga namuna bo‘lmaydi.\n- Jamoaning barcha a’zolari uchun teng imkoniyat va rivojlanishni qo‘llab-quvvatlamaydi.\n- Jamoa taklif qilgan turli ko‘nikma va g‘oyalardan to‘liq foydalanmaydi.\n- Xodimning tayyorgarligi va xavfni baholamasdan, rivojlantiruvchi vazifalarni berishni asossiz cheklaydi"
+  },
+  {
+   "code": "LDR-05",
+   "name": "O‘zgarishlarga yetakchilik qilish | O'zgarishlarni boshqarish",
+   "layer": "Umumiy kasbiy",
+   "definition": "O‘zgarish sababini tushuntiradi, qarshiliklarni boshqaradi va yangi tartibning amalda ishlashini ta’minlaydi.",
+   "levels": {
+    "1": "Boshqalarni o‘zgarishlar haqida xabardor qiladi\n- O‘zgarish zaruriyatini aniqlaydi va tan oladi.\n- O‘zgarish jarayoni, uning ketma-ketligi va mantiqini bu o‘zgarish ta’sir qiladigan odamlarga tushuntiradi.\n- O‘zgarishlar haqidagi fikrlarni muhokama qilishga ochiq bo‘ladi.",
+    "2": "O‘zgarishlarning ijobiy tomonlarini ko‘rsatadi\n- O‘zgarishlarning afzalliklarini qo‘llab-quvvatlaydi.\n- Taklif etilayotgan o‘zgarishlarning ehtimoliy imkoniyatlari va oqibatlarini aniqlashtiradi.\n- O‘zgarishlar amaldagi ish tartibiga qanday ta’sir qilishini tushuntiradi.",
+    "3": "O‘zgarish jarayonini boshqaradi\n- O‘zgarish amalga oshirilgandan keyin ham davom ettirilishi kerak bo‘lgan muhim va samarali ish usullarini aniqlaydi.\n- O‘zgarishga qarshilikning aniq sabablarini oldindan ko‘ra oladi va ularni bartaraf etishga qaratilgan yondashuvlarni qo‘llaydi.\n- O‘zgarish bosqichlari, mas’ullari va muddatlarini belgilaydi; joriy etilishini kuzatib, aniqlangan to‘siqlarga qarab harakatlarni moslashtiradi.",
+    "4": "O‘zgarish tashabbuslarini tashkilot maqsadlariga bog‘laydi\n- Bo‘limdagi loyiha va maqsadlarni o‘zgarish tashabbuslari bilan bog‘laydi; o‘zgarishlarning operatsion maqsadlarga ta’sirini tushuntiradi.\n- Jamoa bilan birga o‘zgarishning amaliy sharoitlarini ko‘rib chiqib, uni samarali boshqarish strategiyalarini ishlab chiqadi.\n- Keyingi rivojlanishga xizmat qiladigan kelajakdagi o‘zgarish ehtiyojlarini aniqlaydi.",
+    "5": "O‘zgarishlarni boshlaydi\n- O‘zgarish va innovatsiyalarni qo‘llab-quvvatlaydigan hamda rag‘batlantiradigan muhit yaratadi.\n- Muvaffaqiyatli o‘zgarishlarni butun tashkilot bo‘ylab yoyadi.\n- O‘zgarishning tashkilot miqyosidagi ta’sirini oldindan baholaydi, qabul qilinishini kuzatadi va natijaga qarab joriy etish yondashuvini o‘zgartiradi."
+   },
+   "negative": "- O‘zgarishning asoslarini tekshirmasdan qarshilik qiladi\n- Ishning yaxshiroq, tezroq yoki arzonroq usullarini izlay olmaydi.\n- Boshqalarning o‘zgarish haqidagi istaklarini qo‘llab-quvvatlamaydi.\n- O‘z ishiga oid konstruktiv fikr-mulohazaga qarshilik ko‘rsatadi; bu tashkilotdagi o‘zgarishlarga xalaqit beradi."
+  },
+  {
+   "code": "FUN-01",
+   "name": "Sotuv jarayonlarini boshqarish",
+   "layer": "Funksional",
+   "definition": "Murojaatni shartnoma va to‘lovga olib boradigan sotuv jarayonini raqamlar, standartlar va jamoa orqali boshqaradi.",
+   "levels": {
+    "1": "1. Sotuv bosqichlari va asosiy ko'rsatkichlarni biladi.\n2. Sotuv skripti mavjudligini tekshiradi.\n3. Reja bajarilmasa, sababini rahbari bilan lead soni yoki konversiyadan qidiradi",
+    "2": "1. Funnel bosqichlari bo'yicha reja va faktni kuzatadi.\n2. Qo'ng'iroq va uchrashuv sifatini chek-list asosida baholaydi.\n3. Lead sifati va sotuv ishlovini alohida tekshiradi.",
+    "3": "1. Konversiya yo'qotish nuqtalarini aniqlab, menejerlar kesimida choralar belgilaydi.\n2. Coaching, role-play va monitoring orqali sotuv xulqini yaxshilaydi.\n3. Talab, konversiya, narx va quvvatni bog'lab qaror qiladi.",
+    "4": "1. Segment, kanal va jamoa bo'yicha sotuv tizimini optimallashtiradi.\n2. Team leadlar orqali sotuv sifatini barqaror boshqaradi.\n3. Sotuv prognozi va kapasitet risklarini ssenariy asosida boshqaradi.",
+    "5": "1. Sotuv modeli va masshtablash standartlarini rivojlantiradi.\n2. Sotuv kompetensiyasi va menejment tizimini tashkilot miqyosida yaratadi.\n3. Daromad o'sishi uchun sotuv portfeli va kanal strategiyasini shakllantiradi."
+   },
+   "negative": ""
+  },
+  {
+   "code": "FUN-02",
+   "name": "Marketing savodxonligi",
+   "layer": "Funksional",
+   "definition": "Maqsadli auditoriya, taklif, reklama kanallari va murojaatlar sifatini tushunib, filialning lokal marketing ishlarini markaziy talablar asosida boshqaradi.",
+   "levels": {
+    "1": "1. Asosiy marketing kanallari va terminlarini taniydi.\n2. Kampaniya natijasini lead soni bilan birga, sinov darsiga kelganlar soni bo’yicha ham so’raydi\n3. Kontentga “bu kimga mo’ljallangan?” degan savoldan kelib chiqib fikr bildiradi",
+    "2": "1. Kampaniya reja va natijalarini oddiy ko'rsatkichlarda kuzatadi.\n2. Lead soni va sifatini sotuv natijasi bilan bog'laydi.\n3. Kontentni auditoriya va maqsadga mosligi bo'yicha baholaydi.",
+    "3": "1. Auditoriya, taklif va kanal natijasini solishtirib lokal choralar belgilaydi.\n2. CPL, konversiya va CAC mantiqidan foydalanib kampaniyani baholaydi.\n3. Lokal insight va mijoz ovozini markaziy marketingga aniq yetkazadi.",
+    "4": "1. Filial bozori va segmentlari uchun marketing portfelini boshqaradi.\n2. Marketing investitsiyasini daromad va quvvat bilan muvozanatlashtiradi.\n3. Filiallar tajribasidan takrorlanadigan lokal o'sish mexanizmini yaratadi.",
+    "5": "1. Hududiy o'sish va brend strategiyasiga dalil asosida ta'sir qiladi.\n2. Marketing samaradorligi va atribusiya tamoyillarini takomillashtiradi.\n3. Bozor insightlarini yangi mahsulot va kengayish qarorlariga aylantiradi."
+   },
+   "negative": ""
+  },
+  {
+   "code": "FUN-03",
+   "name": "Mijoz tajribasini boshqarish",
+   "layer": "Funksional",
+   "definition": "O‘quvchi va ota-onaning birinchi murojaatdan boshlab o‘qishni davom ettirishigacha bo‘lgan tajribasi, xizmat sifati va murojaatlarini boshqaradi.",
+   "levels": {
+    "1": "1. Mijoz murojaatini tegishli xodimga yo'naltiradi.\n2. Mijoz qoniqishini alohida fikrlar bilan birga so’rovnoma natijalaridan ham ko’radi\n3. Shikoyatda avval ikki tomonni tinglaydi, keyin xulosa qiladi.",
+    "2": "1. Murojaatni standart muddatda hal qilib, mijozga javob qaytaradi.\n2. CSAT, NPS, shikoyat va retention ko'rsatkichlarini kuzatadi.\n3. Vaziyatni tinglab, fakt va kutilmani aniqlashtiradi.",
+    "3": "1. Takroriy murojaat sababini aniqlab, servis jarayonini yaxshilaydi.\n2. Mijoz ma'lumotlarini segmentlab, ustuvor servis intervensiyalarini belgilaydi.\n3. Service recovery chorasi bilan ishonchni tiklaydi va saboqni jamoaga o'tkazadi.",
+    "4": "1. Mijoz yo'li bo'yicha uzilishlarni bo'limlararo bartaraf etadi.\n2. Yetakchi va kechikuvchi CX indikatorlari orqali riskni oldindan boshqaradi.\n3. Reputatsion xavfli vaziyatlarni xolis va tez boshqaradi.",
+    "5": "1. Ekotizim miqyosida mijoz tajribasi standartlari va ovozini boshqaradi.\n2. Mijoz tajribasi analitikasi va xizmat dizaynini strategik rivojlantiradi.\n3. Katta servis inqirozlaridan tizimli o'rganish mexanizmini yaratadi."
+   },
+   "negative": ""
+  },
+  {
+   "code": "FUN-04",
+   "name": "Biznes va moliyaviy savodxonlik",
+   "layer": "Funksional",
+   "definition": "Daromad, xarajat, budjet va rentabellikni tushunib, resurslar bo‘yicha iqtisodiy asoslangan qarorlar qabul qiladi.",
+   "levels": {
+    "1": "1. Asosiy moliyaviy ko'rsatkichlarning nomini biladi.\n2. Xarajatni qisqartirishdan oldin bu natijaga qanday ta’sir qilishini so’raydi\n3. O’z qarorlari filial foydasiga ta’sir qilishini misol bilan tushuntiradi",
+    "2": "1. Tushum, xarajat va rentabellik hisobotini o'qiydi.\n2. Xarajatning maqsadi va tasdiqlangan budjetga mosligini tekshiradi.\n3. Filial moliyaviy ko'rsatkichlari uchun o'z javobgarligini tushunadi.",
+    "3": "1. Budjet-fakt og'ishlarini sabablar bo'yicha tahlil qiladi.\n2. Xarajatning natijaga ta'siri va muqobil qiymatini baholaydi.\n3. Operatsion qarorlarni moliyaviy oqibat bilan bog'laydi.",
+    "4": "1. Narx, quvvat, xodim va xarajat ssenariylarini modellashtiradi.\n2. Resursni rentabellik va strategik ustuvorlik bo'yicha qayta taqsimlaydi.\n3. Qisqa foyda va uzoq muddatli sifat riskini muvozanatlashtiradi.",
+    "5": "1. Investitsiya va portfel qarorlarini iqtisodiy qiymat asosida boshqaradi.\n2. Kapital va operatsion resurslar samaradorligi standartini yaratadi.\n3. Barqaror iqtisodiy model va biznes intizomini rivojlantiradi."
+   },
+   "negative": ""
+  },
+  {
+   "code": "FUN-05",
+   "name": "HR jarayonlari savodxonligi",
+   "layer": "Funksional",
+   "definition": "Xodimni tanlash, ishga moslashtirish, faoliyatini baholash, rivojlantirish va ishdan chiqish jarayonlarini belgilangan tartibda amalga oshiradi.",
+   "levels": {
+    "1": "HR - Yo'nalishlar modeli bo'yicha baholanadi. Bunda HR-01 dan HR-11 yo'nalishlari bo'yicha to'plagan o'rtacha balli olinadi. Butun songa yaxlitlanadi.",
+    "2": "",
+    "3": "",
+    "4": "",
+    "5": ""
+   },
+   "negative": ""
+  },
+  {
+   "code": "FUN-06",
+   "name": "Operatsion boshqaruv va compliance",
+   "layer": "Funksional",
+   "definition": "Filialning kundalik faoliyati uzluksizligini, resurslar, xavfsizlik va hujjatlarning to‘g‘ri yuritilishini hamda belgilangan qoidalarga rioya qilinishini ta’minlaydi.",
+   "levels": {
+    "1": "1. Asosiy reglament va operatsion chek-listlarni biladi.\n2. Compliance talabini tekshiruv uchun bajarishi mumkin.\n3. Favqulodda vaziyatda yo’riqnoma bo’yicha birinchi choralarni ko’radi va darhol rahbarga xabar beradi",
+    "2": "1. Kundalik operatsiyalarni chek-list va jadval asosida nazorat qiladi.\n2. Majburiy hujjat va nazoratlarni o'z vaqtida yuritadi.\n3. Standart favqulodda vaziyat protokolini qo'llaydi.",
+    "3": "1. Jarayon uzilishlarini sabab va risk bo'yicha bartaraf etadi.\n2. Buzilish xavfini oldindan aniqlab, profilaktik choralar ko'radi.\n3. Xavfsizlik hodisasini boshqarib, ildiz sabab va tuzatish choralarini belgilaydi.",
+    "4": "1. Bir nechta funksiyaning operatsion ritmi va nazorat tizimini uyg'unlashtiradi.\n2. Yuqori xavfli buzilishlarda tekshiruv, eskalatsiya va tuzatishni boshqaradi.\n3. Biznes uzluksizligi ssenariylari va tayyorgarlik mashqlarini boshqaradi.",
+    "5": "1. Ko'p filialli operatsion standart va nazorat modelini rivojlantiradi.\n2. Riskga asoslangan compliance va ichki nazorat tizimini yaratadi.\n3. Tashkilotning operatsion barqarorlik va xavfsizlik salohiyatini rivojlantiradi."
+   },
+   "negative": ""
+  },
+  {
+   "code": "FUN-07",
+   "name": "Raqamli savodxonlik",
+   "layer": "Funksional",
+   "definition": "Raqamli tizimlar va ma’lumotlardan ishni nazorat qilish, tahlil qilish va soddalashtirish uchun foydalanadi.",
+   "levels": {
+    "1": "1. Asosiy tizimlarga kiradi va standart ma'lumotni kiritadi.\n2. Ma'lumot xatosini texnik muammo deb qabul qiladi.\n3. Takroriy ishni qo'lda bajaradi.",
+    "2": "1. EduTizim, Sheets va boshqa vositalarda ma'lumotni to'g'ri yuritadi.\n2. Kiritilgan ma'lumotning to'liqligi va aniqligini tekshiradi.\n3. Mavjud raqamli funksiyalar bilan oddiy ishni tezlashtiradi.",
+    "3": "1. Dashboard va hisobotlardan boshqaruv nazorati uchun foydalanadi.\n2. Ma'lumot sifati sabablarini aniqlab, javobgarlik va nazoratni belgilaydi.\n3. Takroriy jarayonni avtomatlashtirish ehtiyojini aniqlab, talab yozadi.",
+    "4": "1. Tizimlararo ma'lumot oqimi va raqamli jarayon sifatini yaxshilaydi.\n2. Filial bo'yicha data intizomi va yagona manba amaliyotini boshqaradi.\n3. Avtomatlashtirishni foyda, risk va foydalanuvchi qabul qilishi bilan boshqaradi.",
+    "5": "1. Raqamli transformatsiya va data-governance tamoyillariga ta'sir qiladi.\n2. Tashkilot miqyosida ma'lumot sifati standartlarini rivojlantiradi.\n3. Texnologik investitsiyalarni biznes qiymati bo'yicha ustuvorlashtiradi."
+   },
+   "negative": ""
+  }
+ ],
+ "hr": [
+  {
+   "code": "HR-01",
+   "name": "Tashkiliy tuzilma va lavozim vazifalari",
+   "definition": "Ish vazifalarini tahlil qilib, lavozimlar, bo‘ysunish va qaror vakolatlarini asoslaydi; bo‘linma tuzilmasi, lavozim yo‘riqnomasi va javobgarlik taqsimotini tashkil etadi.",
+   "levels": {
+    "1": "Ish vazifalarini tahlil qilib, lavozimlar, bo‘ysunish va qaror vakolatlarini asoslaydi; bo‘linma tuzilmasi, lavozim yo‘riqnomasi va javobgarlik taqsimotini tashkil etadi.",
+    "2": "Tayyor vosita bilan vazifalarni tartiblaydi\n- Lavozim tahlili va RACI vazifasini tushuntiradi: bajaruvchi, yakuniy javobgar, maslahat beruvchi va xabardor qilinuvchi.\n- Tayyor shablonda oddiy lavozimning vazifa, natija va vakolatlarini yozadi; zarur joyda yordam oladi.\n- Tanish jarayon uchun RACI jadvalini to‘ldirib, takror yoki egasiz vazifalarni tekshiruvga chiqaradi.",
+    "3": "Bo‘linma tuzilmasini mustaqil asoslaydi\n- Funksional va matritsaviy tuzilmaning qo‘llanish shartlarini, boshqaruv oralig‘i va vakolat taqsimotini izohlaydi.\n- Oddiy bo‘linma uchun ish hajmiga mos tuzilma va lavozim yo‘riqnomalarini mustaqil tayyorlab, tasdiqqa kiritadi.\n- RACI orqali vazifa va qaror egalarini belgilaydi; tasdiqlangan tuzilmani amaliy jarayonlarga joriy qiladi.",
+    "4": "Murakkab tuzilma muammosini yechadi\n- Ikki tomonlama bo‘ysunish, ortiqcha boshqaruv qatlamlari va vakolatlar to‘qnashuvining oqibatlarini tahlil qiladi.\n- Bir nechta bo‘linma qatnashadigan jarayonda tuzilma va RACI variantlarini solishtirib, mos yechimni asoslaydi.\n- HR va manfaatdor rahbarlar bilan vakolat chegaralarini qayta taqsimlaydi; sinov natijasiga qarab tuzatadi.",
+    "5": "Tashkilot bo‘yicha tuzilma amaliyotini yaxshilaydi\n- Turli tuzilmalar va boshqaruv oralig‘ini baholash mezonlarini tashkilot ehtiyojiga mos asoslaydi.\n- HR bilan tuzilma, lavozim tahlili va RACI umumiy usulining aniq qismini shaxsan ishlab chiqadi; o‘z yechimi va hissasini loyiha bilan ko‘rsatadi.\n- Usulni bir nechta bo‘linmada sinab, javobgarlik uzilishlariga qarab takomillashtiradi; rahbarlarga qo‘llashni o‘rgatib, sifatini tekshiradi."
+   },
+   "negative": "- Tuzilma turini ish jarayoni va vakolatlardan kelib chiqmay tanlaydi.\n- Vazifa uchun javobgar yoki qaror vakolatini noaniq qoldiradi.\n- Tasdiqsiz bo‘ysunish yoki lavozim vazifasini o‘zgartiradi.",
+   "methods": "Bilim savollari: tuzilma turlari va RACI.\nAmaliy topshiriq: vazifalar ro‘yxatidan sxema, lavozim yo‘riqnomasi va RACI tuzish.\nDalil: shaxsning hissasi ko‘rsatilgan loyiha, tasdiq va joriy etish misoli."
+  },
+  {
+   "code": "HR-02",
+   "name": "Xodimlarga ehtiyojni rejalashtirish",
+   "definition": "Ish hajmi, mavjud xodimlar va ko‘nikmalarni solishtirib, zarur shtat va ish vaqtini hisoblaydi; yollash, qayta taqsimlash yoki rivojlantirish bo‘yicha asoslangan reja tuzadi.",
+   "levels": {
+    "1": "Ehtiyoj hisobining asoslarini tushuntiradi\n- Xodimlar soni, shtat birligi va FTE — to‘liq ish vaqtiga teng bandlik — farqini tushuntiradi.\n- Ko‘rsatma bilan ish hajmi va bir xodimning foydalanish mumkin bo‘lgan ish vaqtini jadvalga kiritadi.\n- Oddiy misolda berilgan formula bo‘yicha zarur FTE va mavjud quvvat orasidagi farqni hisoblaydi.",
+    "2": "Tayyor model bilan ehtiyojni hisoblaydi\n- Ish hajmi, vaqt me’yori, smena va ta’tilning xodimlar ehtiyojiga ta’sirini tushuntiradi.\n- Tanish vaziyatda tasdiqlangan me’yor va shablon bo‘yicha shtat ehtiyojini hisoblaydi; taxminlarini tekshirtiradi.\n- Vakansiya so‘roviga zarur son, vazifa, muddat va ish hajmi asosini yozadi; ba’zan yordam oladi.",
+    "3": "Bo‘linma ehtiyojini mustaqil rejalashtiradi\n- Ish hajmi prognozi, mavjud quvvat va ko‘nikma yetishmovchiligini alohida baholash usulini izohlaydi.\n- Oddiy bo‘linma uchun xodimlar soni va ko‘nikma ehtiyojini mustaqil hisoblab, mavsumiy reja tuzadi.\n- Yollash, ishni qayta taqsimlash va o‘qitish variantlarini vaqt hamda xarajat bo‘yicha solishtirib, rejasini asoslaydi.",
+    "4": "Noaniq talab uchun ssenariylar tuzadi\n- Talab o‘zgarishi, ketishlar va ko‘nikma tanqisligining birgalikdagi ta’sirini tahlil qiladi.\n- Bir nechta bo‘linma uchun past, asosiy va yuqori ish hajmi ssenariylarida ehtiyojni qayta hisoblaydi.\n- HR va moliya bilan resurs cheklovlariga mos variantni tanlaydi; reja-fakt tafovutiga qarab hisobni yangilaydi.",
+    "5": "Tashkilotda ehtiyoj rejalash usulini yaxshilaydi\n- Prognoz xatosi, ortiqcha yoki yetishmaydigan quvvatni aniqlash mezonlarini asoslaydi.\n- HR va moliya bilan umumiy hisob shabloni, taxminlar yoki qayta ko‘rish tartibining aniq qismini shaxsan ishlab chiqadi; o‘z hissasini hisob modeli bilan ko‘rsatadi.\n- Usulni turli bo‘linmalarda sinab, reja-fakt xatolariga qarab takomillashtiradi; rahbarlarga qo‘llashni o‘rgatib, hisob sifatini tekshiradi."
+   },
+   "negative": "- Ish hajmi va mavjud quvvatni hisoblamay xodim so‘raydi.\n- Xodimlar sonini FTE bilan aralashtiradi yoki bir xil ishni ikki marta hisoblaydi.\n- Mavsumiylik va o‘qitish/qayta taqsimlash variantlarini tekshirmaydi.",
+   "methods": "Hisoblash topshirig‘i: ish hajmi, soat, FTE va shtat farqi.\nCase: yollash yoki qayta taqsimlash variantini asoslash.\nDalil: ehtiyoj hisoboti, vakansiya so‘rovi va reja-fakt izohi."
+  },
+  {
+   "code": "HR-03",
+   "name": "Xodimni tanlash",
+   "definition": "Lavozim talablariga mos tanlov mezonlarini belgilaydi; strukturaviy kompetensiya intervyusi va ishga mos amaliy topshiriq orqali nomzod dalillarini tekshirib, tanlov xulosasini asoslaydi.",
+   "levels": {
+    "1": "Intervyu usuli va dalilni taniydi\n- Strukturaviy intervyu, kompetensiya mezoni va STAR: vaziyat, vazifa, harakat, natija — qismlarini tushuntiradi.\n- Berilgan javobdan STAR qismlarini ko‘rsatma bilan ajratadi; nomzodning shaxsiy harakati yetishmagan joyni topadi.\n- Tayyor mezon yordamida oddiy javobni baholab, bahosini keltirilgan dalil bilan izohlaydi.",
+    "2": "Tayyor qo‘llanma bilan intervyu o‘tkazadi\n- Kompetensiyaga oid va vaziyatli savolning farqini, bir xil savol hamda shkala qo‘llash sababini tushuntiradi.\n- Tanish lavozim uchun tayyor savollar bilan intervyu o‘tkazib, STAR bo‘yicha aniqlashtiruvchi savollar beradi.\n- Dalillarni baholash kartasiga yozib, nomzodlarni bir xil mezonda solishtiradi; xulosasini zarur joyda tekshirtiradi.",
+    "3": "Kompetensiya intervyusini mustaqil tashkil etadi\n- BEI — o‘tgan aniq xatti-harakatni tekshiruvchi intervyu — va ish namunasi qachon kerakligini asoslaydi.\n- Lavozim profilidan savollar va baholash mezonlarini tayyorlab, STAR orqali shaxsiy harakat va natijani mustaqil tekshiradi.\n- Ishga mos case yoki ish namunasini intervyu dalili bilan solishtirib, tanlov tavsiyasini yozma asoslaydi.",
+    "4": "Murakkab tanlov dalillarini tekshiradi\n- O‘zini yaxshi ko‘rsatish, halo effekti va qarama-qarshi dalillarning bahoga ta’sirini tushuntiradi.\n- Murakkab lavozim uchun intervyu va ish namunasini moslashtirib, turli baholovchilar dalillaridagi ziddiyatlarni tekshiradi.\n- Baholovchilar bilan mezonlarni kalibrlaydi; noaniq dalil bo‘yicha qo‘shimcha tekshiruv va asoslangan xulosa tayyorlaydi.",
+    "5": "Rahbarlar tanlov amaliyotini yaxshilaydi\n- Intervyu dalili, baholovchilar mosligi va ish namunasining rolga aloqadorligini tekshirish mezonlarini asoslaydi.\n- HR bilan savol banki, baholash kartasi yoki intervyu tekshiruv usulining aniq qismini shaxsan ishlab chiqadi; o‘z hissasini savollar va mezonlar bilan ko‘rsatadi.\n- Usulni bir nechta bo‘linmada sinab, baholash tafovutlariga qarab takomillashtiradi; rahbarlarni STAR/BEI qo‘llashga o‘rgatib, sifatini tekshiradi."
+   },
+   "negative": "- Nomzodni dalil o‘rniga umumiy taassurot yoki shaxsiy o‘xshashlik bo‘yicha tanlaydi.\n- Nomzodning o‘z harakatini tekshirmay, jamoa natijasini uning dalili deb oladi.\n- Nomzodlarga turli mezon qo‘llaydi yoki ishga aloqasiz shaxsiy savollar beradi.",
+   "methods": "Bilim savollari: STAR, BEI va baholash xatolari.\nRol o‘yini: nomzod bilan intervyu, keyin baholash kartasi.\nDalil: shaxssizlantirilgan savollar, qaydlar va tanlov xulosasi.\nJob post, sourcing va ATS boshqaruvi talab etilmaydi."
+  },
+  {
+   "code": "HR-04",
+   "name": "Ishga moslashtirish va sinov muddati",
+   "definition": "Yangi xodimning ishga tayyorligi, o‘rganishi va sinov muddati natijalarini rejalashtiradi; welcome tanishtiruv, mentor yordami, ish amaliyoti va nazorat uchrashuvlarini tashkil etadi.",
+   "levels": {
+    "1": "Moslashtirish vositalarini tushuntiradi\n- Ish boshlashdan oldingi tayyorgarlik, welcome tanishtiruv, mentor va 1:1 uchrashuvning vazifalarini tushuntiradi.\n- Namuna bo‘yicha ish joyi tayyorligi va birinchi hafta moslashtirish ro‘yxatini ko‘rsatma bilan to‘ldiradi.\n- Berilgan oddiy vazifa uchun o‘rganish natijasi va uni tekshirish dalilini belgilaydi.",
+    "2": "Tayyor moslashtirish rejasini yuritadi\n- SMART maqsadi va nazorat nuqtasining sinov muddati bahosidagi vazifasini tushuntiradi.\n- Tanish lavozimda tayyor reja bo‘yicha welcome, mentor va 1:1 uchrashuvlarni tashkil etib, bajarilishini qayd qiladi.\n- Tayyor mezonlar bo‘yicha ish namunalarini yig‘adi va oraliq bahoni yozadi; zarur joyda yordam oladi.",
+    "3": "Lavozimga mos rejani mustaqil tuzadi\n- Tashkiliy tanishtiruv, kasbiy o‘rganish va sinov natijasini bir-biridan ajratib rejalashni izohlaydi.\n- Oddiy lavozim uchun SMART natijalar, ish amaliyoti, mentor vazifalari va tekshiruv muddatlari bilan reja tuzadi.\n- 1:1 va ish namunasi orqali o‘sishni mustaqil tekshiradi; sinov muddati bo‘yicha dalilli tavsiyani HRga kiritadi.",
+    "4": "Murakkab moslashtirishni moslashtiradi\n- Masofaviy ish, bir nechta bo‘limga bog‘liq vazifa va cheklangan mentor resursining ta’sirini tahlil qiladi.\n- Bo‘linmalararo yoki katta guruh moslashtirishida o‘rganish ketma-ketligi va javobgarlarni vaziyatga mos qayta belgilaydi.\n- Qiyinchilik sababini bilim, resurs yoki noaniq talabga ajratib, HR bilan rejani va tekshiruv usulini tuzatadi.",
+    "5": "Tashkilotda moslashtirish usulini yaxshilaydi\n- Moslashtirish sifati, ishni mustaqil bajarishga tayyorlik va sinov bahosi ishonchliligini tekshirish mezonlarini asoslaydi.\n- HR bilan welcome, mentor, 1:1 yoki sinov baholash shablonining aniq qismini shaxsan ishlab chiqadi; o‘z hissasini reja va tekshiruv mezonlari bilan ko‘rsatadi.\n- Usulni turli bo‘linmalarda sinab, o‘rganishdagi uzilishlarga qarab takomillashtiradi; rahbarlarga qo‘llashni o‘rgatib, sifatini tekshiradi."
+   },
+   "negative": "- Moslashtirishni faqat hujjat imzolash yoki tanishtirish bilan cheklaydi.\n- Sinov mezonlarini boshida kelishmaydi yoki yakunida o‘zgartiradi.\n- Ish dalilisiz umumiy taassurot asosida sinov xulosasi chiqaradi.",
+   "methods": "Amaliy topshiriq: welcome, mentor, 1:1 va sinov mezonlari bilan reja.\nCase: yangi xodim reja bo‘yicha o‘zlashtirmayapti.\nDalil: moslashtirish rejasi, nazorat qaydlari, ish namunalari va yakuniy tavsiya."
+  },
+  {
+   "code": "HR-05",
+   "name": "Faoliyatni baholash",
+   "definition": "Ish natijasi va kompetensiyani alohida mezonlarda baholaydi; maqsad, dalil va baholash shkalasini qo‘llab, faoliyat xulosasi hamda yaxshilash rejasini tayyorlaydi.",
+   "levels": {
+    "1": "Baholash asoslarini ajratadi\n- SMART maqsad, KPI va kompetensiya farqini; natija dalili va xatti-harakat dalili nima ekanini tushuntiradi.\n- Ko‘rsatma bilan oddiy maqsadni o‘lchanadigan shaklga keltiradi va mos dalilni tanlaydi.\n- Tayyor shkala bo‘yicha namunaviy ishni baholab, dalil yetishmasligini past bahodan ajratadi.",
+    "2": "Tayyor mezon bilan baholaydi\n- Baholash davri, xatti-harakatga tayangan shkala hamda halo va yaqindagi voqea ta’sirini tushuntiradi.\n- Tanish vazifa bo‘yicha kelishilgan maqsad va tayyor kartadan foydalanib, dalillarni muntazam qayd qiladi.\n- Baholash xulosasi va keyingi amallarni tayyor shaklda yozadi; bahsli bahoni yordam bilan tekshiradi.",
+    "3": "Baholash siklini mustaqil yuritadi\n- Natija mezoni, kompetensiya indikatori va PIP — faoliyatni yaxshilash rejasi — qo‘llanishini asoslaydi.\n- Oddiy rol uchun SMART maqsad va dalil mezonini belgilab, davr yakunida natija hamda kompetensiyani alohida baholaydi.\n- Bahoni dalil bilan asoslaydi; zarur holatda maqsad, yordam, muddat va tekshiruv nuqtalari bilan PIP tuzadi.",
+    "4": "Murakkab baholarni kalibrlaydi\n- O‘zgargan maqsad, resurs cheklovi va turli kuzatuvchilarning ziddiyatli dalillarini tahlil qilishni izohlaydi.\n- Bo‘linmalararo vazifalarda shaxs hissasini jamoa natijasidan ajratib, qarama-qarshi dalillarni qo‘shimcha tekshiradi.\n- HR va rahbarlar bilan baholarni bir xil mezonda kalibrlaydi; noaniq mezon yoki PIPni dalil asosida moslashtiradi.",
+    "5": "Tashkilotda baholash amaliyotini yaxshilaydi\n- Mezonning tushunarliligi, dalil yetarliligi va baholovchilar mosligini tekshirish usullarini asoslaydi.\n- HR bilan maqsad, dalil qaydi, baholash kartasi yoki PIP usulining aniq qismini shaxsan ishlab chiqadi; o‘z hissasini mezonlar va namunalar bilan ko‘rsatadi.\n- Usulni bir nechta bo‘linmada sinab, baholash tafovutlariga qarab takomillashtiradi; rahbarlarni kalibrlashga o‘rgatib, qo‘llash sifatini tekshiradi."
+   },
+   "negative": "- KPI natijasini avtomatik kompetensiya bahosiga aylantiradi.\n- Bahoni hujjat yoki kuzatuvsiz, oxirgi voqea taassuroti bilan qo‘yadi.\n- Mezonlarni keyin o‘zgartiradi yoki dalil yetishmasligini past qobiliyat deb talqin qiladi.",
+   "methods": "Bilim savollari: SMART, KPI/kompetensiya, shkala va PIP.\nAmaliy topshiriq: bir xil case dalillaridan baho va yaxshilash rejasini tuzish.\nDalil: maqsad kartasi, dalil qaydi, baholash xulosasi va PIP."
+  },
+  {
+   "code": "HR-06",
+   "name": "Rivojlantirish va karyera asoslari",
+   "definition": "Ko‘nikma yetishmovchiligini aniqlab, maqsadli amaliyot, o‘qitish va mentorlikni tanlaydi; individual rivojlanish rejasi va karyera tayyorligini ish dalillari bilan tekshiradi.",
+   "levels": {
+    "1": "Rivojlantirish usullarini tushuntiradi\n- Ko‘nikma farqi, individual rivojlanish rejasi (IDP), mentorlik va GROW suhbatining maqsad, hozirgi holat, variant, harakat bosqichlarini tushuntiradi.\n- Berilgan oddiy misolda o‘rganish ehtiyojini resurs yoki noaniq talab muammosidan ko‘rsatma bilan ajratadi.\n- Namuna asosida bitta ko‘nikma uchun mashq va o‘zlashtirish dalilini belgilaydi.",
+    "2": "Tayyor reja va suhbat usulini qo‘llaydi\n- O‘qitish, ishdagi mashq va mentorlikning qo‘llanish farqini; bilim testi bilan amaliy ko‘nikma tekshiruvining farqini izohlaydi.\n- Tayyor GROW savollari va IDP shabloni bilan maqsad, mashq, muddat va tekshiruvni yozadi; zarur joyda yordam oladi.\n- Tanish ko‘nikmada oldingi va keyingi ish namunasini solishtirib, o‘zlashtirish holatini qayd qiladi.",
+    "3": "Ko‘nikma ehtiyojidan reja tuzadi\n- Ko‘nikmalar matritsasi, ehtiyoj tahlili va lavozimning maqsadli darajasidan foydalanish usulini asoslaydi.\n- Oddiy rol uchun ko‘nikma farqini mustaqil aniqlab, GROW suhbatidan keyin amaliy topshiriq, mentorlik va o‘qitishni birlashtirgan IDP tuzadi.\n- O‘zlashtirish va ishda qo‘llash dalillarini tekshiradi; karyera tayyorligi xulosasini maqsadli rol talabi bilan asoslaydi.",
+    "4": "Murakkab rivojlanish ehtiyojini yechadi\n- Bir nechta rol talabi, resurs cheklovi va o‘qiganini ishda qo‘llamaslik sabablarini tahlil qilishni izohlaydi.\n- Bo‘linmalararo rivojlanish yoki voris tayyorlashda ko‘nikma farqlarini ajratib, topshiriq va o‘rganish ketma-ketligini moslashtiradi.\n- HR bilan natijalarni kalibrlab, samarasiz rivojlanish choralarini dalilga qarab o‘zgartiradi.",
+    "5": "Tashkilotda rivojlantirish usulini yaxshilaydi\n- O‘rganish natijasi va ishda qo‘llashni tekshirish mezonlarini, karyera dalillarining rolga mosligini asoslaydi.\n- HR bilan ehtiyoj tahlili, GROW/IDP yoki amaliy ko‘nikma tekshiruvining aniq qismini shaxsan ishlab chiqadi; o‘z hissasini vosita va mezonlar bilan ko‘rsatadi.\n- Usulni bir nechta bo‘linmada sinab, ishda qo‘llash dalillariga qarab takomillashtiradi; rahbarlarga qo‘llashni o‘rgatib, reja sifatini tekshiradi."
+   },
+   "negative": "- Har qanday natija muammosini o‘qitish bilan hal qilmoqchi bo‘ladi.\n- IDPga faqat kurs nomini yozib, mashq va tekshiruv dalilini belgilamaydi.\n- Kursda qatnashishni ko‘nikma yoki keyingi lavozimga tayyorlik deb hisoblaydi.",
+   "methods": "Bilim savollari: IDP, GROW, ehtiyoj va o‘zlashtirish dalili.\nAmaliy topshiriq: ko‘nikma matritsasidan IDP va tekshiruv topshirig‘i tuzish.\nDalil: oldingi/keyingi ish namunasi, mentor qaydi va rolga mos tayyorlik xulosasi."
+  },
+  {
+   "code": "HR-07",
+   "name": "C&B va e’tirof asoslari",
+   "definition": "Tasdiqlangan ish haqi, bonus, imtiyoz va e’tirof qoidalarini tushuntiradi; hisob, mezon va xarajatlarni tekshirib, vakolati doirasida asoslangan rag‘batlantirish taklifini tayyorlaydi.",
+   "levels": {
+    "1": "Rag‘batlantirish qismlarini ajratadi\n- C&B — ish haqi va imtiyozlar — doimiy haq, o‘zgaruvchan haq, imtiyoz hamda nomoliyaviy e’tirof farqini tushuntiradi.\n- Ko‘rsatma bilan sodda misoldagi rag‘batlantirish tarkibini va qo‘llanadigan qoidani ajratadi.\n- Berilgan oddiy bonus formulasi bo‘yicha hisob qiladi va natijani namuna bilan tekshiradi.",
+    "2": "Tayyor qoida bo‘yicha hisobni tekshiradi\n- Bonus sharti, hisob bazasi, davri va tasdiqlash tartibini; rol diapazoni va individual haq farqini izohlaydi.\n- Tanish vaziyatda tasdiqlangan bonus qoidasi asosida hisobni tekshiradi, tafovutni HR yoki moliyaga chiqaradi.\n- Tayyor mezon bo‘yicha e’tirof taklifini hissa dalili bilan yozadi; bahsli holatda yordam oladi.",
+    "3": "Rag‘batlantirish taklifini mustaqil asoslaydi\n- Bonus mezonining nazorat qilinadigan natijaga bog‘liqligi va bir xil holatga bir xil qoida qo‘llashni asoslaydi.\n- Oddiy bo‘linmada tasdiqlangan qoida va ish daliliga tayangan holda bonus, e’tirof yoki imtiyoz taklifini tayyorlaydi.\n- Taklif xarajatini hisoblaydi, mezon va hisobni xodimga tushuntiradi; vakolatidan tashqari o‘zgarishni HRga kiritadi.",
+    "4": "Murakkab rag‘batlantirish holatini tekshiradi\n- Birgalikdagi natija, noto‘g‘ri rag‘bat va rol talablari farqining bonus qaroriga ta’sirini tahlil qiladi.\n- Bo‘linmalararo hissa yoki bahsli bonus holatida hisob, mezon va budjet variantlarini HR/moliya bilan tekshiradi.\n- Vakolati doirasida muammoni hal qiladi; qoida kamchiligiga dalilli o‘zgartirish taklif qilib, ta’sirini sinovda baholaydi.",
+    "5": "Rahbarlar uchun rag‘batlantirish amaliyotini yaxshilaydi\n- Hisob aniqligi, mezon izchilligi va rag‘batning kutilmagan ta’sirini tekshirish usulini asoslaydi.\n- HR va moliya bilan bonus tekshiruvi, e’tirof dalili yoki xarajat asoslash vositasining aniq qismini shaxsan ishlab chiqadi; o‘z hissasini hisob va mezonlar bilan ko‘rsatadi.\n- Vositalarni bir nechta bo‘linmada sinab, aniqlangan xatolarga qarab takomillashtiradi; rahbarlarga qo‘llashni o‘rgatib, hisob va qoida sifatini tekshiradi."
+   },
+   "negative": "- Tasdiqlanmagan ish haqi yoki bonusni va’da qiladi.\n- Hisob bazasi va shartni tekshirmay bonus hisoblaydi.\n- E’tirofni aniq hissa o‘rniga shaxsiy yaqinlikka asoslaydi.",
+   "methods": "Hisoblash topshirig‘i: tasdiqlangan bonus formulasi va xato hisob.\nCase: e’tirof taklifi, xarajat va mezon izohi.\nDalil: shaxssizlantirilgan hisob va tasdiqlash.\nPayroll, soliq hisobi va professional bozor benchmarki talab etilmaydi."
+  },
+  {
+   "code": "HR-08",
+   "name": "Korporativ madaniyat va xodim fikrini o‘rganish",
+   "definition": "Qadriyatlarni kuzatiladigan ish xatti-harakatlariga aylantiradi; xodim fikrini tegishli vosita bilan yig‘ib, umumiy mavzular va amaliy choralarni maxfiylik talablariga mos aniqlaydi.",
+   "levels": {
+    "1": "Madaniyat va fikr yig‘ish asoslarini tushuntiradi\n- Qadriyat, kuzatiladigan xatti-harakat va ish me’yori farqini; pulse-so‘rov va suhbatning maqsadini tushuntiradi.\n- Ko‘rsatma bilan berilgan qadriyat uchun ishga oid xatti-harakat misolini yozadi.\n- Tayyor savolga berilgan javobdan fikr va faktni ajratadi; shaxsni ochadigan ma’lumotni umumiy xulosadan chiqaradi.",
+    "2": "Tayyor vosita bilan fikrni jamlaydi\n- Anonimlik va maxfiylik farqini, yetaklovchi savol va javob bermaslikning xulosaga ta’sirini izohlaydi.\n- Tasdiqlangan savollar yoki suhbat qo‘llanmasi bilan tanish guruh fikrini yig‘adi; zarur joyda yordam oladi.\n- Tayyor usulda takroriy mavzularni jamlab, bir amaliy chora va uning tekshiruv nuqtasini yozadi.",
+    "3": "Bo‘linma fikrini mustaqil tahlil qiladi\n- So‘rov, kichik guruh muhokamasi va individual suhbatni qachon tanlashni; kuzatuvni sabab bilan adashtirmaslikni asoslaydi.\n- Oddiy bo‘linmada tasdiqlangan vosita bilan fikr yig‘ishni tashkil etib, javoblar va ish dalillarini solishtiradi.\n- Qadriyatga mos xatti-harakatlar va ustuvor choralarni belgilaydi; xodimlarga umumiy xulosa hamda bajarilish holatini qaytaradi.",
+    "4": "Murakkab madaniyat muammosini tekshiradi\n- Turli bo‘linma natijalari, past javob qamrovi va ochiq fikr aytish xavfining xulosaga ta’sirini tahlil qiladi.\n- Qarama-qarshi natijalarda HR bilan qo‘shimcha suhbat va ish dalillari orqali sabablarni tekshiradi.\n- Kichik guruh maxfiyligini saqlab, bo‘linmalararo chora rejasini moslashtiradi va natijasini qayta tekshiradi.",
+    "5": "Tashkilotda fikrdan foydalanish usulini yaxshilaydi\n- Fikr yig‘ish sifati, qadriyat indikatorlari va chora samarasini tekshirish mezonlarini asoslaydi.\n- HR bilan qadriyatni xatti-harakatga aylantirish yoki xodim fikridan chora chiqarish usulining aniq qismini shaxsan ishlab chiqadi; o‘z hissasini qo‘llanma bilan ko‘rsatadi.\n- Usulni turli bo‘linmalarda sinab, fikr qamrovi va choralar daliliga qarab takomillashtiradi; rahbarlarni o‘rgatib, maxfiylik va qayta aloqa sifatini tekshiradi."
+   },
+   "negative": "- So‘rov bahosini yaxshilash uchun xodimga bosim o‘tkazadi.\n- Anonim javob egasini aniqlashga urinadi yoki kichik guruhni oshkor qiladi.\n- Qamrov va boshqa dalillarni tekshirmay so‘rovdan qat’iy sabab xulosasi chiqaradi.",
+   "methods": "Bilim savollari: anonimlik, maxfiylik va savol xatolari.\nCase: pulse natijalari hamda ochiq javobdan xulosa/choralar.\nDalil: shaxssizlantirilgan mavzular, chora rejasi va qayta aloqa qaydi."
+  },
+  {
+   "code": "HR-09",
+   "name": "Mehnat munosabatlari va ichki tartiblar",
+   "definition": "Mehnat munosabatlariga oid holatda qoida, hujjat va vakolatni aniqlaydi; ish vaqti, ta’til va tartib jarayonining o‘ziga tegishli qismini tashkil etib, qaror, hujjat tayyorlash va tekshiruvni vakolatli shaxslar bilan muvofiqlashtiradi.",
+   "levels": {
+    "1": "Asosiy hujjat va vakolatlarni ajratadi\n- Mehnat shartnomasi, lavozim yo‘riqnomasi va ichki tartibning vazifalarini; rahbar va HR vakolati farqini tushuntiradi.\n- Berilgan sodda vaziyatda qaysi qoida yoki hujjatni tekshirish kerakligini ko‘rsatma bilan aniqlaydi.\n- Voqea sanasi, harakati va mavjud dalillarni namunada fakt tarzida yozadi; taxminni alohida belgilaydi.",
+    "2": "Standart holatni qoida asosida qayd etadi\n- Ish vaqti, ta’til va tartib holatlarida qayd, tasdiq hamda HRga yo‘naltirish ketma-ketligini izohlaydi.\n- Tanish vaziyatda amaldagi qo‘llanma bo‘yicha ish vaqti yoki ta’til ma’lumotini tekshirib, standart so‘rovni to‘ldiradi.\n- Hodisa bo‘yicha faktlar va hujjatlarni tayyor shaklda yig‘adi; noaniq yoki bahsli qismni yordam bilan HRga chiqaradi.",
+    "3": "Oddiy mehnat masalasini mustaqil tashkil etadi\n- Qoidani tekshirish, holatni hujjatlashtirish va qaror, tayyorlash hamda tekshiruv vakolatlarini ajratish usulini asoslaydi.\n- Oddiy bo‘linmada ish vaqti, ta’til va tartib jarayonining o‘z vakolatiga tegishli qismini mustaqil tashkil etadi.\n- Bahsli holat uchun voqealar va dalillarni tayyorlaydi; rasmiy qarorni vakolatli shaxsga kiritib, zarur tekshiruvni HR/yurist bilan kelishadi.",
+    "4": "Murakkab mehnat holatini muvofiqlashtiradi\n- Qarama-qarshi hujjat, shikoyat va bir nechta bo‘linma vakolati sababli paydo bo‘ladigan xavflarni aniqlaydi.\n- Murakkab holatda dalil va hujjatdagi bo‘shliqlarni tekshirib, HR/yuristga asoslangan masala paketi tayyorlaydi.\n- Vakolatlar bo‘yicha choralarni muvofiqlashtiradi; bo‘linmalar jarayonidagi takroriy uzilishlarni aniqlab, tuzatadi.",
+    "5": "Rahbarlar uchun mehnat jarayoni amaliyotini yaxshilaydi\n- Fakt qaydi, hujjat to‘liqligi va o‘z vaqtida vakolatli shaxsga yo‘naltirish sifat mezonlarini asoslaydi.\n- HR/yurist bilan ish vaqti, ta’til yoki hodisa qaydi vositasining aniq qismini shaxsan ishlab chiqadi; qaror, hujjat va tekshiruv egalarini ajratib, o‘z hissasini ko‘rsatadi.\n- Vositalarni bir nechta bo‘linmada sinab, vakolat va hujjat uzilishlariga qarab takomillashtiradi; rahbarlarni o‘rgatib, qoida qo‘llash sifatini tekshiradi."
+   },
+   "negative": "- Hodisa faktlarini yig‘masdan choraga shoshiladi.\n- Vakolatidan tashqari mehnat sharti yoki rasmiy chorani mustaqil belgilaydi.\n- Noaniq holatni HR/yuristga chiqarmaydi yoki hujjatlarni keyin moslab yozadi.",
+   "methods": "Vaziyatli topshiriq: ish vaqti, ta’til yoki tartib holati uchun qoida, dalil va vakolat egalarini aniqlash.\nDalil: hodisa qaydi, standart so‘rov va qaror/tekshiruvga masala paketi.\nQaror chiqaruvchi, hujjat tayyorlovchi va tekshiruvchi amaldagi lavozim yo‘riqnomasi hamda vakolatlar taqsimoti bilan belgilanadi."
+  },
+  {
+   "code": "HR-10",
+   "name": "HR ma’lumotlari, hujjatlar va tizimlar",
+   "definition": "HR ma’lumotlarini vakolatiga mos yig‘adi va tekshiradi; standart hujjat, HR tizimi hamda xodim ko‘rsatkichlaridan jarayon holatini aniqlash uchun foydalanadi, maxfiylikni saqlaydi.",
+   "levels": {
+    "1": "Ma’lumot va tizim asoslarini tushuntiradi\n- HRIS — xodimlar ma’lumot tizimi — vazifasini, shaxsiy ma’lumot va ruxsatli foydalanish farqini tushuntiradi.\n- Ko‘rsatma bilan oddiy HR jadvalida kerakli maydon, sana va ma’lumot manbasini aniqlaydi.\n- Berilgan oddiy misolda xodimlar sonini sanaydi, dublikat yoki yetishmagan yozuvni topadi.",
+    "2": "Tayyor hujjat va hisobot bilan ishlaydi\n- Xodimlar soni, FTE va ketish ko‘rsatkichi farqini; ko‘rsatkich davri va hisob bazasi ahamiyatini izohlaydi.\n- Tanish jarayonda ruxsatli tizimga ma’lumot kiritadi yoki standart so‘rovni to‘ldiradi; noaniq maydonni tekshirtiradi.\n- Tayyor formula bo‘yicha HR hisobotini chiqarib, dublikat, bo‘sh maydon va manbaga moslikni tekshiradi.",
+    "3": "HR ko‘rsatkichini mustaqil tekshiradi\n- Xodimlar soni, FTE, ketishlar va moslashtirish holati ko‘rsatkichlarining formula, davr va manbasini asoslaydi.\n- Oddiy bo‘linma ma’lumotini mustaqil tekshirib, tasdiqlangan formulalar bo‘yicha HR hisoboti tayyorlaydi.\n- Hisobotni birlamchi qaydlar bilan solishtiradi; farq sababini ko‘rsatib, faqat ruxsat etilgan hajmda ulashadi.",
+    "4": "Murakkab HR ma’lumotlarini moslashtiradi\n- Turli tizimlar, sanalar va hisob bazalari natijani qanday o‘zgartirishini; kichik guruh maxfiyligi xavfini tahlil qiladi.\n- Bo‘linmalararo HR ma’lumotida ziddiyatlarni tekshirib, HR/data mutaxassisi bilan bir xil ta’rif va davrga keltiradi.\n- Takroriy xato sababiga mos kiritish yoki tekshirish tartibini tuzatadi; ortiqcha ma’lumotni hisobotdan chiqaradi.",
+    "5": "Rahbarlar uchun HR ma’lumot amaliyotini yaxshilaydi\n- Ma’lumot sifati, ko‘rsatkich ta’rifi va ruxsatli foydalanishni tekshirish mezonlarini asoslaydi.\n- HR va tizim egalari bilan ko‘rsatkich lug‘ati, standart so‘rov yoki hisobot tekshiruvining aniq qismini shaxsan ishlab chiqadi; o‘z hissasini vosita bilan ko‘rsatadi.\n- Vositalarni bir nechta bo‘linmada sinab, ma’lumot xatolariga qarab takomillashtiradi; rahbarlarga qo‘llashni o‘rgatib, hisob va maxfiylik sifatini tekshiradi."
+   },
+   "negative": "- Davr va hisob bazasini tekshirmay ko‘rsatkichlarni solishtiradi.\n- Dublikat yoki yetishmagan ma’lumotni bilsa ham xulosada ko‘rsatmaydi.\n- Shaxsiy HR ma’lumotini ruxsatsiz ulashadi yoki tizimda tasdiqsiz o‘zgartiradi.",
+   "methods": "Amaliy topshiriq: xatoli HR jadvalini tekshirish, ko‘rsatkich va davrni izohlash.\nTizim simulyatsiyasi: ruxsatli so‘rov/kiritish.\nDalil: shaxssizlantirilgan hisobot, hisob va tekshiruv qaydi.\nHRIS administratsiyasi yoki dasturlash talab etilmaydi."
+  },
+  {
+   "code": "HR-11",
+   "name": "Mehnat munosabatlarini yakunlash",
+   "definition": "Mehnat munosabatlarini yakunlash jarayonining o‘z vakolatiga tegishli qismini tashkil etadi; qaror va rasmiylashtirishni vakolatli shaxslar bilan kelishib, ish, bilim, aktiv va kirish huquqlarini topshirish-yopish dalillarini tekshiradi.",
+   "levels": {
+    "1": "Jarayon bosqichlari va vositalarini tushuntiradi\n- Offboarding, topshirish-qabul qilish, kirish huquqini yopish va exit suhbatining maqsadlarini tushuntiradi.\n- Ko‘rsatma bilan oddiy holat uchun bajariladigan ish va HR/IT/rahbar javobgarligini tayyor ro‘yxatda ajratadi.\n- Tayyor topshirish jadvaliga vazifa, hujjat, aktiv va qabul qiluvchini yozadi.",
+    "2": "Tayyor yakunlash ro‘yxatini yuritadi\n- Ish topshirish dalili, bilim saqlash va xolis exit savollarining jarayondagi ahamiyatini izohlaydi.\n- Tanish holatda tayyor ro‘yxat bo‘yicha topshirish, aktiv qaytarish va ITga kirishlarni yopish so‘rovini tashkil etadi.\n- Tayyor savollar bilan exit suhbatini o‘tkazib, fakt va fikrni ajratadi; bahsli masalani yordam bilan HRga chiqaradi.",
+    "3": "Oddiy yakunlash jarayonini mustaqil tashkil etadi\n- Yakunlash qarori, hujjat tayyorlash, hisob-kitob, ish topshirish va kirishlarni yopishning vakolat egalarini amaldagi tartibdan aniqlaydi.\n- Oddiy holatda o‘z vakolati doirasida topshirish rejasini tuzib, qaror va rasmiylashtirishni tegishli shaxslar bilan muvofiqlashtiradi.\n- Exit suhbatidan shaxssizlantirilgan mavzularni ajratadi; ish, aktiv va kirishlar bo‘yicha qabul yoki yopish tasdiqlarini tekshiradi.",
+    "4": "Murakkab yakunlash holatini muvofiqlashtiradi\n- Kalit xodim ketishi, bir nechta bo‘linma va bahsli topshirish holatining uzluksizlik xavfini tahlil qiladi.\n- Murakkab holatda bilim va vazifalarni qabul qiluvchilarga taqsimlab, HR/IT bilan xavfga mos reja tuzadi.\n- Qabul dalili va yopilmagan ishlarni tekshiradi; exit mavzulari asosida takroriy jarayon muammosiga chora taklif qiladi.",
+    "5": "Tashkilotda yakunlash amaliyotini yaxshilaydi\n- Ish davomiyligi, topshirish to‘liqligi va exit ma’lumotidan foydalanish sifat mezonlarini asoslaydi.\n- HR va IT bilan offboarding, bilim topshirish yoki exit mavzulari vositasining aniq qismini shaxsan ishlab chiqadi; vakolat egalarini ajratib, o‘z hissasini ko‘rsatadi.\n- Vositalarni bir nechta bo‘linmada sinab, topshirish uzilishlariga qarab takomillashtiradi; rahbarlarga qo‘llashni o‘rgatib, qabul va yopish dalillarini tekshiradi."
+   },
+   "negative": "- Topshirishni qabul dalilisiz tugallangan deb belgilaydi.\n- Aktiv yoki tizim kirishlari qaytarilganini tekshirmaydi.\n- Exit suhbatida bosim o‘tkazadi yoki rasmiy yakunlash shartini vakolatsiz belgilaydi.",
+   "methods": "Case: xodim ketishi uchun vakolat, topshirish va uzluksizlik rejasi.\nRol o‘yini: exit suhbat.\nDalil: qabul qaydlari, rasmiylashtirish/yopish tasdiqlari va shaxssizlantirilgan mavzular.\nQaror, hujjat, hisob-kitob va tizim kirishlari egalari amaldagi yo‘riqnoma va vakolatlar taqsimoti bilan belgilanadi."
+  }
+ ],
+ "audit": [
+  {
+   "id": "KOR-01-A1",
+   "competency": "KOR-01",
+   "title": "Vazifa egasi va yakuniy natija",
+   "criterion": "Rahbar javobgarlikni olishi, vazifani oxirigacha kuzatishi va xatoga chora ko‘rishini dalil bilan ajrating.\nTekshirish: Oxirgi 10 topshiriqdan kelishuv, muddat, rahbarning shaxsiy hissasi va yopish dalilini tekshiring."
+  },
+  {
+   "id": "KOR-01-A2",
+   "competency": "KOR-01",
+   "title": "Xato, kechikish va eskalatsiya",
+   "criterion": "Xatoni tan olish, vakolat doirasida chora, vaqtida yordam so‘rash va takroriy xatoni kuzatish dalili.\nTekshirish: 90 kundagi 2 xato yoki kechikish holatida qachon xabar berilgani, muqobil yechim va yakuniy natijani tekshiring."
+  },
+  {
+   "id": "KOR-02-A1",
+   "competency": "KOR-02",
+   "title": "Qarorlarda xolis mezon",
+   "criterion": "Shaxsiy yaqinlikdan qat’i nazar xolis va tushunarli mezon qo‘llangani tasdiqlansin.\nTekshirish: 3 ta bonus, baholash yoki xodimga oid qarorda bir xil mezon, manfaatlar to‘qnashuvi va sabab izohini tekshiring."
+  },
+  {
+   "id": "KOR-02-A2",
+   "competency": "KOR-02",
+   "title": "Ochiqlik va maxfiylik",
+   "criterion": "Noqulay faktlar yashirilmasligi, maxfiylik va ruxsatli ulashish bo‘yicha rahbar harakati ajratilsin.\nTekshirish: 2 noqulay faktni yetkazish holati va 5 ta ruxsat/ulashish misolini tekshiring. Shaxsiy ma’lumotni jadvalga ko‘chirmang."
+  },
+  {
+   "id": "KOR-03-A1",
+   "competency": "KOR-03",
+   "title": "Bo‘limlararo hamkorlik",
+   "criterion": "Ma’lumot, vazifa va muddat kelishilganligi, hamkor ehtiyojini hisobga olish hamda umumiy natijaga hissa.\nTekshirish: 5 ta sotuv–servis–ustoz o‘rtasidagi topshirish va 2 ta markaziy bo‘lim bilan kelishuvni tekshiring."
+  },
+  {
+   "id": "KOR-03-A2",
+   "competency": "KOR-03",
+   "title": "Tajriba ulashish va kelishmovchilik",
+   "criterion": "Boshqalarni jalb qilish, tajriba/resurs ulashish va manfaatlarni konstruktiv kelishtirish dalillari.\nTekshirish: 90 kundagi 2 foydali tajriba ulashish yoki bo‘limlararo kelishmovchilik holatini tegishli tomonlar bilan tekshiring."
+  },
+  {
+   "id": "KOR-04-A1",
+   "competency": "KOR-04",
+   "title": "Shaxsiy rivojlanish maqsadi",
+   "criterion": "O‘z kuchli va rivojlanadigan tomonini bilishi, maqsad va o‘rganish tanlovini dalil bilan asoslang.\nTekshirish: Rahbarning rivojlanish rejasi, o‘z bahosi va olgan feedbackidan 2 rivojlanish harakatini tekshiring."
+  },
+  {
+   "id": "KOR-04-A2",
+   "competency": "KOR-04",
+   "title": "Yangi bilimni ishda qo‘llash",
+   "criterion": "Qo‘llash, murakkab vazifani o‘rganish va tashkilot ehtiyojiga moslashtirish manbadagi daraja bilan solishtirilsin.\nTekshirish: 90 kundagi 2 o‘rganish tajribasining ishdagi qo‘llanishi va qayta feedbackini tekshiring."
+  },
+  {
+   "id": "LDR-01-A1",
+   "competency": "LDR-01",
+   "title": "Maqsad va ijro rejasi",
+   "criterion": "Jamoa maqsadini vazifalarga ajratish va natijaga yo‘naltirilgan reja/ijro sikli.\nTekshirish: Oylik reja va 4 haftalik ishda maqsad, mas’ul, muddat hamda rahbar qarorini tekshiring."
+  },
+  {
+   "id": "LDR-01-A2",
+   "competency": "LDR-01",
+   "title": "Ustuvorlik va resurs",
+   "criterion": "Resursni maqsadga mos taqsimlash, to‘siqqa qaramay natijani saqlash va muqobil yo‘l.\nTekshirish: Bir-biriga zid 3 vazifa va resurs cheklovi bo‘yicha rahbar ustuvorligini tekshiring."
+  },
+  {
+   "id": "LDR-01-A3",
+   "competency": "LDR-01",
+   "title": "Reja-fakt va to‘siqni yengish",
+   "criterion": "Og‘ishni ko‘rish, rejani moslashtirish va bajarilgan chorani natija bilan kuzatish.\nTekshirish: 3 oylik 2 KPI og‘ishi va ularga rahbarning tuzatish rejasini tekshiring."
+  },
+  {
+   "id": "LDR-02-A1",
+   "competency": "LDR-02",
+   "title": "Manbalarni solishtirish",
+   "criterion": "Faktni taxmindan ajratish va bir nechta manbaga tayanib asosli xulosa chiqarish.\nTekshirish: 2 boshqaruv hisobotida manba, davr, segment va qarama-qarshi faktlarni tekshiring."
+  },
+  {
+   "id": "LDR-02-A2",
+   "competency": "LDR-02",
+   "title": "Ildiz sababni tekshirish",
+   "criterion": "Taxmin dalil bilan tekshirilishi, muammoning tashqi belgisi bilan tub sabab farqlanishi.\nTekshirish: 2 katta og‘ishda ehtimoliy sabab, tekshirish va asosiy/ikkilamchi sabab xulosasini ko‘ring."
+  },
+  {
+   "id": "LDR-02-A3",
+   "competency": "LDR-02",
+   "title": "Noaniq ma’lumot va ssenariy",
+   "criterion": "Bog‘liq omillar, muqobil izoh va ehtimoliy oqibatlar tahlili manba darajasiga mos bo‘lsin.\nTekshirish: To‘liq bo‘lmagan yoki zid ma’lumotli 1–2 tahlilni ko‘ring; real holat bo‘lmasa DE va keyingi case belgilang."
+  },
+  {
+   "id": "LDR-03-A1",
+   "competency": "LDR-03",
+   "title": "Variant, xavf va oqibat",
+   "criterion": "Variantlarni solishtirish, vakolat chegarasi va o‘z vaqtida asosli qaror dalili.\nTekshirish: 90 kundagi 2 resurs yoki mijozga ta’sir etgan qarorda muqobillar va xavflarni tekshiring."
+  },
+  {
+   "id": "LDR-03-A2",
+   "competency": "LDR-03",
+   "title": "Qoidalar noaniq bo‘lgan holat",
+   "criterion": "Noaniqlik va omillarni muvozanatlash darajasi manba bilan baholanadi; murakkab holat bo‘lmasa taxmin qilinmaydi.\nTekshirish: Yo‘riqnomada aniq javob bo‘lmagan 2 holatda maslahat, mezon, qaror va eskalatsiyani ko‘ring."
+  },
+  {
+   "id": "LDR-03-A3",
+   "competency": "LDR-03",
+   "title": "Qaror natijasi va qaytalanish",
+   "criterion": "Qaror oqibatini kuzatish va muammoning qaytalanishini kamaytirishga qaratilgan tanlov.\nTekshirish: 2 qarorning natijasi, keyingi tekshiruv va takroriy muammoga yechimini tekshiring."
+  },
+  {
+   "id": "LDR-04-A1",
+   "competency": "LDR-04",
+   "title": "Delegatsiya, nazorat va o‘rinbosarlik",
+   "criterion": "Rahbarning vertikal vazifa taqsimlashi, qo‘llab-quvvatlashi va mustaqil jamoa shakllantirish xulqi.\nTekshirish: 3 topshiriqda xodim tayyorligi, kutilgan natija, vakolat va nazoratni; 1 o‘rinbosarlik holatini tekshiring."
+  },
+  {
+   "id": "LDR-04-A2",
+   "competency": "LDR-04",
+   "title": "Yig‘ilish va individual feedback",
+   "criterion": "Aniq yo‘nalish, muntazam dalilli feedback va kelishuvdan keyingi rahbar nazorati.\nTekshirish: 2 yig‘ilish vazifasi va 2 individual feedback qaydini xodim tasdig‘i bilan tekshiring."
+  },
+  {
+   "id": "LDR-04-A3",
+   "competency": "LDR-04",
+   "title": "Xodimlarni rivojlantirish xulqi",
+   "criterion": "Rivojlanish imkoniyati yaratish, murakkab odamlar masalasini boshqarish va vorisga yordam manba indikatorlariga bog‘lansin.\nTekshirish: 3 xodim bo‘yicha mentorlik, mashq, feedback va ishdagi o‘zgarishni tekshiring; ustozlarda akademik mutaxassis dalilini oling."
+  },
+  {
+   "id": "LDR-05-A1",
+   "competency": "LDR-05",
+   "title": "O‘zgarish sababini tushuntirish",
+   "criterion": "O‘zgarish sababi, ketma-ketligi va afzalliklarini tushuntirish hamda fikrga ochiqlik.\nTekshirish: Oxirgi 2 yangilikda rahbar xabari va 3 xodimning sabab/ta’sirni tushunishini tekshiring."
+  },
+  {
+   "id": "LDR-05-A2",
+   "competency": "LDR-05",
+   "title": "Joriy etish va qarshilik",
+   "criterion": "O‘zgarish amalga oshirilishini boshqarish va to‘siqqa qarab harakatni moslashtirish.\nTekshirish: 1 o‘zgarishda bosqichlar, mas’ullar, muddat, qarshilik sababi va moslashtirishni ko‘ring."
+  },
+  {
+   "id": "LDR-05-A3",
+   "competency": "LDR-05",
+   "title": "O‘zgarishning saqlanishi va ko‘lami",
+   "criterion": "Natijani kuzatish, tashkilot maqsadiga bog‘lash va ta’sir doirasini manbadagi 1–5 darajadan ajrating.\nTekshirish: Joriy qilingan 1 tartibning keyingi kuzatuvi va boshqa bo‘linmaga yoyish dalili bo‘lsa tekshiring."
+  },
+  {
+   "id": "FUN-01-A1",
+   "competency": "FUN-01",
+   "title": "Sotuv voronkasi va CRM ishlovi",
+   "criterion": "Rahbar lead sifati, sotuv ishlovi va bosqich natijalarini ajratib boshqaradi.\nTekshirish: 10 lead bo‘yicha bosqich, ishlov, keyingi aloqa va yo‘qotish nuqtasini tekshiring."
+  },
+  {
+   "id": "FUN-01-A2",
+   "competency": "FUN-01",
+   "title": "Konversiya va quvvat qarori",
+   "criterion": "Konversiya yo‘qotishini aniqlash, talab, narx va quvvatni qarorga bog‘lash.\nTekshirish: 3 oylik voronka va 5 yo‘qotilgan mijozda segment/kanal/menejer kesimidagi chorani tekshiring."
+  },
+  {
+   "id": "FUN-01-A3",
+   "competency": "FUN-01",
+   "title": "Sotuv monitoringi va coaching",
+   "criterion": "Sotuv xulqini monitoring va mashq bilan yaxshilash, qayta natijani tekshirish.\nTekshirish: 3 maslahat yoki qo‘ng‘iroq, va’da haqiqiyligi va 2 coaching/role-play natijasini tekshiring."
+  },
+  {
+   "id": "FUN-02-A1",
+   "competency": "FUN-02",
+   "title": "Auditoriya, taklif va kanal",
+   "criterion": "Rahbar lokal marketingni auditoriya va maqsadga mos tahlil qilishi.\nTekshirish: 2 kampaniya rejasida auditoriya, taklif, kanal va filial ehtiyojini ko‘ring."
+  },
+  {
+   "id": "FUN-02-A2",
+   "competency": "FUN-02",
+   "title": "Marketing samaradorligi",
+   "criterion": "Kanal sifati, xarajat va natijani birgalikda solishtirish hamda lokal chorani asoslash.\nTekshirish: 2 kampaniyada lead, sinovga kelish, CPL/CAC va sotuvga o‘tishni hisob bilan tekshiring."
+  },
+  {
+   "id": "FUN-02-A3",
+   "competency": "FUN-02",
+   "title": "Kontent va mijoz insighti",
+   "criterion": "Kontent mosligi va lokal insightni markaziy marketingga aniq yetkazish.\nTekshirish: 5 kontent yoki reklamada maqsadli auditoriya va 2 mijoz fikrini marketingga yetkazish dalilini ko‘ring."
+  },
+  {
+   "id": "FUN-03-A1",
+   "competency": "FUN-03",
+   "title": "Mijoz yo‘li va saqlab qolish",
+   "criterion": "Xariddan keyingi tajriba va davom ettirishdagi to‘siqni boshqarish.\nTekshirish: 5 kelmagan/ketgan o‘quvchi holatida sabab, aloqa, bo‘limlararo uzilish va keyingi natijani tekshiring."
+  },
+  {
+   "id": "FUN-03-A2",
+   "competency": "FUN-03",
+   "title": "Shikoyat va ishonchni tiklash",
+   "criterion": "Murojaatni yopish, takroriy sababni topish va service recovery chorasi.\nTekshirish: 5 shikoyatda fakt, kutuv, javob, yechim va mijozga qayta aloqa dalilini ko‘ring."
+  },
+  {
+   "id": "FUN-03-A3",
+   "competency": "FUN-03",
+   "title": "Mijoz fikri va CX ma’lumotlari",
+   "criterion": "Mijoz ma’lumotini segmentlab xizmat choralarini belgilash va keyingi natijani kuzatish.\nTekshirish: 3 oylik so‘rovnoma, CSAT/NPS/retention va 3 ustuvor chora natijasini ko‘ring."
+  },
+  {
+   "id": "FUN-04-A1",
+   "competency": "FUN-04",
+   "title": "Budjet-fakt va rentabellik",
+   "criterion": "Ko‘rsatkichni o‘qish, og‘ish sababini tahlil qilish va iqtisodiy qarorni asoslash.\nTekshirish: 3 oy tushum/xarajat/rentabellik va 5 xarajatni birlamchi hisob bilan solishtiring."
+  },
+  {
+   "id": "FUN-04-A2",
+   "competency": "FUN-04",
+   "title": "Resurs va muqobil qiymat",
+   "criterion": "Resursning iqtisodiy oqibati va qisqa foyda/uzoq muddatli sifat muvozanati.\nTekshirish: 2 xarajat yoki quvvat qarorida xarajat, foyda, sifat xavfi va muqobilni tekshiring."
+  },
+  {
+   "id": "FUN-04-A3",
+   "competency": "FUN-04",
+   "title": "Qarzdorlik va pul oqimi",
+   "criterion": "Qarzdorlikni filial moliyaviy natijasi bilan bog‘lash va resurs qarorini asoslash.\nTekshirish: 10 qarzdor va ular bo‘yicha pul oqimi ta’siri, kelishuv, chora va keyingi natijani tekshiring."
+  },
+  {
+   "id": "FUN-05-HR-01",
+   "competency": "FUN-05",
+   "title": "HR-01. Tashkiliy tuzilma va lavozim vazifalari",
+   "criterion": "Tuzilma, lavozim yo‘riqnomasi va javobgarlik taqsimoti texnikasini manba indikatorlariga solishtiring.\nTekshirish: 3 lavozimda vazifa, bo‘ysunish, qaror/tayyorlash/tekshirish egasi va rahbar shaxsiy hissasini tekshiring."
+  },
+  {
+   "id": "FUN-05-HR-02",
+   "competency": "FUN-05",
+   "title": "HR-02. Xodimlarga ehtiyojni rejalashtirish",
+   "criterion": "Ehtiyojni hisoblash va yollash/rivojlantirish/qayta taqsimlash variantlarini asoslash.\nTekshirish: Ish hajmi, soat/FTE, mavjud shtat va 2 vakansiya yoki qayta taqsimlash qarorini hisob bilan tekshiring."
+  },
+  {
+   "id": "FUN-05-HR-03",
+   "competency": "FUN-05",
+   "title": "HR-03. Xodimni tanlash",
+   "criterion": "Tanlov usuli va baholash kartasi sifati; sourcing, job post yoki ATS boshqaruvi talab qilinmaydi.\nTekshirish: 3 nomzodda mezon, strukturali intervyu/STAR qaydi, amaliy topshiriq va tanlov xulosasini ko‘ring."
+  },
+  {
+   "id": "FUN-05-HR-04",
+   "competency": "FUN-05",
+   "title": "HR-04. Ishga moslashtirish va sinov muddati",
+   "criterion": "Moslashtirish rejasining texnik to‘liqligi va o‘zlashtirish dalili.\nTekshirish: 3 yangi xodimda welcome, mentor, ish amaliyoti, nazorat va sinov xulosasini tekshiring."
+  },
+  {
+   "id": "FUN-05-HR-05",
+   "competency": "FUN-05",
+   "title": "HR-05. Faoliyatni baholash",
+   "criterion": "Faoliyatni baholash vositasi va shkalani to‘g‘ri qo‘llash; baholovchi xulqiga alohida ball berilmaydi.\nTekshirish: 3 xodimda KPI va kompetensiya mezonlarini ajratish, ball dalili va yaxshilash rejasini tekshiring."
+  },
+  {
+   "id": "FUN-05-HR-06",
+   "competency": "FUN-05",
+   "title": "HR-06. Rivojlantirish va karyera asoslari",
+   "criterion": "IDP, mentoring va karyera tayyorligini tekshirish vositalari texnikasi; LDR-04 xulqi bilan aralashtirmang.\nTekshirish: 3 IDP/ko‘nikma matritsasida ehtiyoj, usul, ish mashqi va oldingi/keyingi ish namunasini tekshiring."
+  },
+  {
+   "id": "FUN-05-HR-07",
+   "competency": "FUN-05",
+   "title": "HR-07. C&B va e’tirof asoslari",
+   "criterion": "Hisob va C&B qoidasi bo‘yicha hard skill; adolatli qaror xulqi KOR-02da.\nTekshirish: 3 bonus/e’tirof misolida tasdiqlangan formula, hisob bazasi, xarajat va asoslangan taklifni tekshiring."
+  },
+  {
+   "id": "FUN-05-HR-08",
+   "competency": "FUN-05",
+   "title": "HR-08. Korporativ madaniyat va xodim fikrini o‘rganish",
+   "criterion": "Savol va xulosa sifati, fakt/fikr farqi, anonimlik hamda qayta aloqa texnikasi.\nTekshirish: Pulse yoki xodim suhbati vositasi, qamrov, maxfiy mavzular, chora va qayta aloqani tekshiring."
+  },
+  {
+   "id": "FUN-05-HR-09",
+   "competency": "FUN-05",
+   "title": "HR-09. Mehnat munosabatlari va ichki tartiblar",
+   "criterion": "Mehnat jarayonini o‘z vakolatida tashkil etish; huquqiy qarorni vakolatsiz belgilash talab qilinmaydi.\nTekshirish: 3 ish vaqti/ta’til/tartib holatida amaldagi qoida, fakt qaydi va vakolatli HR/yurist bilan kelishuvni tekshiring."
+  },
+  {
+   "id": "FUN-05-HR-10",
+   "competency": "FUN-05",
+   "title": "HR-10. HR ma’lumotlari, hujjatlar va tizimlar",
+   "criterion": "HR ko‘rsatkichini tekshirish texnikasi va ruxsatli ulashish; HRIS administratsiyasi talab qilinmaydi.\nTekshirish: Shaxssizlantirilgan HR jadvali yoki tizimda davr, hisob bazasi, dublikat va standart hisobotni tekshiring."
+  },
+  {
+   "id": "FUN-05-HR-11",
+   "competency": "FUN-05",
+   "title": "HR-11. Mehnat munosabatlarini yakunlash",
+   "criterion": "Yakunlash jarayonidagi o‘z vakolati, qabul/yopish dalili va uzluksizlik nazorati.\nTekshirish: Oxirgi 3 ketishda ish/bilim/aktiv topshirish, kirishni yopish va exit mavzularining qaydini ko‘ring."
+  },
+  {
+   "id": "FUN-06-A1",
+   "competency": "FUN-06",
+   "title": "Kundalik operatsiya va ta’minot",
+   "criterion": "Resurs, jadval, ta’minot va belgilangan operatsion tartibning uzluksiz ishlashi.\nTekshirish: 3 xona, 5 dars jadvali, 5 jihoz/zaxira va majburiy imtihon jadvalining bajarilishini tekshiring."
+  },
+  {
+   "id": "FUN-06-A2",
+   "competency": "FUN-06",
+   "title": "Hujjat, vakolat va ichki nazorat",
+   "criterion": "Majburiy qayd, nazorat, buzilish xavfini aniqlash va vakolatli tomonga chiqarish.\nTekshirish: 5 kunlik kassa nazorati hamda 5 majburiy hujjatda amaldagi tartib va tasdiqlash vakolatini ko‘ring."
+  },
+  {
+   "id": "FUN-06-A3",
+   "competency": "FUN-06",
+   "title": "Hodisa va biznes uzluksizligi",
+   "criterion": "Xavfsizlik hodisasi, oldini olish, tayyorgarlik va uzluksizlik boshqaruvi.\nTekshirish: 2 hodisa/uzilish yoki amaliy tayyorgarlik mashqida protokol, eskalatsiya va sabab choralarini ko‘ring."
+  },
+  {
+   "id": "FUN-07-A1",
+   "competency": "FUN-07",
+   "title": "Raqamli tizim va dashboard",
+   "criterion": "Tizimga kirish/kiritish, mavjud funksiyadan foydalanish va boshqaruv nazorati uchun qo‘llash.\nTekshirish: Rahbardan EduTizim/Sheetsda 3 vazifani amalda bajarish va dashboarddan nazorat qarorini ko‘rsatishni so‘rang."
+  },
+  {
+   "id": "FUN-07-A2",
+   "competency": "FUN-07",
+   "title": "Ma’lumot sifati va yagona manba",
+   "criterion": "Kiritilgan ma’lumotning to‘liqligi/aniqligi, sabab va nazorat hamda yagona manba amaliyoti.\nTekshirish: 10 o‘quvchi/to‘lov yozuvida dublikat, bo‘sh maydon, manba va tuzatish mas’ulini tekshiring."
+  },
+  {
+   "id": "FUN-07-A3",
+   "competency": "FUN-07",
+   "title": "Takroriy ishni soddalashtirish",
+   "criterion": "Raqamli funksiyadan foydalana olish, talab yozish va avtomatlashtirishni biznes qiymatiga bog‘lash.\nTekshirish: 2 takroriy ishda mavjud funksiya yoki avtomatlashtirish talabi, foyda, risk va qabulni tekshiring."
+  }
+ ],
+ "questions": {
+  "KOR-01": [
+   "1.1. Oxirgi bajargan muhim topshirig‘ingizni misol qiling. Undagi o‘z mas’uliyatingizni qanday belgiladingiz va ishni yakunigacha qanday kuzatdingiz?",
+   "1.2. Oxirgi marta ishdagi xatoingizni sezganingizda nima qildingiz? Kimga xabar berdingiz va oqibatini qanday tuzatdingiz?",
+   "1.3. Bugun tugatishga va’da bergan ishni vaqtida bitira olmasligingiz tushdan keyin ma’lum bo‘ldi. Qanday yo‘l tutasiz?"
+  ],
+  "KOR-02": [
+   "2.1. Xodimlarga vazifa yoki qulay ish jadvalini oxirgi marta qanday taqsimladingiz? Kimga nima berishni qaysi mezon bilan hal qildingiz?",
+   "2.2. Eng so‘nggi xodim bahosi yoki rag‘batlantirish qaroringizni misol qiling. Bahoni nimaga asoslab qo‘ydingiz va xodimga qanday tushuntirdingiz?",
+   "2.3. Bir xil qoidani ikki xodim buzdi: biri kuchli natija qiladi, ikkinchisi yangi. Siz qanday qaror qilasiz?"
+  ],
+  "KOR-03": [
+   "3.1. Oxirgi marta boshqa bo‘lim yoki filial bilan birga bajargan oddiy ishingizni ayting. Sizning hissangiz nima bo‘ldi va ishni qanday muvofiqlashtirdingiz?",
+   "3.2. Hamkasbingiz bilan oxirgi fikr farqingizni misol qiling. Uni qanday muhokama qildingiz va nimaga kelishdingiz?",
+   "3.3. O‘zingizdagi foydali tajriba, ma’lumot yoki resursni boshqa filial yoki bo‘limga ulashgan aniq misolingizni ayting. Bu qanday boshlangan va qanday foyda bergan?",
+   "3.4. Sizning jamoangiz vazifasini tugatdi, lekin umumiy ish boshqa bo‘limda to‘xtab qoldi. Siz nima qilasiz?"
+  ],
+  "KOR-04": [
+   "4.1. Oxirgi 6–12 oyda o‘rgangan bilimingiz yoki ish usulingizni rahbarlik faoliyatingizda qo‘llagan aniq misolingizni ayting. Ishingizda nima o‘zgardi?",
+   "4.2. Kelajakdagi o‘zgarishga tayyorlanish uchun bilim yoki ko‘nikmani oldindan o‘rgangan misolingizni ayting. Qaysi belgilar sizni bunga undagan?",
+   "4.3. Sizga yaqinda berilgan bitta ishga oid tavsiyani eslang. Undan keyin ish usulingizda nimani o‘zgartirdingiz?",
+   "4.4. Boshqalarning fikr-mulohazasi siz ilgari sezmagan rivojlanish ehtiyojini ko‘rsatgan vaziyatni ayting. Shundan keyin nima qildingiz?",
+   "4.5. Hozir rahbar sifatida yaxshilashingiz kerak bo‘lgan bitta ko‘nikma qaysi? Keyingi bir oyda uning ustida qanday ishlaysiz?",
+   "4.6. Sizdan yangi bilim yoki ko‘nikma talab qilgan, ilgari bajarmagan murakkab vazifani ayting. Uni bajarishga qanday tayyorlandingiz?"
+  ],
+  "LDR-01": [
+   "5.1. Jamoangizning oxirgi oylik maqsadidan birini ayting. Uni xodimlar vazifalariga qanday ajratdingiz va bajarilishini qanday kuzatdingiz?",
+   "5.2. Filialning haftalik yoki oylik o‘sish rejasini amalga oshirishda kutilgan natijadan ortda qolgan aniq vaziyatni ayting. Siz shaxsan rejani qanday o‘zgartirdingiz va natija qanday bo‘ldi?",
+   "5.3. Oxirgi marta haftalik natija rejadan past chiqqanida nima qildingiz? Keyingi tekshiruvda qanday o‘zgarish bo‘ldi?",
+   "5.4. Filial xarajatlarini optimallashtirib, ta’lim yoki xizmat sifati bo‘yicha kelishilgan natijani saqlashingiz kerak bo‘lgan vaziyatni ayting. Siz qanday harakat qildingiz?",
+   "5.5. Oy tugashiga bir hafta qoldi, reja bajarilishi 80%. Jamoaga shu hafta uchun qanday vazifa berasiz?"
+  ],
+  "LDR-02": [
+   "6.1. Har hafta ko‘radigan hisobotingizdan birini tanlang. Raqamlar orasidan muammoni qanday aniqlaysiz? Yaqindagi oddiy misol bilan tushuntiring.",
+   "6.2. Edu tizimidagi qabul, davomat, faol o‘quvchilar, ketganlar yoki qarzdorlik raqamlarida muhim og‘ish yoxud bir-biriga mos kelmagan ma’lumotni aniqlagan vaziyatingizni ayting. Siz uni qanday tahlil qildingiz?",
+   "6.3. O‘tgan oy 200 murojaatdan 50 ta to‘lov, bu oy 300 murojaatdan 60 ta to‘lov bo‘ldi. Vaziyatni qanday baholaysiz va avval nimani tekshirasiz?",
+   "6.4. So‘nggi takrorlangan ish muammosini tanlang. Uning asl sababini qanday aniqladingiz?"
+  ],
+  "LDR-03": [
+   "7.1. Oxirgi haftada qabul qilgan oddiy boshqaruv qaroringizni ayting. Qaysi variantlarni ko‘rdingiz va nega bittasini tanladingiz?",
+   "7.2. Ertangi dars uchun ustoz kelolmasligi ma’lum bo‘ldi. Hamma ma’lumot hali yo‘q. Hozir qanday qaror qilasiz va qaysi ma’lumotni kutasiz?",
+   "7.3. Qabul qilgan qaroringiz kutilgan natija bermagan yaqin misolni ayting. Buni qanday bildingiz va keyin nima qildingiz?"
+  ],
+  "LDR-04": [
+   "8.1. Oxirgi marta xodimga topshirgan vazifangizni ayting. U ishni qanday bajarishi va siz qachon tekshirishingiz bo‘yicha nimani kelishdingiz?",
+   "8.2. Oxirgi marta xodim ishini yaxshilash uchun qanday suhbat o‘tkazdingiz? Suhbatdan keyin nimani kuzatdingiz?",
+   "8.3. Jamoangizda bir xodimga natijani aytish yetadi, boshqasiga tez-tez yordam kerak. Ularga bir xil vazifani qanday topshirasiz?",
+   "8.4. Jamoaning sizsiz ishlashi yoki rahbar o‘rnini bosadigan xodimni rivojlantirish uchun qilgan ishingizni ayting. Eng murakkab odamlar masalasi nima bo‘lgan?"
+  ],
+  "LDR-05": [
+   "9.1. Oxirgi joriy qilgan yangi qoida yoki ish usulingizni ayting. Uni jamoaga qanday tushuntirdingiz va amalda qo‘llanayotganini qanday bildingiz?",
+   "9.2. Yangi tartibga xodim “bu ortiqcha ish” deb qarshi chiqdi. U bilan qanday suhbatlashasiz?",
+   "9.3. Markazdan joriy qilingan yangilik yoki yangi loyihani ustoz va menejerlarga yetkazib, filialda amalda yo‘lga qo‘ygan vaziyatingizni ayting. Siz qanday o‘zgarish boshqardingiz?",
+   "9.4. Kelasi haftadan yangi hisobot shakliga o‘tish kerak. Birinchi hafta ish uzilmasligi uchun qanday reja tuzasiz?"
+  ],
+  "FUN-01": [
+   "10.1. Filialdagi murojaatdan to‘lovgacha bo‘lgan sotuv jarayonini tushuntiring. Har hafta qaysi bosqichni qanday nazorat qilasiz?",
+   "10.2. Marketing yetarli murojaat beryapti, lekin yangi guruhlar ochilmayapti. Muammo murojaat sifatidami, sotuv menejerlari ishlashidami yoki sinov darsidami — qanday aniqlaysiz?",
+   "10.3. Bu hafta 100 kishi murojaat qildi, 40 kishi tashrif buyurdi, 20 kishi to‘lov qildi. Qaysi bosqichni yaxshilashdan boshlaysiz va nega?",
+   "10.4. Ikki sotuv menejeri bir xil miqdorda murojaat olgan. Birinchisi 30 ta, ikkinchisi 15 ta o‘quvchini to‘lovga olib kelgan. Ularning ishini xolis solishtirish uchun nimalarni tekshirasiz?",
+   "10.5. Talab yuqori, lekin mijozlar so‘rayotgan vaqtda guruhlarda joy yo‘q. Boshqa vaqtdagi guruhlar esa to‘lmagan. Sotuv, jadval va mavjud joylarni qanday muvofiqlashtirasiz?",
+   "10.6. Filial sotuv natijasi faqat bitta kuchli menejerga bog‘lanib qolgan. U yo‘qligida natija tushadi. Sotuv sifatini butun jamoada barqaror qilish uchun qanday tartib yaratasiz?"
+  ],
+  "FUN-02": [
+   "11.1. Filialingizdagi bitta kursga o‘quvchi jalb qilish kerak. Kimga qanday taklif bilan chiqasiz va auditoriyani qanday aniqlaysiz?",
+   "11.2. Filial atrofidagi maktablar, tadbirlar va tarqatma materiallar orqali reklama qilyapsiz. Shu ishlar haqiqatan yangi o‘quvchi olib kelayotganini qanday o‘lchaysiz?",
+   "11.3. Ikki reklama kanaliga 2 mln so‘mdan sarflandi. A kanali 100 murojaat va 10 to‘lov, B kanali 50 murojaat va 10 to‘lov berdi. Qaysi biri yaxshiroq?",
+   "11.4. Yaqiningizda arzonroq narx bilan raqobatchi ochildi. Narxni tushirishdan oldin nimani tekshirasiz? Filialingizning ustunligini mijozga qanday ko‘rsatasiz?",
+   "11.5. Marketing ko‘p murojaat olib kelyapti, sotuv jamoasi esa “sifatsiz” deyapti. Ikki jamoa bilan nimani tekshirasiz?",
+   "11.6. Mavsumiy bo'lmagan oylarda ayrim kurslarga talab kamayadi. Qaysi auditoriya, kurs taklifi va reklama kanallariga e’tibor berasiz? Tanlovingizni qanday ma’lumot bilan asoslaysiz?",
+   "11.7. Bitta lokal kampaniya bir filialda yaxshi natija berdi. Uni boshqa filiallarga ham qo‘llashdan oldin qanday sharoitlarni tekshirasiz va sinovni qanday tashkil qilasiz?"
+  ],
+  "FUN-03": [
+   "12.1. Oxirgi ko‘rib chiqqan mijoz shikoyatingizni ayting. Uni qanday hal qildingiz va mijoz muammo yechilganini qanday tasdiqladi?",
+   "12.2. O‘quvchilarni saqlab qolish pasaymoqda. Ayrimlar narxni, ayrimlar jadvalni, boshqalar dars sifatini sabab qilmoqda. Qaysi guruhlarga qanday chora kerakligini qanday aniqlaysiz?",
+   "12.3. Yangi o‘quvchining birinchi haftasi yaxshi o‘tganini qanday bilasiz? Qaysi nuqtalarni kim orqali tekshirasiz?",
+   "12.4. Sotuv menejeri mijozga amalda bajarib bo‘lmaydigan va’da bergan. Mijoz shu va’da asosida to‘lov qilgan. Uning ishonchini tiklash va vaziyatni hal qilish uchun qanday yo‘l tutasiz?",
+   "12.5. Bir guruhdan ketma-ket uch o‘quvchi chiqib ketmoqchi. Qanday ishlaysiz?",
+   "12.6. Bir xil shikoyat bir nechta filialda takrorlanyapti. Muammo alohida xodimlardami yoki umumiy jarayondami — qanday ajratasiz? Takrorlanishni kamaytirish uchun nima qilasiz?"
+  ],
+  "FUN-04": [
+   "13.1. Filialning oylik moliyaviy hisobotida avval qaysi raqamlarni ko‘rasiz? Ular asosida yaqinda qilgan bitta amaliy qaroringizni ayting.",
+   "13.2. Shartli oyda daromad 200 mln, ustoz haqi 80 mln, ijara 30 mln, boshqa barcha xarajatlar 50 mln so‘m. Foyda va foyda marjasi qancha? Qaysi xarajatni tekshirishdan boshlaysiz?",
+   "13.3. Filialning oylik hisoboti zarar ko‘rsatdi. Avval qaysi daromad va xarajatlarni tekshirasiz? Xarajatni kamaytirish kerak bo‘lsa, ta’lim sifati va keyingi daromadga ta’sirini qanday baholaysiz?",
+   "13.4. Hisobotda foyda bor, lekin ijara to‘lashga pul yetmayapti. Buning mumkin bo‘lgan sabablarini qanday tekshirasiz?",
+   "13.5. O‘quvchilar soni va daromad oshdi, lekin foyda kamaydi. Bu holatning sababini topish uchun qaysi ko‘rsatkichlarni solishtirasiz?",
+   "13.6. Kam to‘lgan guruhni saqlash yoki boshqa guruh bilan birlashtirish kerak. Qaror chiqarishda daromad, xarajat, jadval, ta’lim sifati va o‘quvchi ketishi xavfini qanday hisobga olasiz?",
+   "13.7. Qo‘shimcha mablag‘ni reklama, ustozlar rivoji yoki xonalarni yaxshilashga sarflash mumkin. Qaysi variantni tanlash uchun qanday hisob va ma’lumot kerak? Natijani qachon tekshirasiz?"
+  ],
+  "FUN-05": [
+   "14.1. Yangi xodimga ehtiyoj tug‘ilganda HRga qanday buyurtma berasiz? Oxirgi yoki odatiy buyurtmangizni tushuntiring. Bitta misol tariqasida xodim uchun HR bo'limiga ariza qoldiring",
+   "14.2. Yaqinda yangi filial ochiladi, lekin tayyor menejerlar yetarli emas. HR bilan birga ehtiyojni qanday rejalashtirasiz? Ichki nomzodlarni tayyorlash va tashqi tanlovni qanday bog‘laysiz?",
+   "14.3. Ishga kirish suhbatlarida tajribasi katta, yani suhbatlardan zo'r o'ta oladigan lekin mos bo'lmagan xodimni qanday ajratasiz? Buni aksi ishga kirish suhbatlari bo'yicha bilim va ko'nikmasi kam lekin yaxshi nomzodni o'tkazib yubormaslik uchun suhbatlarni qanday tashkil qilasiz? O'zingizni tajribangizdan misollar keltiring.",
+   "14.4. Bir lavozimdagi xodimlar tez-tez ketmoqda. Maosh, rahbarlik, yuklama yoki noto‘g‘ri tanlov sabab bo‘layotganini qanday tekshirasiz?",
+   "14.5. Yangi xodim ertaga ish boshlaydi. Birinchi hafta va birinchi oy yakunida nimalarni tashkil qilasiz va tekshirasiz?",
+   "14.6. Yangi xodimning birinchi oyi tugadi, natijasi past. Muammo tanlovda, moslashtirishda, bilimida yoki berilgan sharoitdami — qanday aniqlaysiz?"
+  ],
+  "FUN-06": [
+   "15.1. Filialning odatiy ish kunini uzilishsiz olib borish uchun nimani oldindan tekshirasiz? Kim nima uchun javob beradi?",
+   "15.2. Kunlik moliyaviy qaydlarda tafovut bor.  Qaysi tekshiruvlarni tashkil qilasiz, kimga xabar berasiz va hisobot holatini qanday ko‘rsatasiz?",
+   "15.3. Dars boshlanishiga yarim soat qoldi. Xona tayyor emas va kerakli jihoz ishlamayapti. Ishni qanday tashkil qilasiz?",
+   "15.4. Tekshirish ro‘yxatida barcha bandlar bajarilgan deb belgilangan, lekin amalda kamchiliklar topildi. Nazorat faqat qog‘ozda qolib ketganini qanday tekshirasiz va tuzatasiz?",
+   "15.5. Xodim ishni tezlashtirish uchun majburiy ichki tekshiruvni o‘tkazib yuborishni taklif qildi. Qanday yo‘l tutasiz?",
+   "15.6. Elektr yoki internet uzilishi dars, to‘lov va o‘quvchi qaydlariga bir vaqtda ta’sir qildi. Qaysi ishlarni davom ettirish, qaysilarini vaqtincha to‘xtatish va keyin tiklashni qanday belgilaysiz?",
+   "15.7. Bir xil operatsion uzilish bir nechta filialda takrorlanyapti. Umumiy nazorat tartibi va uzilish paytida ishlash rejasini qanday yaratasiz? Ularning ishlashini qanday sinaysiz?"
+  ],
+  "FUN-07": [
+   "16.1. Ishda muntazam foydalanadigan jadval yoki CRM hisobotingizni tushuntiring. Undan bitta muammoni qanday topasiz?",
+   "16.2.  Ikki tizim orasida ma’lumot mos kelmasligi yoki qo‘lda takroriy ishni kamaytirgan misolingizni tanlang. Jarayonni qanday yaxshiladingiz?",
+   "16.3. Xodimga tizimdagi barcha ma’lumotlarga kirish huquqi berilgan, lekin uning ishiga faqat bir qismi kerak. Kirish huquqlari va ma’lumot almashishni qanday tartibga solasiz?",
+   "16.4. AI yordamida jamoa uchun haftalik hisobot xulosasini tayyorlamoqchisiz. Unga qanday ma’lumot berasiz va chiqqan matnni qanday tekshirasiz?",
+   "16.5. Xodimlar bir ma’lumotni uchta joyga qo‘lda kiritmoqda. Ishni soddalashtirish uchun avval nimani o‘rganasiz? Avtomatlashtirish bo‘yicha texnik mutaxassisga qanday talab berasiz?",
+   "16.6. O'zingizni va filialdagi jarayonlar samaradorligini oshirish uchun qanday dasturlardan foydalanasiz?"
+  ]
+ }
+}

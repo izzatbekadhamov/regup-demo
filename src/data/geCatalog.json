@@ -1,0 +1,767 @@
+{
+ "source": "GENERAL english teacher modeli (Google Sheets)",
+ "competencies": [
+  {
+   "code": "KOR-01",
+   "name": "Mas'uliyatlilik",
+   "layer": "Korporativ",
+   "definition": "Vazifa, qaror va muammolar uchun javobgarlikni o‘z zimmasiga oladi, xatosini tan oladi va masalani oxiriga yetkazadi.",
+   "levels": {
+    "1": "Topshirilgan vazifa uchun javobgarlikni qabul qiladi\n- Topshiriqni eslatma bilan bajaradi va holatini rahbarga bildiradi.\n- Xato ko‘rsatilganda tan oladi va tuzatadi.\n- Muammo yoki kechikish yuzaga kelganda, bu haqda rahbariga xabar beradi va ko‘rsatma asosida uni bartaraf etishda ishtirok etadi.",
+    "2": "O‘z vazifasi va xatolari uchun javobgarlikni oladi\n- O‘z vazifasini muddatida bajaradi va kechikish xavfini oldindan aytadi.\n- Xatosini yashirmaydi, sababini va tuzatish choralarini aytadi.\n- Vakolati doirasidagi muammoni boshqalarga o‘tkazmay hal qiladi.",
+    "3": "Kelishilgan natijaga erishishni ta’minlaydi\n- Muammoni oxirigacha kuzatib, natija uchun shaxsiy javobgarlik oladi.\n- Takroriy xatoning oldini oladigan chorani joriy qiladi.\n- Resurs cheklovida ham muqobil yechim topib, kelishilgan natijani beradi.",
+    "4": "Jamoaviy natija uchun javobgarlikni muvofiqlashtiradi\n- Bo‘limlararo masalalarda egalikni belgilab, bajarilishini nazorat qiladi.\n- Jamoada xatolardan o‘rganish va javobgarlik me’yorini shakllantiradi.\n- Murakkab vaziyatlarda javobgarlik chegaralarini aniqlashtirib, umumiy natijani himoya qiladi.",
+    "5": "Tashkilotda mas’uliyat va hisobdorlik tizimini shakllantiradi\n- Tashkilot miqyosida mas’uliyat madaniyatini va hisobdorlik tizimini yaratadi.\n- Tizimli xatolarning ildiz sabablarini bartaraf etadigan mexanizm yaratadi.\n- Yuqori noaniqlikda ham tashkilot manfaatini ko‘zlab javobgarlikni o‘z zimmasiga oladi."
+   },
+   "negative": "- Vazifa yoki muddatni aniqlashtirmasdan ishni qabul qiladi, keyin tushunmovchilikni bahona qiladi.\n- Ish kechikishini bilsa ham, bu haqda manfaatdor tomonlarga vaqtida xabar bermaydi.\n- Muammo yuzaga kelganda yechim izlash o‘rniga aybni boshqalarga yuklaydi.\n- O‘z xatosini yashiradi yoki uning oqibatlarini bartaraf etishda ishtirok etmaydi.\n- Vazifani boshqaga topshirgach, uning bajarilishini kuzatmaydi.\n- «Mening qismim tugadi» deb, kelishilgan yakuniy natija ta’minlanganini tekshirmaydi.\n- Bajarishga ulgurmasligi ayon bo‘lsa ham, yordam so‘ramaydi yoki masalani vaqtida yuqoriga ko‘tarmaydi.\n- Faqat tashqi sabablarni keltirib, o‘z ta’siri doirasidagi choralarni ko‘rmaydi",
+   "criterion": "Avtonomiya, xulqning izchilligi, ta’sir doirasi va tashkilot madaniyatiga ta’siri.",
+   "evidenceHint": "BEI intervyu; in-basket; natijalar portfeli; bevosita rahbar fikri.",
+   "methods": [
+    "interview",
+    "case",
+    "work_sample",
+    "feedback360",
+    "kpi"
+   ],
+   "targets": [
+    2,
+    2,
+    3,
+    3,
+    3
+   ],
+   "growth": "LT-1/2: O‘z guruhlari va vazifalariga javob berish; LT-3/4: Jamoaviy mas'uliyat va mentorlik.",
+   "source": "KOR-01"
+  },
+  {
+   "code": "KOR-02",
+   "name": "Adolatlilik",
+   "layer": "Korporativ",
+   "definition": "Qaror va munosabatlarda xolis, ochiq va bir xil mezonga amal qiladi.",
+   "levels": {
+    "1": "Asosiy etik qoidalarga amal qiladi\n- Asosiy etik qoidalarga ko‘rsatma asosida rioya qiladi.\n- Maxfiy ma’lumotni kimga berish mumkinligini aniqlashtiradi.\n- Qaror mezoni yoki maxfiylik talabi noaniq bo‘lsa, uni rahbaridan aniqlashtiradi va berilgan ko‘rsatmaga amal qiladi.",
+    "2": "Xolislik va maxfiylik talablariga rioya qiladi\n- Manfaatlar to‘qnashuvini yashirmaydi va rahbarga bildiradi.\n- Shaxsiy va maxfiy ma’lumotlarni belgilangan tartibda saqlaydi.\n- Xodimlarni shaxsiy yaqinlikdan qat’i nazar bir xil standartda baholaydi.\n- Boshqalarning ishga qo‘shgan hissasini e’tirof etadi.",
+    "3": "Qarorlarda bir xil mezonni qo‘llaydi\n- Qaror mezonlarini ochiq tushuntiradi va bir xil holatga bir xil mezon qo‘llaydi.\n- Jamoaga maxfiylik talabini tushuntiradi va buzilishning oldini oladi.\n- Noqulay faktlarni yashirmasdan rahbariyat va jamoaga yetkazadi.",
+    "4": "Murakkab vaziyatlarda xolis jarayonni ta’minlaydi\n- Murakkab manfaatlar to‘qnashuvida xolis jarayon va tekshiruvni tashkil qiladi.\n- Maxfiylik xavflarini tizimli nazorat qilib, buzilishlarga xolis munosabat bildiradi.\n- Bosim ostida ham adolatli qarorni dalillar bilan himoya qiladi.",
+    "5": "Tashkilotda adolatli boshqaruv standartlarini shakllantiradi\n- Etik boshqaruv standartlari va ishonch muhitini tashkilot miqyosida mustahkamlaydi.\n- Ma’lumot etikasi va maxfiylik bo‘yicha tashkilot amaliyotini takomillashtiradi.\n- Tashkilot obro‘siga qisqa muddatli foydadan ustun qaraydigan etik mezon yaratadi."
+   },
+   "negative": "- Xodimlarga bir xil vaziyatda turlicha mezon qo‘llaydi yoki ayrimlarga asossiz imtiyoz beradi.\n- Qarorga shaxsiy yaqinlik, yoqtirish yoki kelishmovchilikning ta’sir qilishiga yo‘l qo‘yadi.\n- Manfaatlar to‘qnashuvini yashiradi yoki u haqida vaqtida xabar bermaydi.\n- Qaror sababini tushuntira olmaydi, qo‘llangan mezonlarni izchil ko‘rsatmaydi.\n- Noqulay faktlarni yashiradi yoki qarorni oqlash uchun ma’lumotni tanlab taqdim etadi.\n- Xodimlarning shaxsiy yoki maxfiy ma’lumotlarini ruxsatsiz ulashadi.\n- Shikoyat yoki xatoni tekshirishda bir tomonning fikriga tayanib xulosa chiqaradi.\n- Bosim ostida dalillarga zid qaror qabul qiladi yoki adolatsiz qarorga ko‘z yumadi.\n- Qaroriga shaxsiy munosabat ta’sir qilayotganini anglamaydi yoki ko‘rsatilganda ham mezonni qayta ko‘rib chiqmaydi.",
+   "criterion": "Avtonomiya, xulqning izchilligi, ta’sir doirasi va tashkilot madaniyatiga ta’siri.",
+   "evidenceHint": "BEI intervyu; etik dilemma case’i; compliance dalillari; 180/360 fikr.",
+   "methods": [
+    "interview",
+    "case",
+    "feedback360"
+   ],
+   "targets": [
+    2,
+    2,
+    3,
+    4,
+    4
+   ],
+   "growth": "LT-1/2: O‘quvchilarni xolis baholash; LT-3/4: Nizolarni hal qilish va odob-axloq mezonlariga tayanish.",
+   "source": "KOR-02"
+  },
+  {
+   "code": "KOR-03",
+   "name": "Jamoaviylik",
+   "layer": "Korporativ",
+   "definition": "Boshqa xodim va bo‘limlar bilan ma’lumot, tajriba va resurslarni baham ko‘rib, umumiy natijaga erishadi.",
+   "levels": {
+    "1": "Jamoaviy ishning asosiy qoidalariga amal qiladi (yangi)\n- O‘ziga biriktirilgan vazifani va uning jamoa ishiga qanday bog‘liqligini aniqlashtiradi.\n- Kelishilgan vazifani bajaradi; kechikish yoki qiyinchilik tug‘ilsa, bu haqda jamoani xabardor qiladi.\n- O‘z ishiga taalluqli zarur ma’lumotni so‘ralganda tegishli hamkasblariga yetkazadi.\n- Kelishmovchilikni aniqlashtirishga harakat qiladi; masala vakolatidan oshsa, rahbar yordamiga murojaat qiladi.\n",
+    "2": "Samarali hamkorlik qiladi\n- Boshqalar bilan bajonidil hamkorlik qiladi.\n- Boshqalardan maslahat so‘rashdan tortinmaydi.\n- Turli bo‘lim, tashkilot va jamoalarda vazifalarni bajarish usullari farqlanishini tan oladi.",
+    "3": "Boshqalarni jalb qiladi\n- Turli qatlam vakillarini jamoa ishiga faol jalb qiladi.\n- Turli ko‘nikma va g‘oyalardan samarali foydalanadi. Boshqalarga eng yaxshi yechimni topishda yordam berish uchun vaqt ajratadi.\n- Boshqalar haqida ijobiy fikr bildiradi.\n- Boshqa tashkilot va madaniyatlarni o‘rganish hamda tushunishga vaqt ajratadi.\n-  Ma’lumot va yangi bilimlarini hamkasblari bilan o‘z tashabbusi bilan bo‘lishadi.\n- Jamoa ichidagi nizolar yoki muammolarni ochiq va konstruktiv yo‘l bilan hal qiladi.",
+    "4": "Murakkab bo‘limlararo hamkorlik va nizolarni boshqaradi\n\n- Murakkab bo‘limlararo vazifalarda tomonlarning harakatlarini muvofiqlashtiradi.  \n- Manfaatlar to‘qnashuvini aniqlab, tomonlar uchun maqbul kelishuvga erishadi.  \n- Bir nechta jamoani umumiy maqsad va natija atrofida birlashtiradi.",
+    "5": "Filiallar yoki tashkilot bo‘ylab hamkorlik standartlari va mexanizmlarini yaratadi\n- tashkilot miqyosidagi hamkorlik standartlarini belgilaydi;\n- bo‘limlararo ishlash mexanizmlarini yaratadi;\n- hamkorlikka to‘sqinlik qiluvchi tizimli sabablarni bartaraf etadi;\n- hamkorlik samaradorligini kuzatish mezonlarini joriy qiladi.\n"
+   },
+   "negative": "- O‘zini boshqalardan ustun qo‘yadi va ularning hissasini hurmat qilmaydi.\n- Muhim ma’lumotni o‘zida yoki faqat o‘z bo‘limida saqlab qoladi.\n- Hamkorlarning ish sharoiti va ehtiyojlaridagi muhim farqlarni hisobga olmaydi.\n- Faqat shaxsiy manfaatiga mos kelgandagina hamkorlik qiladi.\n- Boshqalar bilan yuqoridan turib gaplashadi yoki boshqa bo‘limlar haqida mensimay fikr bildiradi.",
+   "criterion": "Avtonomiya, xulqning izchilligi, ta’sir doirasi va tashkilot madaniyatiga ta’siri.",
+   "evidenceHint": "BEI intervyu; 180/360 fikr; bo‘limlararo misollar; rol o‘yini.",
+   "methods": [
+    "interview",
+    "case",
+    "feedback360"
+   ],
+   "targets": [
+    2,
+    2,
+    3,
+    3,
+    3
+   ],
+   "growth": "LT-1/2: Akademik tadbirlarda faol ishtirok; LT-3/4: Hamkasblarga ko‘mak va tajriba almashish.",
+   "source": "KOR-03"
+  },
+  {
+   "code": "KOR-04",
+   "name": "O'z ustida ishlash",
+   "layer": "Korporativ",
+   "definition": "Kuchli va rivojlantirishi kerak bo‘lgan tomonlarini biladi, bilim va ish usullarini muntazam yaxshilaydi.",
+   "levels": {
+    "1": "Fikr-mulohazani qabul qiladi va tavsiya etilgan rivojlanish vazifalarini bajaradi.\n- O‘rganish va doimiy rivojlanish imkoniyatlaridan foydalanadi.\n- Fikr-mulohazani qabul qiladi, rahbar ko‘magida rivojlanish ehtiyojini aniqlaydi va tavsiya etilgan o‘rganish vazifalarini bajaradi\n- O‘rganishda tushunmagan masalalarini aniqlashtiradi va berilgan tavsiyalarni ishda qo‘llashga harakat qiladi.",
+    "2": "Hozirgi ishida samaradorligini oshirishga intiladi\n- Joriy vaziyatdan ko‘proq o‘rganish uchun yangi yondashuvlarni sinab ko‘radi.\n- Barcha o‘rganish imkoniyatlaridan foydalanadi: masalan, kurslar, boshqalar ishini kuzatish va loyiha vazifalari.\n- Yangi bilimlarini ishda qo‘llaydi.\n- Kuchli va zaif tomonlarini, yaxshilanish yo‘llarini aniqlash uchun o‘zini muntazam baholaydi va boshqalardan fikr-mulohaza so‘raydi.",
+    "3": "Mavjud talablar doirasidan tashqarida ham o‘rganish imkoniyatlarini izlaydi\n- Oldiga murakkab maqsadlar qo‘yadi. Hozirgi va kelgusi faoliyatida o‘sishni ko‘zlab, o‘ziga yuqori sifat mezonlarini belgilaydi.\n- Kasbiy va shaxsiy jihatdan muntazam rivojlanadi.\n- Qobiliyatlarini sinovdan o‘tkazadigan vazifalarni izlaydi.",
+    "4": "Shaxsiy rivojlanishini tashkilot maqsadlari bilan bog‘laydi\n- Tanish bo‘lmagan va bir nechta yo‘nalish bilan bog‘liq murakkab vazifani bajarish uchun zarur ko‘nikmalarni mustaqil o‘zlashtiradi, amalda qo‘llaydi va natijaga qarab o‘rganish yondashuvini moslashtiradi.\n- Tashkilotdagi o‘zgarishlardan yangi ko‘nikma va bilimlarni rivojlantirish imkoniyati sifatida foydalanadi.\n\n",
+    "5": "O‘rganishini tashkilot strategiyasidagi kutilayotgan o‘zgarishlarga moslaydi\n- Kelajakda zarur bo‘ladigan bilim va ko‘nikmalarni oldindan aniqlaydi, shaxsiy rivojlanish rejasini moslashtiradi va samarali o‘rganish amaliyotini boshqalarga tarqatadi.\n- Ish faoliyatiga kengroq ta’sir qiladigan yangiliklardan xabardor bo‘lish uchun tashqi muhitni muntazam kuzatadi."
+   },
+   "negative": "- Asosli fikr-mulohazani tahlil qilmasdan rad etadi.\n- Kelishilgan rivojlanish harakatlarini asosli sababsiz bajarmaydi.\n- Yangi bilimni ishda qo‘llash imkoniyati bo‘lsa ham, sinab ko‘rmaydi.\n- Takroriy xatolar sababini tahlil qilmaydi va ish usulini o‘zgartirmaydi.",
+   "criterion": "Avtonomiya, xulqning izchilligi, ta’sir doirasi va tashkilot madaniyatiga ta’siri.",
+   "evidenceHint": "BEI intervyu; individual rivojlanish rejasi; o‘qish portfeli; rahbar fikri.",
+   "methods": [
+    "interview",
+    "work_sample",
+    "feedback360"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: IELTS/C1; LT-3/4: Xalqaro/MIlliy sertifikatlar (IELTS 8/8.5,CEFR C1,CELTA) va ilg‘or tajriba ulashish.",
+   "source": "KOR-04"
+  },
+  {
+   "code": "BEH-01",
+   "name": "Samarali muloqot",
+   "layer": "Pedagogik xulq-atvor",
+   "definition": "O‘quvchilar, ota-onalar va hamkasblar bilan ochiq, professional, hurmatli va aniq muloqot o‘rnatadi; axborotni tinglovchi darajasiga mos ravishda yetkazadi va konstruktiv aloqani ta’minlaydi.",
+   "levels": {
+    "1": "Asosiy muloqot etikasiga amal qiladi\n- Darsda xushmuomala muloqot qiladi va berilgan skript/yo‘riqnomalarga amal qiladi.\n- Ota-onalar va o‘quvchilar savollariga javob berishda mentor yoki ma’muriyat yordamiga tayanadi.\n- Hamkasblar bilan axborot almashishda belgilangan tartibga rioya qiladi.",
+    "2": "Standart vaziyatlarda mustaqil va aniq muloqot qiladi\n- Darsda o‘quvchilar bilan tushunarli va professional tilda so‘zlashadi.\n- Ota-onalarga o‘quvchi natijasi va darsdagi faolligi bo‘yicha odatiy xabarlarni mustaqil yetkazadi.\n- E’tiroz yoki savol tug‘ilganda xushmuomalalikni saqlaydi, murakkab ziddiyatlarda rahbariga murojaat qiladi.",
+    "3": "Turli auditoriyalar bilan ishonchli va ta’sirchan aloqa o‘rnatadi\n- O‘quvchi va ota-onaning ehtiyojini faol tinglab, aniq, dalillarga asoslangan va konstruktiv fikr bildiradi.\n- Ota-onalar bilan suhbatda o‘quvchining kuchli va rivojlanishi kerak bo‘lgan jihatlarini professional tushuntiradi.\n- Murakkab muloqot vaziyatlarida va e’tirozlarda xotirjamlik bilan o‘zaro maqbul yechim topadi.",
+    "4": "Murakkab muloqot va ziddiyatli vaziyatlarni ustalik bilan boshqaradi\n- Guruhdagi va ota-onalar bilan yuzaga kelgan nozik nizoli holatlarni mustaqil va diplomatik yo‘l bilan ijobiy hal qiladi.\n- Yangi va yosh ustozlarga ota-onalar hamda o‘quvchilar bilan samarali muloqot qilish bo‘yicha maslahat beradi.\n- Auditoriya kayfiyati va ehtiyojiga qarab muloqot uslubini tez va moslashuvchan o‘zgartiradi.",
+    "5": "Tashkilotda muloqot va professional aloqa standartlarini rivojlantiradi\n- Ota-onalar, o‘quvchilar va jamoa bilan aloqalar bo‘yicha tizimli muloqot standartlari va treninglarini ishlab chiqadi.\n- O‘quv markazining nufuzi va ommaviy tadbirlarida jamoa vakili sifatida ta’sirchan muloqot olib boradi.\n- Filial miqyosida psixologik xavfsiz va qo‘llab-quvvatlovchi muloqot muhitini shakllantiradi."
+   },
+   "negative": "- O‘quvchi yoki ota-onalar bilan qo‘pol, mensimay yoki tajovuzkor ohangda gaplashadi.\n- Tinglashni bilmaydi, suhbatdoshning so‘zini bo‘ladi yoki uning fikrini e’tiborsiz qoldiradi.\n- Ota-onaga o‘quvchi holati haqida noto‘g‘ri, haddan tashqari bo‘rttirilgan yoki asossiz salbiy axborot beradi.\n- Ziddiyatli vaziyatda his-tuyg‘ularini jilovlay olmaydi va nizoni chuqurlashtiradi.\n- Kasbiy etiketga zid gap-so‘zlar yoki professional bo‘lmagan xatti-harakatlarga yo‘l qo‘yadi.",
+   "criterion": "Avtonomiya, muloqot murakkabligi, hissiy yetuklik, nizo boshqaruvi va jamoaga ta’siri.",
+   "evidenceHint": "Lesson observation; NPS / Ota-ona va o‘quvchi fikri; 180/360 fikr; audio/video yozuvlar tahlili; BEI intervyu.",
+   "methods": [
+    "observation",
+    "interview",
+    "work_sample",
+    "feedback360",
+    "kpi"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    4
+   ],
+   "growth": "LT-1/2: O‘quvchi va ota-onalar bilan professional aloqa; LT-3/4: Konstruktiv muloqot va murakkab vaziyatlarda yechim topish.",
+   "source": "BEH-01"
+  },
+  {
+   "code": "BEH-02",
+   "name": "O‘quvchiga yo‘naltirilganlik",
+   "layer": "Pedagogik xulq-atvor",
+   "definition": "O‘quvchilarning qiziqishi, intilishi, psixologik holati va maqsadlarini ustuvor deb biladi; ularning shaxsiy va akademik rivojlanishi uchun g‘amxo‘rlik, mehr va qat’iy qo‘llab-quvvatlov ko‘rsatadi.",
+   "levels": {
+    "1": "O‘quvchilarga ijobiy munosabatda bo‘ladi va qoidalarga amal qiladi\n- Dars jarayonida o‘quvchilarga nisbatan e’tiborli va xayrixoh bo‘lishga harakat qiladi.\n- O‘quvchilarning umumiy kayfiyati va qiziqishini kuzatadi, muammolarni katta ustozga yetkazadi.\n- Belgilangan me’yorlar asosida o‘quvchilarni rag‘batlantirish usullarini qo‘llaydi.",
+    "2": "O‘quvchilarning faolligi va darsga qiziqishini ta’minlaydi\n- Har bir o‘quvchining ismini, darsdagi ishtirokini biladi va ularni teng jalb qilishga intiladi.\n- O‘quvchining tushunmay qolgan mavzusi bo‘yicha yordam beradi va savollariga e’tibor bilan qaraydi.\n- O‘quvchining motivatsiyasi pasayganda sababini aniqlashga va ijobiy dalda berishga harakat qiladi.",
+    "3": "O‘quvchilarning o‘sishi va ruhiy ishonchini barqaror shakllantiradi\n- O‘quvchilarning maqsad va orzularini tushunib, darslarni ularning ichki motivatsiyasiga moslaydi.\n- Qiyinchilikka uchragan o‘quvchiga ruhiy va metodik suyanch bo‘ladi, unda o‘z kuchiga ishonch uyg‘otadi.\n- O‘quvchi ehtiyojlaridan kelib chiqib qo‘shimcha yordam yoki yo‘nalish beradi, dars muhitini do‘stona tutadi.",
+    "4": "O‘quvchilarni mustaqil fikrlaydigan va maqsad sari intiluvchan shaxs sifatida tarbiyalaydi\n- O‘quvchilarda nafaqat fan, balki o‘z-o‘zini rivojlantirish va mustaqil o‘rganish ko‘nikmalarini shakllantiradi.\n- Tashvishli, tushkun yoki o‘qishdan ko‘ngli qolgan o‘quvchilarni qayta ilhomlantirib, natijaga yetaklaydi.\n- Yangi ustozlarga o‘quvchi bilan ishonchli va mehrli munosabat qurish sirlarini o‘rgatadi.",
+    "5": "Tashkilotda o‘quvchi manfaati ustuvor bo‘lgan pedagogik madaniyatni shakllantiradi\n- O‘quv markazi bo‘yicha o‘quvchilar tajribasi (Student Experience) va g‘amxo‘rlik standartlarini ishlab chiqadi.\n- Murakkab, og‘ir xatti-harakatli o‘quvchilar bilan ishlash bo‘yicha pedagogik strategiyalarni joriy qiladi.\n- Barcha ustozlarda o‘quvchiga hurmat, muhabbat va ishonch bilan qarash qadriyatini mustahkamlaydi."
+   },
+   "negative": "- O‘quvchilarga befarq, sovuqqon munosabatda bo‘ladi, faqat vaqt o‘tkazish uchun dars o‘tadi.\n- O‘quvchining tushunmaganini ko‘rib turib, unga yordam bermasdan mavzuda davom etaveradi.\n- O‘quvchilar orasida ayirmachilik qiladi, sevimli va yoqtirmaydigan o‘quvchilarga ajratadi.\n- O‘quvchining intilishi yoki savollarini mensimaydi, ularni darsda kamsitadi yoki uyaltiradi.\n- O‘quvchining ruhiy tushkunligi yoki darsdan qolishiga e’tibor bermaydi.",
+   "criterion": "Empatiya chuqurligi, o‘quvchiga g‘amxo‘rlik, mustaqillik darajasi va talabalar tajribasiga ta’siri.",
+   "evidenceHint": "NPS / O‘quvchilar so‘rovnomasi; dars kuzatuvi (Lesson Observation); o‘quvchilarning saqlanishi (Retention); 180/360 baholash.",
+   "methods": [
+    "observation",
+    "feedback360",
+    "kpi"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: O‘quvchi ehtiyoji va guruh davomatini saqlash; LT-3/4: Motivatsiya va yuqori mamnuniyatga erishish.",
+   "source": "BEH-02"
+  },
+  {
+   "code": "BEH-03",
+   "name": "Individual yondashuv",
+   "layer": "Pedagogik xulq-atvor",
+   "definition": "O‘quvchilarning o‘zlashtirish tezligi, bilish uslubi (learning style), qobiliyati va xarakteridagi farqlarni inobatga oladi; har bir o‘quvchi uchun mos metod va sur’atni qo‘llaydi.",
+   "levels": {
+    "1": "O‘quvchilar orasidagi tafovutlarni sezadi va tayyor yo‘riqnomaga tayanadi\n- Guruhdagi kuchli va nisbatan sust o‘zlashtiruvchi o‘quvchilarni ajrata oladi.\n- Mentor ko‘rsatmasi bo‘yicha orqada qolayotgan o‘quvchiga qo‘shimcha topshiriq beradi.\n- O‘quvchining individual savollariga darsdan so‘ng qisqa vaqt ajratadi.",
+    "2": "Darsda darajaviy topshiriqlarni qo‘llay oladi\n- Tez ishlaydigan o‘quvchilar uchun qo‘shimcha mashqlar, qiynalayotganlar uchun soddaroq misollar tayyorlaydi.\n- O‘quvchilarning qaysi mavzuda oqsayotganini aniqlab, individual maslahatlar beradi.\n- Turli xarakterdagi (uyatchan, faol) o‘quvchilarga mos savol-javob shaklini tanlaydi.",
+    "3": "Har bir o‘quvchining individual o‘sish trayektoriyasini boshqaradi\n- Guruh ichida differensial yondashuvni tabiiy va kamsitmasdan qo‘llaydi (task, support, time bo‘yicha).\n- O‘quvchining kuchli tomonlarini kashf etib, zaif nuqtalarini bartaraf qilish uchun aniq individual tavsiyalar beradi.\n- O‘quvchining shaxsiy o‘rganish tezligiga hurmat bilan qarab, uning o‘z darajasidan sakrashiga erishadi.",
+    "4": "Murakkab ta’limiy ehtiyojlarga ega o‘quvchilar uchun maxsus yondashuv yaratadi\n- O‘zlashtirishi qiyin bo‘lgan yoki haddan tashqari ilg‘or o‘quvchilar uchun moslashtirilgan o‘qitish strategiyasini ishlab chiqadi.\n- Jamoadagi boshqa ustozlarga darsda individual yondashuvni tashkil qilish bo‘yicha amaliy metodlarni o‘rgatadi.\n- Har bir o‘quvchining diagnostikasi asosida uning individual rivojlanish rejasini (IDP) shakllantiradi.",
+    "5": "Tizimli diagnostika va adaptiv ta’lim metodologiyasini joriy qiladi\n- O‘quv markazi bo‘yicha o‘quvchilarni individual profilaktika qilish va tabaqalashtirilgan o‘qitish tizimini yo‘lga qo‘yadi.\n- Murakkab holatlarda boshqa ustozlarga individual konsultatsiya va metodik yechimlar beradi.\n- Turli toifadagi o‘quvchilar bilan ishlash bo‘yicha metodik qo‘llanmalar va keyslar to‘plamini yaratadi."
+   },
+   "negative": "- Hamma o‘quvchiga bir xil shablon va bir xil tezlikda yondashadi, orqada qolganlarga e’tibor bermaydi.\n- O‘quvchining shaxsiy xususiyatlari, qobiliyati yoki qiyinchiliklarini inobatga olmaydi.\n- Tezkor o‘quvchilarni zaxira topshiriqsiz bekor qoldiradi, sekin o‘quvchilarni esa shoshtirib ruhiy bosim o‘tkazadi.\n- «Bu o‘quvchidan baribir hech narsa chiqmaydi» deb, o‘quvchiga tamg‘a bosadi.\n- Individual yordam so‘ragan o‘quvchini qaytaradi yoki unga vaqt ajratishdan bosh tortadi.",
+   "criterion": "Diagnostika aniqligi, differensial metodlar xilma-xilligi, moslashuv darajasi va o‘quvchi o‘sish sur’ati.",
+   "evidenceHint": "Differensial materiallar tahlili; dars kuzatuvi (Lesson Observation); o‘quvchilar progressi dinamikasi; IDP kartalari.",
+   "methods": [
+    "observation",
+    "work_sample"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    3,
+    4
+   ],
+   "growth": "LT-1/2: Differensial vazifalar berish; LT-3/4: Qiyin vaziyatdagi o‘quvchilarga maxsus yondashuv topish.",
+   "source": "BEH-03"
+  },
+  {
+   "code": "BEH-04",
+   "name": "Moslashuvchanlik",
+   "layer": "Pedagogik xulq-atvor",
+   "definition": "O‘zgaruvchan sharoitlar, kutilmagan vaziyatlar, yangi talablar va turli auditoriyalarga tez, xotirjam va samarali moslashadi; ish uslubini vaziyatga qarab o‘zgartira oladi.",
+   "levels": {
+    "1": "O‘zgarishlarni qabul qiladi va ko‘rsatma asosida harakat qiladi\n- Dars jadvali yoki xona o‘zgarganda xotirjamlikni saqlashga harakat qiladi.\n- Texnik nosozlik yoki rejadagi o‘zgarish yuz berganda mentor yoki ma’muriyatdan yordam so‘raydi.\n- Yangi talab va tartiblarni o‘rganishga ochiq bo‘ladi.",
+    "2": "Darsdagi kutilmagan vaziyatlarda muqobil yechim topadi\n- Texnika ishlamay qolsa yoki material yetishmasa, darsni zaxira rejada (Plan B) davom ettira oladi.\n- Guruh dinamikasi kutilgandek bo‘lmaganda dars tezligi yoki topshiriq ketma-ketligini o‘zgartiradi.\n- O‘quv markazidagi yangi qoidalar va metodik tavsiyalarni o‘z ishiga tez kiritadi.",
+    "3": "Noaniqlik va tezkor o‘zgarishlar sharoitida yuqori samaradorlikni saqlaydi\n- Dars davomida o‘quvchilar tushunish darajasiga qarab reja va metodni real vaqtda moslashtiradi.\n- Guruhga yangi o‘quvchilar qo‘shilganda dars maromini buzmasdan ularni jarayonga tez integratsiya qiladi.\n- Turli yoshdagi, fe’l-atvordagi va darajadagi guruhlarga oson moslashadi va natijani tushirmaydi.",
+    "4": "Murakkab kutilmagan vaziyatlarda yechim topadi va boshqalarga ko‘maklashadi\n- Favqulodda vaziyatlarda (boshqa ustoz o‘rniga darsga kirish, fors-major) tayyorgarliksiz ham a’lo darajada dars o‘ta oladi.\n- O‘quv tizimi yoki dasturidagi yangiliklarni birinchilardan bo‘lib o‘zlashtirib, hamkasblariga moslashishga yordam beradi.\n- Yangi metodika va vositalarni (masalan, yangi EdTech/AI) o‘z amaliyotiga mohirlik bilan kiritadi.",
+    "5": "Tizimli o‘zgarishlarga yetakchilik qiladi va jamoada moslashuvchanlik madaniyatini rivojlantiradi\n- O‘quv markazi miqyosidagi transformatsiya, innovatsiya va dasturiy islohotlarni joriy qilishda lokomotiv bo‘ladi.\n- Inqirozli va noaniq vaziyatlarda tezkor harakat strategiyalarini ishlab chiqadi.\n- Jamoada o‘zgarishlarga nisbatan ijobiy qarash va innovatsiyalarni qabul qilish muhitini shakllantiradi."
+   },
+   "negative": "- Har qanday kichik o‘zgarish yoki nosozlikda sarosimaga tushadi va darsni yo‘qotib qo‘yadi.\n- Qat’iy qolipga yopishib oladi, vaziyat talab qilsa ham dars rejasidan bir qadam chetga chiqmaydi.\n- Yangi qoidalar, o‘quv dasturlari yoki texnologiyalarga asossiz qarshilik ko‘rsatadi.\n- O‘rniga dars o‘tish yoki tezkor yordam so‘ralganda qat’iy rad etadi va moslashishni istamaydi.\n- O‘zgarishlar paytida jamoada vahima yoki salbiy kayfiyat tarqatadi.",
+   "criterion": "Vaziyatga reaktsiya tezligi, noaniqlikda qaror qabul qilish, muqobil yechimlar sifati va moslashuv kengligi.",
+   "evidenceHint": "Kutilmagan vaziyatlardagi dars kuzatuvi; fors-major vaziyatlar qaydlari; bevosita rahbar bahosi; peer feedback.",
+   "methods": [
+    "observation",
+    "work_sample",
+    "feedback360"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: Kutilmagan vaziyatlarda darsni davom ettirish; LT-3/4: Jadval va dasturdagi o‘zgarishlarga tez moslashish.",
+   "source": "BEH-04"
+  },
+  {
+   "code": "BEH-05",
+   "name": "Natijadorlik",
+   "layer": "Pedagogik xulq-atvor",
+   "definition": "O‘quvchilarning real bilim o‘sishi, imtihon natijalari (IELTS/CEFR/Grammar), guruh saqlanishi (retention) va sifat ko‘rsatkichlari uchun shaxsiy javobgarlikni his qiladi va yuqori natijalarga erishadi.",
+   "levels": {
+    "1": "Vazifalarni bajaradi va standart natija talablarini tushunadi\n- Dars jadvali, mavzular rejasi va oraliq testlarni o‘z vaqtida o‘tkazadi.\n- O‘quvchilarning baholari va davomatini belgilangan tizimda qayd etib boradi.\n- Natijalar past bo‘lganda sabablarini mentor bilan birgalikda tahlil qiladi.",
+    "2": "Standart maqsadli ko‘rsatkichlarni (KPI) ta’minlaydi\n- Guruhdagi o‘quvchilarning oraliq testlardan muvaffaqiyatli o‘tishini nazorat qiladi.\n- O‘quvchilarning dars qoldirmasligi va uy vazifalarini bajarishini muntazam kuzatib boradi.\n- Guruh saqlanishi (retention) bo‘yicha bazaviy ko‘rsatkichlarga erishadi, tushib qolish xavfi bo‘lgan o‘quvchilar bilan ishlaydi.",
+    "3": "Barqaror yuqori akademik va operatsion natijalarni ta’minlaydi\n- Guruhdagi o‘quvchilarning o‘rtacha ballari, mock natijalari va darajadan darajaga o‘tish foizini yuqori darajada ushlaydi.\n- Retention (guruh saqlanishi) ko‘rsatkichini doimiy yuqori saqlaydi, sinov darslaridan kursga yozilish konversiyasini ta’minlaydi.\n- Natijasi past o‘quvchilar bilan maqsadli ishlab, ularning baholari ko‘tarilishiga erishadi.",
+    "4": "Kutilgandan yuqori natijalarga erishadi va jamoa natijadorligini oshiradi\n- O‘quvchilaridan rekord darajadagi sertifikat natijalari (yuqori IELTS/CEFR ballari) chiqishini ta’minlaydi.\n- Past natija ko‘rsatayotgan guruhlarni qabul qilib olib, ularning ko‘rsatkichlarini qisqa muddatda keskin oshiradi.\n- O‘z tajribasi va natijadorlik usullarini hamkasblari bilan bo‘lishib, filial reytingining ko‘tarilishiga hissa qo‘shadi.",
+    "5": "Tashkilot miqyosida natijadorlik mezonlarini va sifat kafolatini belgilaydi\n- O‘quv markazining umumiy akademik reytingi, ta’lim sifati va natijadorlik tizimini takomillashtiradi.\n- Eng yuqori natija beruvchi o‘qitish metodikalarini tahlil qilib, butun tarmoq bo‘yicha tizimlashtiradi.\n- Registon o‘quv markazining ta’lim bozori va jamoatchilik oldidagi yuqori natijadorlik brendini shakllantirishda yetakchilik qiladi."
+   },
+   "negative": "- O‘quvchilarning past natijalari yoki guruhdan chiqib ketishiga befarq qaraydi («o‘zi o‘qimadi» deb aybni o‘quvchiga to‘nkash).\n- Oraliq va yakuniy testlarni vaqtida o‘tkazmaydi yoki natijalarni asossiz ravishda sun’iy oshirib ko‘rsatadi.\n- O‘quvchilar sonining kamayib ketishi (chunki darslar sifatsiz) sabablarini tahlil qilmaydi.\n- Faqat dars o‘tish jarayoni bilan cheklanib, o‘quvchi oxir-oqibat nima o‘rganganiga qiziqmaydi.\n- KPI va akademik maqsadlarga beparvo qaraydi, natijani yaxshilash uchun hech qanday qo‘shimcha harakat qilmaydi.",
+   "criterion": "Natijalarning barqarorligi, o‘quvchilar yutuqlari (test/sertifikat), retention ko‘rsatkichi va tashkilot KPIga hissasi.",
+   "evidenceHint": "Mock va oraliq test natijalari; Guruh saqlanishi (Retention) hisoboti; Sinov darsi konversiyasi; Yakuniy imtihon/sertifikat natijalari.",
+   "methods": [
+    "kpi"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: O‘quvchilar o‘zlashtirishi ≥80%; LT-3/4: Barqaror yuqori imtihon ko‘rsatkichlariga erishish.",
+   "source": "BEH-05"
+  },
+  {
+   "code": "GEN-01",
+   "name": "Darsni rejalashtirish va o‘quv natijalarini belgilash",
+   "layer": "Funksional",
+   "definition": "Dars maqsadi, kutilayotgan o‘quv natijalari, topshiriqlar va dars bosqichlarini o‘quvchilar darajasi, ehtiyojlari hamda o‘quv dasturiga muvofiq rejalashtirish.",
+   "levels": {
+    "1": "Mentor bergan lesson plan asosida ishlaydi\n- Dars materiallarini tayyorlaydi va darsdan oldin kerakli texnik vositalarni tekshiradi.",
+    "2": "Oddiy dars uchun lesson plan tuzadi, dars maqsadi va vaqt taqsimotini belgilaydi\n- Rejani moslashtirishda mentor ko‘magiga muhtoj bo‘ladi.",
+    "3": "Mustaqil lesson plan tuzadi\n- Unda aim, stage aim, timing, interaction, anticipated problems va solutionsni ko‘rsatadi.\n- Dars maqsadini topshiriqlar va kutilayotgan o‘quv natijalari bilan bog‘laydi.",
+    "4": "O‘quvchilar ehtiyoji va oldingi dars natijalariga qarab lesson plan’ni moslashtiradi\n- Kutilayotgan qiyinchiliklar uchun yechimlarni oldindan belgilaydi va zarur hollarda rejasini asosli o‘zgartiradi.",
+    "5": "Boshqa ustozlarning lesson plan’larini tahlil qiladi\n- Rejalashtirishdagi metodik kamchiliklarni aniqlaydi va dars rejalashtirish amaliyotini takomillashtirishga hissa qo‘shadi."
+   },
+   "negative": "- Dars maqsadi yoki kutilayotgan natijani belgilamaydi.\n- Lesson plan va amalda o‘tilgan dars o‘rtasida sezilarli nomuvofiqlik mavjud.\n- Topshiriqlarni dars maqsadi bilan bog‘lamaydi.\n- Materiallar va texnik vositalarni oldindan tekshirmaydi.\n- Dars vaqti va bosqichlarini rejalashtirmaydi.",
+   "criterion": "Lesson plan mustaqilligi, maqsad va topshiriqlar muvofiqligi, dars bosqichlari hamda vaqt taqsimotining aniqligi, rejaning o‘quvchi ehtiyojlariga moslashuvi.",
+   "evidenceHint": "Lesson plan tahlili; dars kuzatuvi; materiallar tayyorligi; dars maqsadi va yakuniy topshiriq muvofiqligi; o‘quv natijalari.",
+   "methods": [
+    "observation",
+    "work_sample",
+    "kpi"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: Standart lesson plan va dars maqsadi; LT-3/4: Moslashuvchan reja va boshqalarga metodik ko'mak.",
+   "source": "FUN-01"
+  },
+  {
+   "code": "GEN-02",
+   "name": "Til tizimlarini o‘rgatish metodikasi",
+   "layer": "Funksional",
+   "definition": "Grammatikani, lug‘atni va talaffuzni kontekstda tushuntirish, ma’no, shakl va talaffuzni o‘zaro bog‘lash hamda o‘quvchilarning til birliklarini amalda qo‘llashini tashkil etish.",
+   "levels": {
+    "1": "Mentor ko‘magida tayyor grammar, vocabulary va pronunciation materiallaridan foydalanadi\n- Tilga oid savollarda yordam so‘raydi.",
+    "2": "Til birliklarining asosiy ma’nosi va shaklini tushuntiradi, tayyor mashqlarni tashkil qiladi\n- Ayrim tushuntirishlarda aniqlik yoki izchillik yetishmaydi.",
+    "3": "Grammar, vocabulary va pronunciationni kontekstda o‘rgatadi\n- Meaning, Form va Pronunciation jihatlarini bog‘laydi hamda o‘quvchilarga til birliklarini mashq qilish imkonini beradi.",
+    "4": "Murakkab til mavzularini tushuntiradi\n- Takroriy xatolarning sababini aniqlaydi va mashqlarni o‘quvchilar ehtiyojiga moslashtiradi.",
+    "5": "Murakkab til masalalari bo‘yicha boshqa ustozlarga metodik yordam beradi\n- Til tizimlarini o‘rgatish amaliyotini takomillashtirishga hissa qo‘shadi."
+   },
+   "negative": "- Til birliklarining ma’nosi yoki qo‘llanishini noto‘g‘ri tushuntiradi.\n- Grammar, vocabulary yoki pronunciation’ni kontekstsiz o‘rgatadi.\n- Meaning, Form va Pronunciation jihatlarini bog‘lamaydi.\n- O‘quvchilarning til birliklarini tushunganini tekshirmaydi.\n- Takroriy til xatolariga mos mashq bermaydi.",
+   "criterion": "Til mazmunining aniqligi, Meaning–Form–Pronunciation tahlili, kontekstdan foydalanish, tushunishni tekshirish va til birliklarini amalda qo‘llatish sifati.",
+   "evidenceHint": "Dars kuzatuvi; lesson plan; doskadagi yozuvlar; til tahlili; o‘quvchi ishlari; til xatolariga berilgan feedback.",
+   "methods": [
+    "observation",
+    "work_sample"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: MFP tushuntirish va mashqlar; LT-3/4: Murakkab mavzular, xatolar tahlili va metodik yordam.",
+   "source": "FUN-02"
+  },
+  {
+   "code": "GEN-03",
+   "name": "Topshiriqlarni tushuntirish va o‘quvchi tushunishini tekshirish",
+   "layer": "Funksional",
+   "definition": "Topshiriq bo‘yicha aniq ko‘rsatma va namuna berish, zarur savollar orqali o‘quvchilar vazifani to‘g‘ri tushunganini tekshirish.",
+   "levels": {
+    "1": "- Mentor ko‘rsatgan topshiriq ko‘rsatmalari va namunalaridan foydalanadi.",
+    "2": "Topshiriqni tushuntiradi va o‘quvchilardan tushunganini so‘raydi\n- Lekin ko‘rsatmalar ba’zan uzun yoki noaniq bo‘ladi.",
+    "3": "Ko‘rsatmalarni qisqa va ketma-ket beradi\n- Kerakli namuna ko‘rsatadi va CCQ/ICQ orqali o‘quvchilarning topshiriqni tushunganini tekshiradi.",
+    "4": "Murakkab topshiriqlarni kichik bosqichlarga ajratadi\n- Tushunmovchilikni aniqlaydi va ko‘rsatmalarni vaziyatga moslashtiradi.",
+    "5": "Topshiriq ko‘rsatmalari va CCQ/ICQ sifatini tahlil qiladi\n- Boshqa ustozlarga aniq misollar asosida metodik yordam beradi."
+   },
+   "negative": "- Ko‘rsatmalarni uzun, noaniq yoki ketma-ketliksiz beradi.\n- Topshiriq bajarilishiga namuna ko‘rsatmaydi.\n- O‘quvchilar tushunganini tekshirmasdan faoliyatni boshlatadi.\n- CCQ/ICQ savollarini maqsadsiz yoki noto‘g‘ri ishlatadi.\n- Tushunmovchilik yuzaga kelganda ko‘rsatmani qayta moslashtirmaydi.",
+   "criterion": "Ko‘rsatmalarning aniqligi, namuna sifati, CCQ/ICQ’ning maqsadga muvofiqligi va o‘quvchilarning topshiriqni mustaqil boshlay olish darajasi.",
+   "evidenceHint": "Dars kuzatuvi; ko‘rsatmalar va CCQ/ICQ namunalari; topshiriqni boshlashdagi tushunmovchiliklar; o‘quvchilarning savollari va faoliyatni bajarishi.",
+   "methods": [
+    "observation"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: Aniq ko'rsatma va namunalar; LT-3/4: CCQ/ICQ tahlili va ko'rsatmalarni moslashtirish.",
+   "source": "FUN-03"
+  },
+  {
+   "code": "GEN-04",
+   "name": "Kommunikativ darsni tashkil etish va sinfni boshqarish",
+   "layer": "Funksional",
+   "definition": "Dars vaqtini, o‘quvchilar ishtirokini, juftlik va guruh ishlarini hamda sinfdagi o‘quv muhitini boshqarib, faol til amaliyotini tashkil etish.",
+   "levels": {
+    "1": "Mentor ko‘magida juftlik va guruh ishlarini tashkil qiladi\n- Asosiy sinf rutinlariga amal qiladi.",
+    "2": "Juftlik va guruh ishlarini tashkil qiladi\n- Lekin vaqt taqsimoti, o‘tish bosqichlari yoki o‘quvchilar ishtirokini boshqarishda yordamga muhtoj bo‘ladi.",
+    "3": "Dars maqsadiga mos interaction pattern tanlaydi\n- Vaqtni boshqaradi va o‘quvchilarning faol til amaliyotida qatnashishini ta’minlaydi.",
+    "4": "Turli sinf vaziyatlarini boshqaradi\n- Kam qatnashadigan o‘quvchilarni faol jalb qiladi va guruhlar o‘rtasidagi ishtirokni muvozanatlashtiradi.",
+    "5": "Classroom management va kommunikativ dars tashkil etish bo‘yicha boshqa ustozlarga yordam beradi\n- Jamoaviy metodik amaliyotni takomillashtiradi."
+   },
+   "negative": "- Pair work va group work’ni dars maqsadiga mos tashkil qilmaydi.\n- Dars vaqtini nazorat qilmaydi va bosqichlar orasida ko‘p vaqt yo‘qotadi.\n- Ayrim o‘quvchilar faol qatnashmayotganini e’tiborsiz qoldiradi.\n- Sinf tartibini saqlashda nomuvofiq yoki samarasiz usullardan foydalanadi.\n- O‘quvchilarni kamsituvchi yoki ruhiy bosim o‘tkazuvchi munosabat ko‘rsatadi.",
+   "criterion": "Interaction pattern tanlovi, o‘quvchilar ishtiroki, vaqt boshqaruvi, sinf rutinlari va ijobiy o‘quv muhitini saqlash qobiliyati.",
+   "evidenceHint": "Dars kuzatuvi; o‘quvchilar ishtiroki qaydlari; vaqt taqsimoti; pair/group work natijalari; zarur hollarda o‘quvchi fikri va peer feedback.",
+   "methods": [
+    "observation",
+    "work_sample",
+    "feedback360",
+    "kpi"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: Juftlik/guruh ishlari va vaqt boshqaruvi; LT-3/4: Murakkab sinf vaziyatlari va tajriba ulashish.",
+   "source": "FUN-04"
+  },
+  {
+   "code": "GEN-05",
+   "name": "O‘quvchi faoliyatini kuzatish va feedback berish",
+   "layer": "Funksional",
+   "definition": "Dars davomida o‘quvchilar faoliyatini kuzatish, qiyinchilik va xatolarni aniqlash, o‘rganishni davom ettirishga yordam beradigan fikr-mulohaza berish.",
+   "levels": {
+    "1": "Mentor ko‘magida o‘quvchilar faoliyatini kuzatadi\n- Aniqlangan xatolarni qayd etadi.",
+    "2": "O‘quvchilarning xatolarini aniqlaydi va feedback beradi\n- Lekin izohlar ko‘pincha umumiy bo‘ladi.",
+    "3": "O‘quvchilar faoliyatini kuzatadi, muhim xatolarni aniqlaydi\n- Self-correction yoki peer correction’dan foydalanadi va keyingi qadamni ko‘rsatadigan feedback beradi.",
+    "4": "Takroriy xatolarni tahlil qiladi\n- Feedback usulini o‘quvchi ehtiyojiga moslashtiradi va zarur bo‘lganda qo‘shimcha mashq belgilaydi.",
+    "5": "Feedback amaliyotini tahlil qilish va takomillashtirishda boshqa ustozlarga yordam beradi\n- Samarali feedback misollarini jamoa bilan ulashadi."
+   },
+   "negative": "- O‘quvchilar ishlayotgan paytda monitoring olib bormaydi.\n- Takroriy yoki muhim xatolarni e’tiborsiz qoldiradi.\n- Feedback’ni faqat “to‘g‘ri/noto‘g‘ri” kabi umumiy izohlar bilan cheklaydi.\n- O‘quvchilarga xatosini tushunish yoki tuzatish imkonini bermaydi.\n- Aniqlangan qiyinchiliklarga mos keyingi qadamni belgilamaydi.",
+   "criterion": "Monitoringning muntazamligi, xatolarni aniqlash aniqligi, feedback sifati, self-correction va peer correction’dan foydalanish hamda keyingi qadamni belgilash.",
+   "evidenceHint": "Dars kuzatuvi; o‘quvchi ishlari; feedback namunalari; error log; tuzatilgan ishlar va keyingi mashqlar.",
+   "methods": [
+    "observation",
+    "work_sample"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: Monitoring va bazaviy feedback; LT-3/4: Takroriy xatolar tahlili va individual feedback.",
+   "source": "FUN-05"
+  },
+  {
+   "code": "GEN-06",
+   "name": "Baholash va natijalar asosida o‘qitish",
+   "layer": "Funksional",
+   "definition": "O‘quvchilar bilim va ko‘nikmalarini belgilangan mezonlar asosida baholash, natijalarni tahlil qilish va aniqlangan ehtiyojlarga ko‘ra keyingi o‘qitish jarayonini moslashtirish.",
+   "levels": {
+    "1": "- Mentor ko‘magida tayyor answer key yoki rubric asosida o‘quvchi ishlarini tekshiradi.",
+    "2": "Natijalarni belgilangan mezonlar asosida qayd etadi\n- O‘quvchilarga qiyin bo‘lgan mavzularni aniqlaydi.",
+    "3": "O‘quvchilarni mezonlar asosida mustaqil baholaydi\n- Natijalarni tahlil qiladi va aniqlangan bo‘shliqlarga qarab keyingi darsni rejalashtiradi.",
+    "4": "Guruh natijalaridagi umumiy muammolarni aniqlaydi\n- Reteach va reassessment choralarini belgilaydi hamda qarorlarini natijalar bilan asoslaydi.",
+    "5": "- Baholash mezonlarini muvofiqlashtirish, natijalarni tahlil qilish va baholash amaliyotini takomillashtirishda jamoaga metodik yordam beradi."
+   },
+   "negative": "- Baholash mezonlariga amal qilmaydi yoki natijalarni noto‘g‘ri qayd etadi.\n- O‘quvchi natijalarini tahlil qilmaydi.\n- Guruhdagi umumiy qiyinchiliklarni aniqlamaydi.\n- Past natijalarga qaramay, o‘qitish usulini o‘zgartirmaydi.\n- Reteach yoki reassessment zaruratini e’tiborsiz qoldiradi.",
+   "criterion": "Baholash mezonlariga rioya qilish, natijalarni to‘g‘ri qayd etish, individual va guruh bo‘shliqlarini tahlil qilish hamda natijalarga asoslangan keyingi harakatlar.",
+   "evidenceHint": "Test va assessment natijalari; gradebook; rubric; item yoki skill kesimidagi tahlil; reteach rejasi; qayta baholash natijalari.",
+   "methods": [
+    "work_sample",
+    "kpi"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: Mezonli baholash va qayd etish; LT-3/4: Natijalar tahlili, reteach va qayta baholash chorasi.",
+   "source": "FUN-06"
+  },
+  {
+   "code": "GEN-07",
+   "name": "Differentiation va scaffolding",
+   "layer": "Funksional",
+   "definition": "O‘quvchilarning tayyorgarligi va ehtiyojlaridagi farqlarni hisobga olib, topshiriqlar murakkabligini, yordam darajasini va qo‘shimcha rivojlanish imkoniyatlarini moslashtirish.",
+   "levels": {
+    "1": "- Mentor tavsiya qilgan qo‘shimcha tushuntirish va yordam topshiriqlaridan foydalanadi.",
+    "2": "Qiynalayotgan o‘quvchilarga qo‘shimcha yordam beradi\n- Lekin turli darajadagi o‘quvchilar uchun topshiriqlarni oldindan moslashtirishda yordamga muhtoj bo‘ladi.",
+    "3": "- O‘quvchilarning darajasi va ehtiyojiga qarab topshiriq murakkabligini, yordam miqdorini va qo‘shimcha mashqlarni moslashtiradi.",
+    "4": "- Turli tayyorgarlik darajasidagi o‘quvchilar uchun support, extension va flexible grouping’dan maqsadli foydalanadi.",
+    "5": "Differentiation va scaffolding bo‘yicha ilg‘or amaliyotlarni jamoada rivojlantiradi\n- Boshqa ustozlarga amaliy yordam beradi."
+   },
+   "negative": "- Barcha o‘quvchilarga bir xil yordam va murakkablikdagi topshiriqlarni beradi.\n- Qiynalayotgan o‘quvchilarga zarur yordam ko‘rsatmaydi.\n- Kuchli o‘quvchilar uchun qo‘shimcha challenge tayyorlamaydi.\n- O‘quvchi qiyinchiligini aniqlamasdan topshiriqni o‘zgartiradi.\n- Qo‘shimcha yordamning natijasini tekshirmaydi.",
+   "criterion": "O‘quvchi ehtiyojlarini aniqlash, support va extension topshiriqlarini tanlash, scaffolding darajasi va moslashtirish natijasini kuzatish.",
+   "evidenceHint": "Lesson plan; turli darajadagi topshiriqlar; dars kuzatuvi; o‘quvchi ishlari; intervention qaydlari va oldingi-keyingi natijalar.",
+   "methods": [
+    "observation",
+    "work_sample",
+    "kpi"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    4
+   ],
+   "growth": "LT-1/2: Qo'shimcha yordam va topshiriqlar; LT-3/4: Differensial yondashuv, support va extension.",
+   "source": "FUN-07"
+  },
+  {
+   "code": "GEN-08",
+   "name": "O‘quv materiallari va raqamli vositalardan pedagogik foydalanish",
+   "layer": "Funksional",
+   "definition": "Dars maqsadiga mos material va raqamli vositalarni tanlash, moslashtirish hamda ulardan o‘quv natijasiga xizmat qiladigan tarzda foydalanish.",
+   "levels": {
+    "1": "- Mentor tavsiya qilgan materiallar va raqamli vositalardan ko‘rsatma asosida foydalanadi.",
+    "2": "Dars uchun mos material va raqamli vositalarni tanlaydi\n- Lekin ularning dars maqsadiga mosligini aniqlashda yordamga muhtoj bo‘lishi mumkin.",
+    "3": "Material va raqamli vositalarni dars maqsadiga mos tanlaydi\n- Zarur hollarda moslashtiradi va ulardan o‘quv jarayonida maqsadli foydalanadi.",
+    "4": "Materiallarni turli o‘quvchi ehtiyojlariga moslashtiradi\n- Raqamli vositalarning foydasini tahlil qiladi va AI yordamida tayyorlangan materiallarni tekshiradi.",
+    "5": "Materiallar va raqamli vositalardan pedagogik foydalanish amaliyotini takomillashtiradi\n- Boshqa ustozlarga metodik yordam beradi."
+   },
+   "negative": "- Materialni dars maqsadiga mosligini tekshirmasdan ishlatadi.\n- O‘quvchilar darajasiga mos kelmaydigan material tanlaydi.\n- Raqamli vositadan pedagogik maqsadsiz foydalanadi.\n- Materialdagi xato yoki nomuvofiqlikni tekshirmaydi.\n- AI yordamida yaratilgan materialni tekshirmasdan darsga kiritadi.",
+   "criterion": "Materialning dars maqsadi va o‘quvchi darajasiga mosligi, materialni moslashtirish sifati, raqamli vositaning pedagogik foydasi va mazmunning to‘g‘riligini tekshirish.",
+   "evidenceHint": "Dars materiallari; lesson plan; LMS yoki raqamli vosita faoliyati; moslashtirilgan topshiriqlar; materialdagi xatolar va ularni tekshirish qaydlari.",
+   "methods": [
+    "work_sample"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    3,
+    4
+   ],
+   "growth": "LT-1/2: Tavsiya etilgan vositalardan foydalanish; LT-3/4: Material va EdTech vositalarini maqsadli moslashtirish.",
+   "source": "FUN-08"
+  },
+  {
+   "code": "GEN-09",
+   "name": "Mustaqil o‘rganish va o‘quvchi rivojlanishini qo‘llab-quvvatlash",
+   "layer": "Funksional",
+   "definition": "Uy vazifasi, mustaqil mashq, o‘z natijasini kuzatish va muntazam takrorlash orqali o‘quvchining darsdan tashqari rivojlanishini qo‘llab-quvvatlash.",
+   "levels": {
+    "1": "Mentor ko‘magida uy vazifasini tushuntiradi\n- Mustaqil mashq qilish bo‘yicha ko‘rsatma beradi.",
+    "2": "Uy vazifasini beradi va bajarilishini tekshiradi\n- Lekin feedback va keyingi dars bilan bog‘lash doimiy emas.",
+    "3": "Uy vazifasi, mustaqil mashq va takrorlashni dars maqsadlari bilan bog‘laydi\n- O‘quvchiga o‘z natijasini kuzatish va rivojlanishiga yordam beradi.",
+    "4": "O‘quvchining mustaqil o‘rganishdagi qiyinchiliklarini aniqlaydi\n- Individual mashqlar yoki resurslar tavsiya qiladi va rivojlanishini kuzatadi.",
+    "5": "Mustaqil o‘rganishni qo‘llab-quvvatlash amaliyotini takomillashtiradi\n- Jamoa uchun foydali tajriba hamda resurslar bilan bo‘lishadi."
+   },
+   "negative": "- Uy vazifasini dars maqsadiga bog‘lamaydi.\n- Uy vazifasini tekshirmaydi yoki feedback bermaydi.\n- O‘quvchiga mustaqil mashq qilish yo‘lini tushuntirmaydi.\n- Takrorlash va oldingi bilimlarni qayta faollashtirishni tashkil qilmaydi.\n- Mustaqil o‘rganishdagi qiyinchiliklarni aniqlamaydi.",
+   "criterion": "Uy vazifasining maqsadga muvofiqligi, feedback sifati, mustaqil mashq va takrorlashning tashkil etilishi, o‘quvchi rivojlanishini kuzatish.",
+   "evidenceHint": "Uy vazifasi qaydlari; tekshirilgan ishlar; LMS faoliyati; dars kuzatuvi; o‘quvchi rivojlanish qaydlari va mustaqil mashqlar natijalari.",
+   "methods": [
+    "observation",
+    "work_sample",
+    "kpi"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: Uy vazifasi va mustaqil mashq; LT-3/4: Rivojlanish tahlili va individual resurslar berish.",
+   "source": "FUN-09"
+  },
+  {
+   "code": "GEN-10",
+   "name": "Syllabus, daraja va kurs natijalarini muvofiqlashtirish",
+   "layer": "Funksional",
+   "definition": "Kurs dasturi, o‘quv materiali, dars maqsadlari va kutilayotgan til darajasi natijalarining o‘zaro muvofiqligini ta’minlash; kurs davomida va yakunida natijalarni kutilgan ko‘rsatkichlar bilan solishtirish.",
+   "levels": {
+    "1": "Mentor ko‘rsatgan syllabus va dars rejasiga amal qiladi\n- Kurs maqsadlarini tushunishda yordam oladi.",
+    "2": "Dars maqsadlarini syllabus va o‘quvchilar darajasi bilan bog‘laydi\n- Lekin prerequisite bilimlar yoki kurs materiallari ketma-ketligini tekshirishda yordamga muhtoj bo‘ladi.",
+    "3": "Unit va lesson maqsadlarini syllabus hamda level can-do bilan muvofiqlashtiradi\n- Prerequisite bilimlarni tekshiradi va Mid/End Course natijalarini kutilgan natijalar bilan solishtiradi.",
+    "4": "O‘quvchining keyingi darajaga o‘tishga tayyorligini natijalar asosida baholaydi\n- Progress kechikganda review yoki bridge plan tuzadi.",
+    "5": "Syllabus, daraja va kurs natijalari o‘rtasidagi muvofiqlikni tahlil qiladi\n- Progression qarorlarini kalibrlash va kursni takomillashtirishda jamoaga yordam beradi."
+   },
+   "negative": "- Dars maqsadlarini syllabus yoki til darajasi bilan moslashtirmaydi.\n- Kurs materiallari ketma-ketligiga amal qilmaydi va o‘zgarishlarni asoslamaydi.\n- O‘quvchilarning oldingi bilimlarini tekshirmaydi.\n- Mid/End Course natijalarini kutilgan kurs natijalari bilan solishtirmaydi.\n- Progress kechikishiga qaramay, review yoki bridge plan tuzmaydi.",
+   "criterion": "Syllabus va lesson aim muvofiqligi, prerequisite bilimlarni tekshirish, kurs natijalarini tahlil qilish va keyingi darajaga o‘tish bo‘yicha qarorlarni asoslash.",
+   "evidenceHint": "Syllabus; lesson plan; coursebook ketma-ketligi; Mid/End Course natijalari; progression qaydlari; review va bridge plan.",
+   "methods": [
+    "work_sample",
+    "kpi"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: Syllabus va dars maqsadi muvofiqligi; LT-3/4: Kurs progression tahlili, review va bridge plan.",
+   "source": "FUN-10"
+  },
+  {
+   "code": "GEN-11",
+   "name": "Integratsiyalashgan til ko‘nikmalari va kommunikativ amaliyotni rivojlantirish",
+   "layer": "Funksional",
+   "definition": "Speaking, Listening, Reading va Writing ko‘nikmalarini mavzu yoki real kommunikativ vazifa atrofida uyg‘unlashtirish, o‘quvchilarning tilni tushunish va undan foydalanish qobiliyatini rivojlantirish.",
+   "levels": {
+    "1": "- Mentor ko‘magida tayyor Listening, Reading, Speaking yoki Writing topshiriqlarini tashkil qiladi.",
+    "2": "Alohida til ko‘nikmalarini o‘rgatadi\n- Ayrim darslarda receptive hamda productive skills’ni bir mavzu doirasida bog‘laydi.",
+    "3": "Listening, Reading, Speaking va Writing’ni mavzu yoki kommunikativ vazifa atrofida integratsiyalaydi\n- Har bir ko‘nikma uchun maqsadli topshiriqlar beradi.",
+    "4": "Controlled practice va real-life output o‘rtasidagi muvozanatni ta’minlaydi\n- Speaking’da fluency va interaction, Reading/Listening’da gist, detail va inference, Writing’da text type, audience va purpose’ni hisobga oladi.",
+    "5": "Integratsiyalashgan til ko‘nikmalarini o‘rgatish amaliyotini takomillashtiradi\n- Boshqa ustozlarga metodik yordam beradi."
+   },
+   "negative": "- Listening, Reading, Speaking va Writing’ni kurs maqsadiga mos bog‘lamaydi.\n- Darsni faqat bitta turdagi mashq bilan cheklaydi.\n- Speaking’da o‘quvchilarga yetarli fikr bildirish imkonini bermaydi.\n- Reading/Listening’da gist, detail yoki inference kabi o‘qish maqsadlarini aniqlamaydi.\n- Writing’da matn turi, audience va purpose’ni hisobga olmaydi.",
+   "criterion": "To‘rtta til ko‘nikmasining uyg‘unligi, topshiriqlarning kommunikativ maqsadi, receptive va productive skills muvozanati hamda o‘quvchi natijalarini mezonlar asosida baholash.",
+   "evidenceHint": "Integratsiyalashgan lesson plan; Speaking va Writing ishlari; Reading/Listening topshiriqlari; dars kuzatuvi; success criteria asosidagi baholash.",
+   "methods": [
+    "observation",
+    "work_sample"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: Alohida ko'nikmalar mashqi; LT-3/4: Integratsiyalashgan topshiriqlar va kommunikativ balans.",
+   "source": "FUN-11"
+  },
+  {
+   "code": "GEN-12",
+   "name": "Grammar, vocabulary va pronunciationni kommunikativ qo‘llashga o‘rgatish",
+   "layer": "Funksional",
+   "definition": "Grammatik tuzilmalar, lug‘at birliklari va talaffuz xususiyatlarini kontekstda o‘rgatish, ularning to‘g‘ri va mazmunli qo‘llanishini og‘zaki hamda yozma amaliyot orqali rivojlantirish.",
+   "levels": {
+    "1": "- Mentor ko‘magida tayyor grammar, vocabulary va pronunciation mashqlarini o‘tkazadi.",
+    "2": "Grammatik shakl va ma’noni tushuntiradi, lug‘at va talaffuz mashqlarini tashkil qiladi\n- Lekin til birliklarini kommunikativ vazifada qo‘llashni rivojlantirishda yordamga muhtoj bo‘ladi.",
+    "3": "Grammar’ning form, meaning va use jihatlarini kontekstda o‘rgatadi\n- Vocabulary’da collocation va word family’ga, pronunciation’da intelligibility va stress’ga e’tibor beradi.\n- O‘quvchilarga target language’ni speaking yoki writing’da qo‘llash imkonini yaratadi.",
+    "4": "Common errorlarni aniqlaydi\n- Maqsadli mashqlar va spaced review orqali til birliklarining to‘g‘ri qo‘llanishini rivojlantiradi.",
+    "5": "Grammar, vocabulary va pronunciation’ni kommunikativ o‘rgatish bo‘yicha ilg‘or amaliyotni takomillashtiradi\n- Jamoaga metodik yordam beradi."
+   },
+   "negative": "- Grammar’ni form, meaning va use jihatlarini bog‘lamasdan tushuntiradi.\n- Vocabulary’ni kontekst va qo‘llanish bilan bog‘lamaydi.\n- Pronunciation’da tushunarlilik, urg‘u yoki connected speech’ga e’tibor bermaydi.\n- O‘quvchilarning target language’dan amaliy foydalanishini tashkil qilmaydi.\n- Takroriy xatolarga mos review yoki qo‘shimcha mashq bermaydi.",
+   "criterion": "Grammar’ning form/meaning/use tahlili, vocabulary’ning collocation va word family bilan o‘rgatilishi, pronunciation tushunarliligi va til birliklarini kommunikativ qo‘llash.",
+   "evidenceHint": "Language analysis; lesson plan; doskadagi yozuvlar; o‘quvchi speaking/writing ishlari; common error tahlili; review va retrieval mashqlari.",
+   "methods": [
+    "work_sample"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "growth": "LT-1/2: Grammatika va lug'at mashqlari; LT-3/4: Target language kontekstda qo'llash va spaced review.",
+   "source": "FUN-12"
+  },
+  {
+   "code": "GEN-13",
+   "name": "General English materiallarini moslashtirish va kurs progressini qo‘llab-quvvatlash",
+   "layer": "Funksional",
+   "definition": "Coursebook va autentik materiallarni kurs maqsadi hamda o‘quvchilar darajasiga moslashtirish, o‘quvchilar yoki guruhlar rivojlanishidagi bo‘shliqlarni aniqlash va kurs bo‘yicha keyingi rivojlanish choralarini belgilash.",
+   "levels": {
+    "1": "- Mentor tavsiya qilgan coursebook va qo‘shimcha materiallardan ko‘rsatma asosida foydalanadi.",
+    "2": "Coursebook topshiriqlarini dars maqsadiga mos tanlaydi\n- Autentik materialni soddalashtirishda yoki qo‘shimcha yordam tayyorlashda ko‘makka muhtoj bo‘lishi mumkin.",
+    "3": "Coursebook va autentik materiallarni dars maqsadi hamda o‘quvchilar darajasiga moslashtiradi\n- Support va extension variantlarini tayyorlaydi.",
+    "4": "Kurs kitobidagi mashqlarni dars mavzusi va o‘quvchilar darajasiga moslashtira oladi, zarur hollarda AI vositalaridan foydalanadi. O‘quvchilarning ehtiyojlariga qarab, support va extension mashqlarini tayyorlay oladi..",
+    "5": "Materiallarni moslashtirish va kurs progressini qo‘llab-quvvatlash amaliyotini takomillashtiradi\n- Boshqa ustozlarga intervention va progression qarorlarini asoslashda yordam beradi."
+   },
+   "negative": "- Coursebook materialini dars maqsadi va o‘quvchilar darajasiga moslashtirmaydi.\n- Autentik materialni o‘quvchilar uchun tushunarsiz holatda ishlatadi.\n- Turli tayyorgarlik darajalari uchun support yoki extension variantlarini tayyorlamaydi.\n- Kurs natijalaridagi bo‘shliqlarni tahlil qilmaydi.\n- Progress yoki engagement pasayganda akademik sabablarni tekshirmaydi va intervention belgilamaydi.",
+   "criterion": "Coursebook va autentik materiallarni moslashtirish sifati, support/extension variantlari, kurs progressidagi bo‘shliqlarni aniqlash va intervention/reassessment choralarini belgilash.",
+   "evidenceHint": "Moslashtirilgan coursebook materiallari; autentik materiallar; support/extension topshiriqlari; Mid/End Course natijalari; progress tracker; intervention va reassessment qaydlari.",
+   "methods": [
+    "work_sample",
+    "kpi"
+   ],
+   "targets": [
+    1,
+    2,
+    3,
+    4,
+    4
+   ],
+   "growth": "LT-1/2: Darslik topshiriqlarini tanlash; LT-3/4: Material adaptatsiyasi va akademik intervention.",
+   "source": "FUN-13"
+  }
+ ],
+ "questions": {
+  "KOR-01": [
+   "Biror darsda kutilgan natijaga erisha olmagan vaziyatingiz bo‘lganmi? Qanday sabablarni aniqladingiz va nimalarni o‘zgartirdingiz?",
+   "Bir vaqtning o‘zida bir nechta muhim vazifalar yuklatilganda qanday ustuvorlik belgilaysiz?",
+   "Tashkilotda o‘zingizga bevosita tegishli bo‘lmagan muammo yoki jarayonni yaxshilash bo‘yicha shaxsiy tashabbus ko‘rsatganmisiz?"
+  ],
+  "KOR-02": [
+   "Baholash jarayonida subyektivlikdan qochish uchun qanday amaliyotlar qo‘llaysiz? O‘quvchi sizni nohaq baholadi deb hisoblagan vaziyat bo‘lganmi?",
+   "Qoidaga zid, ammo ko‘pchilik ko‘z yumadigan holatga duch kelganmisiz? Qanday qaror qabul qilgansiz?",
+   "O‘zingizga xarakteri yoqmagan yoki qiyin o‘quvchiga nisbatan xolis va adolatli munosabatni qanday ta’minlaysiz?"
+  ],
+  "KOR-03": [
+   "Hamkasbingiz bilan umumiy maqsad yo‘lida birgalikda ishlagan vaziyatingizni ayting. Unda sizning rolingiz qanday bo‘ldi?",
+   "Jamoadoshingiz xato qilganini ko‘rsangiz yoki fikrlar to‘qnashuvi yuz berganda qanday munosabat bildirasiz?",
+   "Jamoaga yangi kelgan ustoz yoki xodimga moslashishida qanday amaliy yordam bergansiz?"
+  ],
+  "KOR-04": [
+   "So‘nggi bir yil ichida o‘zingiz o‘rgangan va dars jarayonida muvaffaqiyatli qo‘llagan yangi metod yoki usul haqida ayting.",
+   "O‘zingizdagi zaif jihatlarni yoki sizga berilgan tanqidiy fikr-mulohazalarni qanday qabul qilasiz va ustida qanday ishlaysiz?",
+   "O‘z ustingizda muntazam ishlash bo‘yicha doimiy odatlaringiz (kitob, kuzatuv, CPD) qanday yo‘lga qo‘yilgan?"
+  ],
+  "BEH-01": [
+   "O‘quvchi mavzuni tushunmayotganini sezsangiz yoki darsda tushkun holatda bo‘lsa, qanday muloqot uslubini qo‘llaysiz?",
+   "Ota-ona bilan nozik mavzuda (farzandi o‘zlashtirishi sustligi, intizomi) qanday professional muloqot olib borasiz?",
+   "Ota-onadan yoki o‘quvchidan salbiy fikr/e’tiroz eshitsangiz, qanday reaksiyada bo‘lasiz va muloqotni qanday boshqarasiz?"
+  ],
+  "BEH-02": [
+   "O‘quvchini darsga qiziqtirish va rag‘batlantirish uchun qanday tizimli metodlardan foydalanasiz?",
+   "O‘quvchilar darsdan charchaganini yoki motivatsiyasi tushganini ko‘rsangiz, dars shaklini qanday o‘zgartirasiz?",
+   "O‘quvchi yoki ota-onaning fikrini (feedback) qabul qilib, unga asoslangan holda dars jarayonini o‘zgartirganmisiz?"
+  ],
+  "BEH-03": [
+   "Guruhdan orqada qolayotgan yoki o‘zlashtirishi qiyin bo‘lgan o‘quvchiga qanday yordam va individual strategiya qo‘llaysiz?",
+   "Guruhda turli yoshdagi yoki turli xarakterdagi (uyatchan vs faol) o‘quvchilar bo‘lganda darsni qanday moslaysiz?",
+   "10 ta o‘quvchi bilan 15 ta o‘quvchiga dars o‘tish o‘rtasidagi monitoring va metodika farqini qanday tushuntirasiz?"
+  ],
+  "BEH-04": [
+   "Dars jarayonida kutilmagan texnik nosozlik (internet, elektr, xona issiqligi) yuz berganda darsni qanday davom ettirasiz?",
+   "O‘quv markazidagi yangi talablar, me’yorlar yoki dars jadvali to‘satdan o‘zgarganda qanday tezkor moslashgansiz?",
+   "O‘quvchilar mavzuni kutilgandan sekin o‘zlashtirayotgan bo‘lsa, dars rejasini real vaqtda qanday moslashtirasiz?"
+  ],
+  "BEH-05": [
+   "O‘quvchilar natijasi pasaya boshlagan guruhni qayta ko‘tarish va progress yaratish tajribangizni so‘zlab bering.",
+   "Guruhning saqlanishini (retention) yuqori darajada ushlash va o‘quvchilar ketib qolishini kamaytirish bo‘yicha qanday amaliyotlaringiz bor?",
+   "O‘zingizga qo‘yilgan maqsadli ko‘rsatkich yoki KPIni muddatidan oldin yoki oshirib bajargan holatingiz bo‘lganmi?"
+  ],
+  "GEN-01": [
+   "Dars rejasini (lesson plan) qanday tuzasiz va dars maqsadini qanday belgilaysiz?",
+   "Darsda mavzuni o‘quvchilar kutilgandan tezroq yoki sekinroq tushunsa, rejangizni qanday o‘zgartirasiz?",
+   "Dars rejalashtirishda yuzaga kelishi mumkin bo‘lgan qiyinchiliklarni qanday oldindan hisobga olasiz? Misol keltiring."
+  ],
+  "GEN-02": [
+   "Yangi so‘z yoki grammatikani o‘rgatishda qoida, ma'no va talaffuzni bir-biriga qanday bog‘laysiz?",
+   "O‘quvchilar bitta xatoni qayta-qayta takrorlayversa, buni qanday tuzatasiz?",
+   "O‘rgatilgan yangi qoida yoki so‘zlarni o‘quvchilar erkin muloqotda qo‘llashi uchun qanday mashqlar bajarasiz?"
+  ],
+  "GEN-03": [
+   "Topshiriq berishda ko‘rsatmalarni (instructions) hamma o‘quvchi birdek tushunishi uchun qanday qilib qisqa va aniq tushuntirasiz?",
+   "'Tushundingizmi?' deb so‘ramasdan, o‘quvchilar vazifani to‘g‘ri tushunganini qanday savollar orqali tekshirasiz? Misol keltiring.",
+   "Ko‘rsatma bergandan so‘ng ham ayrim o‘quvchilar nima qilishni bilmay tursa, qanday yordam berasiz?"
+  ],
+  "GEN-04": [
+   "Darsda o‘qituvchi kamroq gapirib, o‘quvchilar ko‘proq gapirishi uchun qanday usullardan foydalanasiz?",
+   "Juftlik yoki guruh ishlarida kam gapiradigan, tortinchoq o‘quvchilarni qanday jalb qilasiz?",
+   "Sinfda intizom buzilsa, shovqin ko‘paysa yoki vaqt yetmay qolsa, darsni qanday tartibga solasiz?"
+  ],
+  "GEN-05": [
+   "O‘quvchilar erkin gaplashayotganda (speaking jarayonida) ularning xatolarini darsni to‘xtatmasdan qanday kuzatasiz va keyin qanday tushuntirasiz?",
+   "Xatoni darhol o‘zingiz aytmasdan, o‘quvchining o‘zi yoki sherigi orqali to‘g‘rilashiga qanday erishasiz?",
+   "O‘quvchiga ruhiyatini tushirmasdan, aksincha o‘rganishga ishtiyoqini oshiradigan qilib qanday fikr (feedback) bildirasiz? Misol keltiring."
+  ],
+  "GEN-06": [
+   "O‘quvchilar mavzuni qanchalik o‘zlashtirganini dars jarayonida qanday usullar bilan muntazam tekshirib borasiz?",
+   "Oraliq test natijalari past chiqqan mavzularni o‘quvchilarga qanday qayta tushuntirasiz?",
+   "O‘quvchilarning speaking va writing ishlarini adolatli va xolis baholash uchun qanday mezonlarga tayanasiz?"
+  ],
+  "GEN-07": [
+   "Bir guruhdagi kuchli va sekinroq o‘rganuvchi o‘quvchilarga topshiriqlarni qanday moslashtirasiz?",
+   "Kuchli o‘quvchi zerikib qolmasligi, sekinroq o‘rganuvchi esa orqada qolib ketmasligi uchun qanday vazifalar berasiz?",
+   "Qiyin mavzuni o‘quvchilarga asta-sekin, bosqichma-bosqich osonlashtirib tushuntirish tajribangizdan misol keltiring."
+  ],
+  "GEN-08": [
+   "Darslaringizda qanday qiziqarli ilovalar (Kahoot, Quizlet va h.k.) yoki raqamli vositalardan foydalanasiz?",
+   "Darsga material tayyorlashda yoki topshiriqlarni tuzishda sun’iy intellekt (AI)dan qanday foydalanasiz?",
+   "Raqamli o‘yinlar yoki vositalar shunchaki vaqt o‘tkazish emas, balki tilni o‘rganishga xizmat qilishini qanday ta'minlaysiz?"
+  ],
+  "GEN-09": [
+   "Uy vazifalari o‘quvchiga majburiyat emas, balki qiziqarli mustaqil odat bo‘lishi uchun qanday tizim qilasiz?",
+   "O‘quvchilar o‘zlarining o‘sishi va natijalarini mustaqil kuzatib borishlari uchun qanday yo‘l-yo‘riq ko‘rsatasiz?",
+   "Darsdan tashqarida mustaqil shug‘ullanishga qiynaladigan o‘quvchiga qanday yordam va tavsiyalar berasiz?"
+  ],
+  "GEN-10": [
+   "Har bir dars mavzusini umumiy o‘quv dasturi va daraja talablari bilan qanday bog‘laysiz?",
+   "Guruh kurs dasturidan orqada qolayotganini sezsangiz, ularni yetkazib olish uchun qanday reja qilasiz?",
+   "O‘quvchi keyingi darajaga o‘tishga tayyor ekanligini qaysi natija va ko‘rsatkichlarga qarab aniqlaysiz?"
+  ],
+  "GEN-11": [
+   "Bitta darsda eshitish/o‘qish va gapirish/yozish ko‘nikmalarini bir-biriga qanday bog‘lab o‘tasiz?",
+   "O‘quvchilar matnni o‘qib yoki eshitib bo‘lgach, undagi ma'lumotlar asosida ularni erkin gapirishga qanday undaysiz?",
+   "Mashqlarni oddiy tushunishdan tortib, erkin muloqotga o‘tishgacha bo‘lgan jarayonni qanday tashkil qilasiz?"
+  ],
+  "GEN-12": [
+   "Yangi grammatik qoidalarni formulalar yodlatmasdan, real hayotiy misollar orqali qanday tushuntirasiz?",
+   "Yangi so‘zlarni shunchaki tarjima qilmasdan, ularni to‘g‘ri gap va birikmalarda qo‘llashni qanday o‘rgatasiz?",
+   "To‘g‘ri talaffuz va intonatsiyani alohida dars qilmasdan, har bir dars muloqotiga qanday singdirasiz?"
+  ],
+  "GEN-13": [
+   "Kitobdagi mavzu yoki mashq o‘quvchilarga zerikarli tuyulsa, uni qanday moslashtirib (qiziqarli qilib) o‘tasiz?",
+   "Hayotiy materiallarni (video, yangilik, maqola) o‘quvchilarning til darajasiga moslab qanday qiziqarli dars qilasiz?",
+   "Butun guruh mavzularni o‘zlashtirishda orqada qolsa, qanday qo‘shimcha mashg‘ulot yoki yordam tashkil qilasiz?"
+  ]
+ }
+}
