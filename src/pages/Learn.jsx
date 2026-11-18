@@ -95,7 +95,7 @@ export default function Learn({ id, emp }) {
                   <div className="learn-body">
                     {c.kind === 'lesson' && (
                       <div className="stack">
-                        <div className="lesson-stub"><Icon name="cards" size={18} /> Dars materiali (video / matn) Exode LMS’da: «{c.title}»</div>
+                        <div className="lesson-stub"><Icon name="cards" size={18} /> Dars materiali (video / matn): «{c.title}»</div>
                         {!ok && !locked && <div><button className="btn primary sm" onClick={() => run(D.completeLesson, { enrollmentId: enr.id, componentId: c.id }, 'Dars o‘qildi')}>O‘qidim — keyingisi</button></div>}
                       </div>
                     )}

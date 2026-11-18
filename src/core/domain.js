@@ -481,8 +481,8 @@ export function updateIdp(state, { id, patch, actor = 'HR/L&D' }) {
   });
 }
 
-/** Kurs yakuni (Exode'dan yoki qo'lda): takroriy yozuv dublikat yaratmaydi (INT 01). */
-export function courseCompleted(state, { employeeId, courseId, externalId, actor = 'Exode integratsiyasi' }) {
+/** Kurs yakuni (platformaning o'zidan, tashqi manbadan yoki qo'lda): takroriy yozuv dublikat yaratmaydi (INT 01). */
+export function courseCompleted(state, { employeeId, courseId, externalId, actor = 'RegUP LMS' }) {
   return mutate(state, (s) => {
     s.courseEvents ||= [];
     if (s.courseEvents.includes(externalId)) {
@@ -1216,8 +1216,8 @@ function validKpiRow(r) {
   if (Number(r.graduated) + Number(r.left) > Number(r.start)) fail('Bitirgan + ketgan oy boshidagi o‘quvchilardan ko‘p bo‘lishi mumkin emas');
 }
 
-/** Exode LMS oylik hisobotini olish (demo: tayyor hisobot) va qoidalarni qo'llash. */
-export function importKpiMonth(state, { month, actor = 'Exode LMS (avtomatik)' }) {
+/** Edu oylik hisobotini olish (demo: tayyor hisobot) va qoidalarni qo'llash. */
+export function importKpiMonth(state, { month, actor = 'Edu (avtomatik)' }) {
   return mutate(state, (s) => {
     const inbox = s.kpiInbox?.[month];
     if (!inbox) fail('Bu oy uchun hisobot topilmadi');

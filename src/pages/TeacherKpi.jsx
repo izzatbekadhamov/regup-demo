@@ -210,7 +210,7 @@ export default function TeacherKpi({ user }) {
       <div className="page-head">
         <div>
           <h1>Ustozlar KPI</h1>
-          <p>Har oy Exode LMS hisobotidan ustozning 1-oy konversiyasi va retentioni olinadi. Chegaradan past bo‘lsa — mos kurs avtomatik majburiy biriktiriladi, ustoz va uning mas’uliga xabar boradi.</p>
+          <p>Har oy Edu hisobotidan ustozning 1-oy konversiyasi va retentioni olinadi. Chegaradan past bo‘lsa — mos kurs avtomatik majburiy biriktiriladi, ustoz va uning mas’uliga xabar boradi.</p>
         </div>
         {manage && !manual && <button className="btn" onClick={() => setManual(true)}>Qo‘lda kiritish</button>}
       </div>
@@ -259,7 +259,7 @@ export function MyKpi({ emp }) {
       <div className="page-head">
         <div>
           <h1>KPI ko‘rsatkichlari</h1>
-          <p>{D.monthName(m)} natijalari Exode LMS hisobotidan. Chegaradan past bo‘lsa, mos kurs avtomatik majburiy biriktiriladi.</p>
+          <p>{D.monthName(m)} natijalari Edu hisobotidan. Chegaradan past bo‘lsa, mos kurs avtomatik majburiy biriktiriladi.</p>
         </div>
       </div>
       {mine && (

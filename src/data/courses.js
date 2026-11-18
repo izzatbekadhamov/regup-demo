@@ -353,14 +353,14 @@ export const COURSES = [
   {
     id: 'CRS-ON-GE', exodeId: 'EX-0002', direction: 'ONB', title: 'Ustozning birinchi 30 kuni', hours: 6, status: 'active', onboarding: true, version: 2,
     changelog: 'v2 (2026-10-01): amaliy topshiriqqa o‘tkazilgan dars tahlili qo‘shildi',
-    summary: 'Registon dars standarti, Exode LMS’da davomat va uy vazifasi, birinchi darslarni rejalash. Topshiriqni mentor tekshiradi.',
+    summary: 'Registon dars standarti, Edu’da davomat va uy vazifasi, birinchi darslarni rejalash. Topshiriqni mentor tekshiradi.',
     components: [
       lesson('l1', 'Registon dars standarti: bosqichlar, vaqt, STT/TTT', 30),
-      lesson('l2', 'Exode LMS: davomat, uy vazifasi, natijalar', 20),
+      lesson('l2', 'Edu: davomat, uy vazifasi, natijalar', 20),
       test('t1', 'Dars standarti testi', 70, [
         q('Lesson plan’da birinchi navbatda nima belgilanadi?', ['Darsning o‘lchanadigan maqsadi', 'Faqat mavzu nomi', 'Uy vazifasi'], 0),
         q('Ko‘rsatma berilgach tushunganini qanday tekshirasiz?', ['«Tushundingizmi?» deb so‘rayman', 'ICQ — aniq tekshiruv savollari bilan', 'Tekshirmayman'], 1),
-        q('Davomat Exode LMS’da qachon belgilanadi?', ['Oy oxirida', 'Har dars davomida yoki darhol keyin', 'Kerak bo‘lmaydi'], 1),
+        q('Davomat Edu’da qachon belgilanadi?', ['Oy oxirida', 'Har dars davomida yoki darhol keyin', 'Kerak bo‘lmaydi'], 1),
         q('Speaking mashqida ustozning gapirish ulushi (TTT) qanday bo‘lishi kerak?', ['Iloji boricha kam, o‘quvchilar ko‘proq gapiradi', 'Ko‘proq ustoz gapiradi', 'Farqi yo‘q'], 0),
       ]),
       task('a1', 'Lesson plan va o‘tkazilgan dars tahlili', 'work', 'Bitta darsingizning lesson planini yozing, darsni o‘tkazing va qisqa tahlil qiling: nima ishladi, nimani o‘zgartirasiz.', 'Maqsad aniq va o‘lchanadi; bosqichlar va vaqt; ICQ/CCQ; tahlilda 1–2 aniq o‘zgarish.'),

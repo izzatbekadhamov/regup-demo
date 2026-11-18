@@ -375,8 +375,8 @@ export function createSeed() {
     { id: 'lpe-2', employeeId: 'e-rustam', pathId: 'LP-FR1', by: 'employee', startedAt: '2026-09-01', status: 'active' },
   ];
 
-  // Ustozlar natijalari (Exode LMS oylik hisoboti). Qator: yangi kelgan, ulardan qolgan, oy boshida, bitirgan, ketgan.
-  const KR = (employeeId, month, [newStudents, stayedNew, start, graduated, left]) => ({ employeeId, month, newStudents, stayedNew, start, graduated, left, source: 'Exode LMS · oylik hisobot' });
+  // Ustozlar natijalari (Edu oylik hisoboti). Qator: yangi kelgan, ulardan qolgan, oy boshida, bitirgan, ketgan.
+  const KR = (employeeId, month, [newStudents, stayedNew, start, graduated, left]) => ({ employeeId, month, newStudents, stayedNew, start, graduated, left, source: 'Edu · oylik hisobot' });
   const T = {
     'e-malika': [[14, 12, 62, 0, 3], [18, 14, 70, 4, 4], [16, 10, 74, 0, 5]],
     'e-aziza': [[10, 8, 80, 6, 5], [12, 10, 82, 0, 11], [11, 9, 78, 5, 5]],
@@ -388,14 +388,14 @@ export function createSeed() {
     'e-farrux': [[9, 8, 70, 0, 5], [11, 9, 72, 4, 8], [12, 10, 70, 0, 9]],
   };
   const kpiResults = Object.entries(T).flatMap(([id, rows]) => [KR(id, '2026-08', rows[0]), KR(id, '2026-09', rows[1])]);
-  const kpiInbox = { '2026-10': { source: 'Exode LMS · oylik hisobot', readyAt: '2026-11-03', rows: Object.entries(T).map(([id, rows]) => { const { month, source, ...r } = KR(id, '2026-10', rows[2]); return r; }).concat([{ employeeId: 'e-nilufar', newStudents: 10, stayedNew: 6, start: 20, graduated: 0, left: 4 }]) } };
+  const kpiInbox = { '2026-10': { source: 'Edu · oylik hisobot', readyAt: '2026-11-03', rows: Object.entries(T).map(([id, rows]) => { const { month, source, ...r } = KR(id, '2026-10', rows[2]); return r; }).concat([{ employeeId: 'e-nilufar', newStudents: 10, stayedNew: 6, start: 20, graduated: 0, left: 4 }]) } };
   const kpiRules = [
     { id: 'kr-conv', position: 'GE', metric: 'conversion', min: 75, months: 1, minBase: 5, courseId: 'CRS-GE-CONV' },
     { id: 'kr-ret', position: 'GE', metric: 'retention', min: 90, months: 1, minBase: 10, courseId: 'CRS-GE-RET' },
   ];
   const kpiActions = [
-    { id: 'ka-2', employeeId: 'e-farrux', ruleId: 'kr-ret', month: '2026-09', kind: 'course', value: 88.2, min: 90, enrollmentId: 'enr-12', at: '2026-10-03', by: 'Exode LMS (avtomatik)' },
-    { id: 'ka-1', employeeId: 'e-aziza', ruleId: 'kr-ret', month: '2026-09', kind: 'course', value: 86.6, min: 90, enrollmentId: 'enr-11', at: '2026-10-03', by: 'Exode LMS (avtomatik)' },
+    { id: 'ka-2', employeeId: 'e-farrux', ruleId: 'kr-ret', month: '2026-09', kind: 'course', value: 88.2, min: 90, enrollmentId: 'enr-12', at: '2026-10-03', by: 'Edu (avtomatik)' },
+    { id: 'ka-1', employeeId: 'e-aziza', ruleId: 'kr-ret', month: '2026-09', kind: 'course', value: 86.6, min: 90, enrollmentId: 'enr-11', at: '2026-10-03', by: 'Edu (avtomatik)' },
   ];
 
   // Ko'nikmalar katalogi (kompetensiyadan alohida). supports — qaysi kompetensiyani to'ldiradi.
@@ -408,7 +408,7 @@ export function createSeed() {
     { id: 'SK-COL-03', group: 'collab', name: 'ClickUp / Trello — vazifa boshqaruvi', description: 'Vazifa, muddat va mas’ulni yuritish, jamoa doskasi.', supports: ['FUN-06'] },
     { id: 'SK-DAT-01', group: 'data', name: 'Excel / Google Sheets: formula va pivot', description: 'Formulalar, filtr, pivot jadval, oddiy grafik.', supports: ['FUN-07', 'FUN-04', 'LDR-02'] },
     { id: 'SK-DAT-02', group: 'data', name: 'Looker Studio / Power BI dashboard', description: 'Ko‘rsatkichlar dashboardini yig‘ish va o‘qish.', supports: ['FUN-07', 'LDR-02'] },
-    { id: 'SK-EDU-01', group: 'edu', name: 'Exode LMS', description: 'Guruh, davomat, uy vazifasi va natijalarni LMS’da yuritish.', supports: ['FUN-07', 'GEN-08'] },
+    { id: 'SK-EDU-01', group: 'edu', name: 'Edu', description: 'Guruh, davomat, uy vazifasi va natijalarni Edu’da yuritish.', supports: ['FUN-07', 'GEN-08'] },
     { id: 'SK-EDU-02', group: 'edu', name: 'Canva — vizual material', description: 'Dars slaydlari, flashcard va e’lonlarni tayyorlash.', supports: ['GEN-08'] },
     { id: 'SK-EDU-03', group: 'edu', name: 'Interaktiv vositalar (Kahoot, Quizlet, Wordwall)', description: 'Darsda o‘yin va tezkor tekshiruv vositalari.', supports: ['GEN-08', 'GEN-04'] },
     { id: 'SK-BIZ-01', group: 'biz', name: 'amoCRM', description: 'Lid, sinov darsi va to‘lov voronkasini CRM’da yuritish va hisobot olish.', supports: ['FUN-01', 'FUN-07'] },

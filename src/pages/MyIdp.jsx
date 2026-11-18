@@ -45,7 +45,7 @@ function Item({ x, s, emp }) {
         <div><span>Mentor / mas’ul</span><b>{x.owner}</b></div>
         <div><span>Muddat</span><b>{fmtDate(x.due)}</b></div>
         {x.reassessAt && <div><span>Qayta baholash</span><b>{fmtDate(x.reassessAt)}</b></div>}
-        {x.courseId && <div><span>Kurs (Exode)</span><b>{x.courseId}{x.learningStatus ? ` · ${x.learningStatus}` : ''}</b></div>}
+        {x.courseId && <div><span>Kurs</span><b>{x.courseId}{x.learningStatus ? ` · ${x.learningStatus}` : ''}</b></div>}
       </div>
       {x.status === 'rejected' && <div className="callout small">Mentor bu taklifni rejaga kiritmadi: {x.review?.reason}</div>}
       {x.status === 'returned' && x.review?.reason && <div className="callout bad small"><b>Qaytarildi:</b> {x.review.reason} — {x.review.by}, {fmtDate(x.review.at)}</div>}

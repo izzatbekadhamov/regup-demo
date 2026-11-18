@@ -80,7 +80,7 @@ export default function CourseDetail({ id }) {
       <section className="panel hero compact-hero">
         <div className="hero-top">
           <div style={{ minWidth: 0 }}>
-            <div className="crumbs"><a href="#/courses"><Icon name="back" size={13} /> Kurslar</a><span className="code">{c.id}{c.exodeId ? ` · Exode ${c.exodeId}` : ''}</span></div>
+            <div className="crumbs"><a href="#/courses"><Icon name="back" size={13} /> Kurslar</a><span className="code">{c.id}{c.exodeId ? ` · eski Exode ID ${c.exodeId}` : ''}</span></div>
             <div className="row" style={{ marginTop: 4 }}><h1>{c.title}</h1>{editable ? <Pill tone="muted">qoralama</Pill> : <Pill tone="good">faol</Pill>}</div>
             <p className="ink2" style={{ marginTop: 4 }}>{c.summary}</p>
             <div className="meta"><span>{DIRECTIONS[c.direction]}</span><span>{c.hours} soat</span><span>{learners.length} o‘quvchi</span>{paths.length > 0 && <span>Learning Path: {paths.map((p) => p.title).join(', ')}</span>}</div>

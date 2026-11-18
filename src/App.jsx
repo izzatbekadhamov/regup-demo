@@ -183,7 +183,7 @@ export default function App() {
           <BrandMark />
           <div>
             <b>RegUP</b>
-            <small>Exode LMS · kompetensiyalar</small>
+            <small>LMS · kompetensiyalar</small>
           </div>
         </div>
         <Nav groups={admin ? ADMIN_NAV : EMP_NAV} current={p0 || ''} state={state} session={session} role={admin ? role : null} />

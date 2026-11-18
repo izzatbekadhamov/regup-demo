@@ -1,6 +1,6 @@
 # RegUP — kompetensiyalarni boshqarish (demo prototip)
 
-Exode LMS uchun tayyorlanayotgan RegUP tizimining ishlaydigan demo-prototipi. Hamma narsa brauzerda ishlaydi: server yo'q, ma'lumotlar `localStorage`'da saqlanadi.
+RegUP LMS — alohida, mustaqil o‘quv va kompetensiya platformasining ishlaydigan demo-prototipi. U Exode ichida qurilmaydi, balki uning o‘rnini bosadi. Hamma narsa brauzerda ishlaydi: server yo'q, ma'lumotlar `localStorage`'da saqlanadi.
 
 ## Ishga tushirish
 
@@ -72,7 +72,7 @@ src/pages/*                 ekranlar
 ```
 
 ## Cheklovlar (prototip)
-- Autentifikatsiya, server, fayl saqlash va Exode integratsiyasi yo'q. Ishchi tizimda hisob, ruxsat va audit server tomonida bajariladi; `src/core` mantiqini server kodiga ko'chirish mumkin.
+- Autentifikatsiya, server, fayl saqlash va tashqi tizimlar (Exode, HR, Jobster, Edu) bilan integratsiya yoki ulardan ma'lumot ko'chirish yo'q. Ishchi tizimda hisob, ruxsat va audit server tomonida bajariladi; `src/core` mantiqini server kodiga ko'chirish mumkin.
 - Excel import `.xlsx` fayl o'rniga varaqlar tarkibini JSON ko'rinishida qabul qiladi.
 - General English modeli jadvalda «Ekspert tekshiruvi kerak» holatida; jadvaldagi ayrim ziddiyatlar (KPI chegaralari, rol nomlari) prototipda bitta variant bilan olingan.
 - Ismlar va raqamlar shartli.

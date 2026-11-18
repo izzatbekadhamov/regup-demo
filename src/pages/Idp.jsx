@@ -57,7 +57,7 @@ function Proposed({ x, s }) {
         <label className="f" style={{ gridColumn: 'span 3' }}>Vazifa<input className="i" value={f.task} onChange={(ev) => setF({ ...f, task: ev.target.value })} /></label>
         <label className="f">Mentor / mas’ul<input className="i" value={f.owner} onChange={(ev) => setF({ ...f, owner: ev.target.value })} /></label>
         <label className="f">Muddat<input className="i" type="date" value={f.due} onChange={(ev) => setF({ ...f, due: ev.target.value })} /></label>
-        <label className="f">Kurs (ixtiyoriy)<input className="i" placeholder="Exode kurs ID" value={f.courseId} onChange={(ev) => setF({ ...f, courseId: ev.target.value })} /></label>
+        <label className="f">Kurs (ixtiyoriy)<input className="i" placeholder="Kurs ID" value={f.courseId} onChange={(ev) => setF({ ...f, courseId: ev.target.value })} /></label>
       </div>
       <div className="row">
         <button className="btn primary sm" onClick={() => run(D.activateIdp, { id: x.id, patch: { ...f, courseId: f.courseId || null, owner: f.owner } }, 'Vazifa faollashtirildi — xodim kabinetida ko‘rinadi')}>{x.source === 'employee' ? 'Tasdiqlash' : 'Faollashtirish va xodimga yuborish'}</button>
@@ -121,7 +121,7 @@ export default function Idp() {
                 <td className="small">{x.owner}</td>
                 <td className="small" style={{ whiteSpace: 'nowrap' }}>{fmtDate(x.due)}</td>
                 <td><Pill tone={IDP_STATUS[x.status][1]}>{IDP_STATUS[x.status][0]}</Pill></td>
-                <td>{x.courseId && x.status !== 'done' && <button className="btn sm" onClick={() => run(D.courseCompleted, { employeeId: x.employeeId, courseId: x.courseId, externalId: `exode:${x.employeeId}:${x.courseId}` }, 'Exode: kurs yakuni qabul qilindi')}>Exode’dan kurs yakuni</button>}</td>
+                <td>{x.courseId && x.status !== 'done' && <button className="btn sm" onClick={() => run(D.courseCompleted, { employeeId: x.employeeId, courseId: x.courseId, externalId: `lms:${x.employeeId}:${x.courseId}` }, 'Kurs yakuni qayd etildi')}>Kurs yakunini qayd etish</button>}</td>
               </tr>
             ))}</tbody>
           </table>
