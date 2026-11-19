@@ -1481,8 +1481,9 @@ export function setSkillProfile(state, { profileCode, skillId, level, actor = 'H
 // ---------------------------------------------------------------------------
 export const ONB_DAYS = 30; // moslashuv dasturining standart muddati (lavozimda sozlanadi)
 export const ADAPT_DAYS = 60; // butun adaptatsiya: preboarding → orientation (1–7) → functional (8–60)
+// onbDay: ish boshlagan kun — 0, demak 1–7-kunlar = 0…6, 8–60-kunlar = 7…59.
 export const ADAPT_PHASES = [['preboarding', 'Preboarding', -3, 0], ['orientation', 'Orientation', 1, 7], ['functional', 'Functional onboarding', 8, 60]];
-export const adaptPhase = (day) => (day < 1 ? ADAPT_PHASES[0] : day <= 7 ? ADAPT_PHASES[1] : ADAPT_PHASES[2]);
+export const adaptPhase = (day) => (day < 0 ? ADAPT_PHASES[0] : day < 7 ? ADAPT_PHASES[1] : ADAPT_PHASES[2]);
 export const daysBetween = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 86400000);
 export { addDays };
 export const activeEmployees = (s) => s.employees.filter((e) => e.status !== 'archived');

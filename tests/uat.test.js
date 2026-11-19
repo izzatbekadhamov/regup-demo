@@ -603,6 +603,7 @@ describe('Onboarding tizimi (2026-11-19): huquqlar, karta, kurslar, fikrlar, soâ
     const ob = D.onboardingOf(s, sh.id);
     expect(ob.days).toBe(45);
     expect(D.onbEnrollments(s, ob)[0].deadline).toBe('2026-12-24');
+    expect(D.adaptPhase(0)[0]).toBe('orientation'); // birinchi ish kuni
     expect(D.adaptPhase(5)[0]).toBe('orientation');
     expect(D.adaptPhase(40)[0]).toBe('functional');
     expect(() => D.setProgramDays(s, { position: 'GE', days: 90 })).toThrow(/7â€“60/);
