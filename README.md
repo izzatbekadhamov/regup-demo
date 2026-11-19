@@ -1,6 +1,6 @@
 # RegUP — kompetensiyalarni boshqarish (demo prototip)
 
-RegUP LMS — alohida, mustaqil o‘quv va kompetensiya platformasining ishlaydigan demo-prototipi. U Exode ichida qurilmaydi, balki uning o‘rnini bosadi. Hamma narsa brauzerda ishlaydi: server yo'q, ma'lumotlar `localStorage`'da saqlanadi.
+RegUP LMS'ning ishlaydigan demo-prototipi. RegUP — ichki akademiya, ya'ni tizim: reja, jarayonlar va metodika. RegUP LMS esa shu tizimni qo'llab-quvvatlaydigan va avtomatlashtiradigan alohida, mustaqil dastur. U Jobster, EduTizim va Google Workspace bilan integratsiyada ishlaydi; hozirgi Exode'dan faqat kurs kontenti (video va o'quv materiallari) ko'chiriladi. Hamma narsa brauzerda ishlaydi: server yo'q, ma'lumotlar `localStorage`'da saqlanadi.
 
 ## Ishga tushirish
 
@@ -8,7 +8,7 @@ RegUP LMS — alohida, mustaqil o‘quv va kompetensiya platformasining ishlaydi
 cd app
 npm install
 npm run dev      # http://localhost:5180
-npm test         # 15 ta UAT + hisoblash va ish oqimi testlari
+npm test         # 15 ta UAT + hisoblash, ish oqimi va onboarding tizimi testlari (56 ta)
 npm run build    # dist/ — statik sayt, istalgan hostingga qo'yiladi
 ```
 
@@ -44,6 +44,17 @@ Chap pastdagi «Demoni qayta boshlash» tugmasi demoni boshlang'ich holatga qayt
 - Admin: Kurslar va Learning Path (katalog, kurs konstruktori, yo'llar, mentor tekshiruvi). Xodim: Kurslarim (yo'llar, tavsiyalar, kurs o'tish).
 - Namunaviy ma'lumot: `src/data/courses.js` — 13 kurs, 4 Learning Path (FR-1, FR-2, Akademik bo'lim rahbari, LT-2).
 
+## Onboarding tizimi (2026-11-19 yangilanishi)
+Tizim hujjati — «RegUP onboarding tizimi» (Claude Doc). Prototipda:
+- **60 kunlik adaptatsiya** (orientation 1–7, functional 8–60); moslashuv dasturi muddati lavozim bo'yicha sozlanadi (standart 30 kun), onboarding bahosi shu muddat yakunida.
+- **Huquqlar shaxsga beriladi** («Jamoa a'zolari»): har huquq filial doirasi bilan (barcha / tanlangan / o'ziga biriktirilganlar). TZ'dagi 6 ta qat'iy rol o'rniga. Mentor va **buddy** biriktiriladi.
+- **Kompetensiya kartasi rekrutingdan**: modeli bor lavozimda birinchi kundan ochiladi, rekruting baholari shartli; 60-kunda birinchi lavozim darajasi. Rasmiy e'lon yiliga 1–2 marta (sozlanadi). Modeli yo'q lavozimda karta yo'q, kurslar ishlaydi.
+- **Kurs ↔ kompetensiya**: test savollari daraja indikatoriga bog'lanadi, daraja topilgan indikatorlardan; kurs bahosi alohida, dalil uchun kamida 4 (sozlanadi).
+- **Kurs fikrlari** (barcha kurslar): dars bahosi, «Kursdan qoniqish bahosi» (1–5), NPS (0–10), ochiq fikr — anonim; e'lonni «Kurs izohlarini boshqarish» huquqi egasi qiladi.
+- **So'rovnomalar anonim**: D8/D30/D60/Fail Case faqat filial va lavozim kesimida; 8 bandli standartlar nazorat ro'yxati; javob ulushi past filiallarga eslatma.
+- **Offboarding**: ketish turiga qarab Fail Case yoki exit-intervyu; haydalish faqat ikki sabab bilan; «Qaytadi» va dublikatga so'rovnoma yo'q. «Markaz admini» — shaxsiy raqamga alohida akkaunt.
+- Dashboard'dagi ko'rsatkichlar kelishilgan ro'yxat bo'yicha (kohorta retention 30/60/90, 30 kun ichida ketganlar, mentor yuklamasi, eNPS, ma'lumot sifati, reboarding, ishga tayyor bo'lish vaqti; baho ↔ KPI bog'liqligi faqat 100+ xodimdan keyin xulosa).
+
 ## Moslashuvchan model
 Mohiyat hamma lavozimda bir xil: kompetensiya → daraja indikatorlari → dalil → yakuniy daraja → moslik (`100 × Σmin(baho, maqsad) ÷ Σmaqsad`) va shartlar → qaror. Lavozimga qarab quyidagilar model konfiguratsiyasida sozlanadi:
 - **Kompetensiyalar** soni va turi (qatlam), har birining ta'rifi, salbiy indikatorlari va savollari; umumiy kompetensiyalar (masalan KOR-01…04) kutubxonadan olinadi.
@@ -72,7 +83,7 @@ src/pages/*                 ekranlar
 ```
 
 ## Cheklovlar (prototip)
-- Autentifikatsiya, server, fayl saqlash va tashqi tizimlar (Exode, HR, Jobster, Edu) bilan integratsiya yoki ulardan ma'lumot ko'chirish yo'q. Ishchi tizimda hisob, ruxsat va audit server tomonida bajariladi; `src/core` mantiqini server kodiga ko'chirish mumkin.
+- Autentifikatsiya, server, fayl saqlash va Jobster, EduTizim va Google Workspace bilan integratsiya hamda Exode'dan kontent ko'chirish yo'q. Ishchi RegUP LMS'da hisob, ruxsat va audit server tomonida bajariladi; `src/core` mantiqini server kodiga ko'chirish mumkin.
 - Excel import `.xlsx` fayl o'rniga varaqlar tarkibini JSON ko'rinishida qabul qiladi.
 - General English modeli jadvalda «Ekspert tekshiruvi kerak» holatida; jadvaldagi ayrim ziddiyatlar (KPI chegaralari, rol nomlari) prototipda bitta variant bilan olingan.
 - Ismlar va raqamlar shartli.

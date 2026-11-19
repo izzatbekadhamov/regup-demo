@@ -35,6 +35,7 @@ import TaskQueue from './pages/TaskQueue.jsx';
 import ObservationPage from './pages/ObservationPage.jsx';
 import MyOnboarding from './pages/MyOnboarding.jsx';
 import OnbDashboard from './pages/OnbDashboard.jsx';
+import Team from './pages/Team.jsx';
 import { kpiValue, kpiResult, kpiMonths } from './core/domain.js';
 import * as D from './core/domain.js';
 import { OTHER_POSITIONS } from './core/modelKit.js';
@@ -52,7 +53,7 @@ const ADMIN_NAV = [
   ]],
   ['Moslashuv (onboarding)', [
     ['onb-dashboard', 'Onboarding dashboard', null, 'chart'],
-    ['onboarding', 'Moslashuv — 30 kun', (s, sess) => { const sc = D.scopeEmployees(s, D.getStaff(s, sess.userId)); return s.onboardings.filter((o) => o.status === 'active' && (!sc || sc.has(o.employeeId)) && (D.onboardingScore(s, o).ready || D.onbDay(s, o) >= D.ONB_DAYS)).length; }, 'user'],
+    ['onboarding', 'Moslashuv — 60 kun', (s, sess) => { const sc = D.scopeEmployees(s, D.getStaff(s, sess.userId)); return s.onboardings.filter((o) => o.status === 'active' && (!sc || sc.has(o.employeeId)) && (D.onboardingScore(s, o).ready || D.onbDay(s, o) >= D.obDays(s, o))).length; }, 'user'],
     ['integration', 'Integratsiya navbati', (s) => s.hrInbox.length, 'upload'],
     ['tasks', 'Topshiriqlarni tekshirish', (s, sess) => { const u = D.getStaff(s, sess.userId); return s.enrollments.reduce((a, e) => a + (D.canReviewTask(s, u, e) && e.status !== 'archived' ? Object.values(e.progress).filter((p) => p.status === 'pending').length : 0), 0); }, 'check'],
     ['observations', 'Dars kuzatuvi', (s, sess) => { const sc = D.scopeEmployees(s, D.getStaff(s, sess.userId)); return s.onboardings.filter((o) => o.status === 'active' && (!sc || sc.has(o.employeeId)) && D.onbObservations(s, o).length < (D.onbProgram(s, D.getEmployee(s, o.employeeId))?.observations || 0)).length; }, 'target'],
@@ -66,6 +67,7 @@ const ADMIN_NAV = [
   ['Sozlamalar', [
     ['models', 'Lavozim modellari', null, 'layers'],
     ['kpi', 'Yangi filial KPI', null, 'chart'],
+    ['team', 'Jamoa a’zolari', null, 'users'],
   ]],
   ['Tizim', [
     ['audit', 'O‘zgarishlar jurnali', null, 'list'],
@@ -74,16 +76,17 @@ const ADMIN_NAV = [
   ]],
 ];
 
-// TZ rollari: har rol faqat o'z bo'limlari va o'ziga biriktirilgan xodimlarni ko'radi. null — hammasi.
-const ROLE_ROUTES = {
-  super: null,
-  hr: ['', 'cards', 'stretch', 'evidence', 'idp', 'candidates', 'succession', 'teachers', 'onb-dashboard', 'onboarding', 'integration', 'tasks', 'observations', 'meetings', 'reminders', 'skills', 'courses', 'audit'],
-  branch: ['onboarding', 'onb-dashboard', 'teachers', 'meetings', 'reminders'],
-  mentor: ['onboarding', 'tasks', 'teachers', 'meetings'],
-  methodist: ['observations', 'onboarding', 'meetings'],
-  curator: ['tasks'],
+// Bo'limga kirish — shaxsga berilgan huquq bo'yicha (TZ'dagi qat'iy rollar o'rniga). Xodimlar ro'yxati huquq doirasiga qarab torayadi.
+const ROUTE_RIGHTS = {
+  '': ['cards.publish'], cards: ['cards.assign', 'cards.assess', 'cards.publish'], stretch: ['cards.publish'], evidence: ['cards.publish'],
+  idp: ['talent.view'], candidates: ['talent.view'], succession: ['talent.view'], skills: ['talent.view'], teachers: ['kpi.view'], kpi: ['kpi.view'],
+  'onb-dashboard': ['onb.view'], onboarding: ['onb.view'], integration: ['onb.integration'], tasks: ['courses.review', 'courses.manage'],
+  observations: ['onb.observe'], meetings: ['onb.meetings'], reminders: ['onb.reminders'],
+  courses: ['courses.view', 'courses.manage'], paths: ['courses.view', 'courses.manage'], models: ['models.manage'], team: ['team.manage'],
+  audit: ['audit.view'], import: ['system.import'], uat: ['system.import'],
 };
-const allowed = (role, path) => !ROLE_ROUTES[role] || ROLE_ROUTES[role].includes(path);
+const allowed = (user, path) => user.role === 'super' || D.canAny(user, ROUTE_RIGHTS[path] || []);
+const firstRoute = (user) => ADMIN_NAV.flatMap(([, items]) => items.map((it) => it[0])).find((p) => allowed(user, p)) ?? '';
 
 const EMP_NAV = [
   ['Mening kabinetim', [
@@ -99,10 +102,10 @@ const EMP_NAV = [
   ]],
 ];
 
-function Nav({ groups, current, state, session, role }) {
+function Nav({ groups, current, state, session, user }) {
   return (
     <nav className="nav">
-      {groups.map(([g, items]) => [g, items.filter((it) => (!role || allowed(role, it[0])) && (!it[4] || it[4](state, session)))]).filter(([, items]) => items.length).map(([g, items]) => (
+      {groups.map(([g, items]) => [g, items.filter((it) => (!user || allowed(user, it[0])) && (!it[4] || it[4](state, session)))]).filter(([, items]) => items.length).map(([g, items]) => (
         <div key={g}>
           <div className="nav-group">{g}</div>
           {items.map(([path, label, count, icon]) => {
@@ -128,15 +131,15 @@ export default function App() {
   const [p0, p1] = parts;
   const admin = session.mode === 'admin';
   const user = D.getStaff(state, session.userId) || D.getStaff(state, 'u-super');
-  const role = user.role;
   const actives = D.activeEmployees(state);
   const emp = actives.find((e) => e.id === session.employeeId) || actives[0];
 
   let page;
-  if (admin && !allowed(role, p0 || '')) {
-    page = <div className="panel panel-body">Bu bo‘lim <b>{D.ROLE_LABEL[role]}</b> roliga kirmaydi. <a href={`#/${ROLE_ROUTES[role][0]}`}>Mening bo‘limlarim</a></div>;
+  if (admin && !allowed(user, p0 || '')) {
+    page = <div className="panel panel-body"><b>{user.name}</b>da bu bo‘lim uchun huquq yo‘q. Huquqlarni «Jamoa a’zolari» bo‘limida Super Admin beradi. <a href={`#/${firstRoute(user)}`}>Mening bo‘limlarim</a></div>;
   } else if (admin) {
     if (!p0) page = <Dashboard />;
+    else if (p0 === 'team') page = <Team user={user} focus={p1} />;
     else if (p0 === 'onb-dashboard') page = <OnbDashboard key={user.id} user={user} />;
     else if (p0 === 'onboarding') page = <Onboarding key={user.id} user={user} focus={p1} />;
     else if (p0 === 'integration') page = <Integration user={user} />;
@@ -151,7 +154,7 @@ export default function App() {
     else if (p0 === 'models') page = <Models />;
     else if (p0 === 'import') page = <ImportPage />;
     else if (p0 === 'succession') page = <Succession />;
-    else if (p0 === 'courses' && p1) page = <CourseDetail id={p1} />;
+    else if (p0 === 'courses' && p1) page = <CourseDetail id={p1} user={user} />;
     else if (p0 === 'courses') page = <Courses />;
     else if (p0 === 'paths' && p1) page = <PathDetail id={p1} />;
     else if (p0 === 'candidates') page = <Candidates key={p1 || 'x'} initial={p1 ? decodeURIComponent(p1) : null} />;
@@ -186,7 +189,7 @@ export default function App() {
             <small>LMS · kompetensiyalar</small>
           </div>
         </div>
-        <Nav groups={admin ? ADMIN_NAV : EMP_NAV} current={p0 || ''} state={state} session={session} role={admin ? role : null} />
+        <Nav groups={admin ? ADMIN_NAV : EMP_NAV} current={p0 || ''} state={state} session={session} user={admin ? user : null} />
         <div className="side-foot">
           <div>Demo prototip. Ma’lumotlar brauzerda saqlanadi.</div>
           <button onClick={() => ask('Barcha demo o‘zgarishlar o‘chadi. Davom etasizmi?', () => resetDemo())}><Icon name="reset" size={14} /> Demoni qayta boshlash</button>
@@ -195,14 +198,14 @@ export default function App() {
       <div className="main">
         <header className="topbar">
           <div className="mode-switch">
-            <button className={admin ? 'on' : ''} title="HR, baholovchi va rahbar uchun" onClick={() => { setSession({ mode: 'admin' }); go(`/${ROLE_ROUTES[role]?.[0] ?? ''}`); }}>Admin</button>
+            <button className={admin ? 'on' : ''} title="HR, baholovchi va rahbar uchun" onClick={() => { setSession({ mode: 'admin' }); go(`/${firstRoute(user)}`); }}>Admin</button>
             <button className={!admin ? 'on' : ''} title="Xodim o‘z kabinetini qanday ko‘radi" onClick={() => { setSession({ mode: 'employee' }); go('/'); }}>Xodim</button>
           </div>
           {admin ? (
-            <label className="who" title="TZ rollari: har rol o‘z bo‘limlari va xodimlarini ko‘radi">
-              <Avatar name={role === 'super' ? 'HR LD' : user.name} />
-              <select className="i compact" value={user.id} onChange={(e) => { const u = D.getStaff(state, e.target.value); setSession({ userId: u.id }); go(`/${ROLE_ROUTES[u.role]?.[0] ?? ''}`); }}>
-                {state.staff.map((u) => <option key={u.id} value={u.id}>{D.ROLE_LABEL[u.role]}{u.role === 'super' ? '' : ` · ${u.name}`}</option>)}
+            <label className="who" title="Har bir jamoa a’zosi o‘ziga berilgan huquqlar va filial doirasi bo‘yicha ishlaydi">
+              <Avatar name={user.role === 'super' ? 'HR LD' : user.name} />
+              <select className="i compact" value={user.id} onChange={(e) => { const u = D.getStaff(state, e.target.value); setSession({ userId: u.id }); go(`/${firstRoute(u)}`); }}>
+                {state.staff.filter((u) => u.active !== false).map((u) => <option key={u.id} value={u.id}>{u.role === 'super' ? 'Super Admin' : `${u.name} · ${u.title}`}</option>)}
               </select>
             </label>
           ) : (

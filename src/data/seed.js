@@ -467,34 +467,71 @@ export function createSeed() {
   ];
 
   // ---------------- Onboarding (TZ): rollar, moslashuv dasturlari, integratsiya navbati, uchrashuvlar ----------------
+  // Jamoa a'zolari: huquqlar shaxsga beriladi, har biriga filial doirasi (role — faqat lavozim shabloni).
+  const PRESET = {
+    hr: ['onb.view', 'onb.approve', 'onb.assign', 'onb.observe', 'onb.integration', 'onb.meetings', 'onb.reminders', 'cards.assign', 'cards.assess', 'cards.publish', 'talent.view', 'courses.view', 'courses.manage', 'courses.review', 'courses.comments', 'kpi.view', 'audit.view'],
+    lda: ['onb.view', 'onb.assign', 'onb.integration', 'onb.meetings', 'onb.reminders', 'cards.assign', 'courses.view', 'courses.comments'],
+    branch: ['onb.view', 'onb.approve', 'onb.assign', 'onb.meetings', 'onb.reminders', 'cards.assign', 'kpi.view', 'courses.view'],
+    mentor: ['onb.view', 'onb.assign', 'cards.assign', 'courses.review', 'kpi.view', 'onb.meetings'],
+    methodist: ['onb.view', 'onb.observe', 'cards.assess', 'onb.meetings'],
+    curator: ['courses.review', 'courses.view'],
+  };
   const staff = [
-    { id: 'u-super', role: 'super', name: 'HR / L&D boshqaruvchisi', title: 'Super Admin' },
-    { id: 'u-hr', role: 'hr', name: 'Madina Xasanova', title: 'HR Admin' },
-    { id: 'u-br-chil', role: 'branch', name: 'Anvar Qosimov', title: 'Chilonzor filiali rahbari', branchIds: ['b-chil'] },
-    { id: 'u-men-gul', role: 'mentor', name: 'Gulbahor Rasulova', title: 'Mentor — Chilonzor ustozlari', employeeId: 'e-gulbahor' },
-    { id: 'u-men-sher', role: 'mentor', name: 'Sherzod Ismoilov', title: 'Mentor — Yunusobod ustozlari', employeeId: 'e-sherzod' },
-    { id: 'u-met', role: 'methodist', name: 'Shahnoza Mirzayeva', title: 'Metodist — General English', positions: ['GE'] },
-    { id: 'u-cur', role: 'curator', name: 'Laylo Karimova', title: 'Kurator — korporativ va moliya kurslari', courseIds: ['CRS-ON-CORP', 'CRS-ON-FIN'] },
+    { id: 'u-super', role: 'super', name: 'HR / L&D boshqaruvchisi', title: 'Super Admin', rights: [], scope: { kind: 'all' }, active: true },
+    { id: 'u-hr', role: 'hr', name: 'Madina Xasanova', title: 'HR Admin', rights: PRESET.hr, scope: { kind: 'all' }, active: true },
+    { id: 'u-lda', role: 'lda', name: 'Shahzoda Donyorova', title: 'L&D assistent', rights: PRESET.lda, scope: { kind: 'all' }, active: true },
+    { id: 'u-br-chil', role: 'branch', name: 'Anvar Qosimov', title: 'Chilonzor filiali rahbari', branchIds: ['b-chil'], rights: PRESET.branch, scope: { kind: 'branches', branchIds: ['b-chil'] }, active: true },
+    { id: 'u-men-gul', role: 'mentor', name: 'Gulbahor Rasulova', title: 'Mentor — Chilonzor ustozlari', employeeId: 'e-gulbahor', rights: PRESET.mentor, scope: { kind: 'assigned' }, active: true },
+    { id: 'u-men-sher', role: 'mentor', name: 'Sherzod Ismoilov', title: 'Mentor — Yunusobod ustozlari', employeeId: 'e-sherzod', rights: PRESET.mentor, scope: { kind: 'assigned' }, active: true },
+    { id: 'u-met', role: 'methodist', name: 'Shahnoza Mirzayeva', title: 'Metodist — General English', positions: ['GE'], rights: PRESET.methodist, scope: { kind: 'assigned' }, active: true },
+    { id: 'u-cur', role: 'curator', name: 'Laylo Karimova', title: 'Kurator — korporativ va moliya kurslari', courseIds: ['CRS-ON-CORP', 'CRS-ON-FIN'], rights: PRESET.curator, scope: { kind: 'assigned' }, active: true },
   ];
   const onboardingPrograms = [
-    { position: 'GE', courses: ['CRS-ON-CORP', 'CRS-ON-GE'], observations: 2 },
-    { position: 'FIN', courses: ['CRS-ON-CORP', 'CRS-ON-FIN'], observations: 0 },
-    { position: 'FR', courses: ['CRS-ON-CORP'], observations: 0 },
+    { position: 'GE', courses: ['CRS-ON-CORP', 'CRS-ON-GE'], observations: 2, days: 30 },
+    { position: 'FIN', courses: ['CRS-ON-CORP', 'CRS-ON-FIN'], observations: 0, days: 30 },
+    { position: 'FR', courses: ['CRS-ON-CORP'], observations: 0, days: 45 },
+    { position: 'ADM', courses: ['CRS-ON-CORP'], observations: 0, days: 30 },
   ];
   const onboardingConfig = {
     weights: { courses: 25, tests: 25, tasks: 25, obs: 25 }, badgeMin: 3, lateDays: 7,
     obsCodes: ['GEN-01', 'GEN-03', 'GEN-04', 'GEN-05', 'BEH-01', 'BEH-02'],
     mentors: { 'GE:b-chil': 'e-gulbahor', 'GE:b-yunus': 'e-sherzod', 'FIN:b-chil': 'e-rustam' },
-    surveyBranchAvg: { 'b-chil': 4.1, 'b-yunus': 4.3, 'b-serg': 3.6, 'b-yangi': 3.9, 'b-mirz': 4.0, 'b-samq': 3.8, 'b-olm': 4.2 },
+  };
+  // So'rovnomalar (Google Forms → Sheets) anonim: faqat filial kesimidagi jamlanma. DEMO raqamlar, oktabr 2026.
+  // checklist — onboarding standartlarining 8 ta «Ha/Yo'q» bandi bo'yicha «Ha» ulushi (%), CHECKLIST_ITEMS tartibida.
+  const SV = (hires, d8, d30, d60, enps, checklist, jobsterOnTime, dataIn3) => ({ hires, d8, d30, d60, enps, checklist, jobsterOnTime, dataIn3 });
+  const surveyStats = {
+    period: '2026-10',
+    byBranch: {
+      'b-chil': SV(9, [6, 4.3], [5, 4.1], [3, 4.2], 38, [100, 83, 67, 100, 83, 67, 60, 80], 89, 78),
+      'b-yunus': SV(7, [5, 4.5], [4, 4.4], [2, 4.5], 52, [100, 100, 80, 100, 100, 80, 75, 75], 100, 86),
+      'b-serg': SV(8, [2, 3.4], [2, 3.2], [1, 3.0], -10, [50, 50, 0, 50, 100, 0, 50, 0], 63, 50),
+      'b-yangi': SV(5, [3, 3.9], [2, 3.8], [1, 4.0], 20, [100, 67, 67, 67, 100, 33, 50, 50], 80, 60),
+      'b-mirz': SV(6, [4, 4.0], [3, 4.0], [2, 3.9], 25, [100, 75, 75, 100, 75, 50, 67, 67], 83, 83),
+      'b-samq': SV(6, [2, 3.7], [1, 3.5], [0, null], 0, [100, 50, 50, 100, 50, 0, 0, 100], 67, 67),
+      'b-olm': SV(4, [3, 4.2], [2, 4.3], [1, 4.4], 45, [100, 100, 67, 100, 100, 67, 100, 100], 100, 75),
+    },
   };
   const onboardings = [
-    { id: 'onb-0', employeeId: 'e-lola', startedAt: '2026-06-02', enteredAt: '2026-06-02', source: 'recruiting', status: 'completed', reboarding: false, survey: { d8: 4.5, d30: 4.4 }, restored: [],
+    { id: 'onb-0', employeeId: 'e-lola', startedAt: '2026-06-02', enteredAt: '2026-06-02', source: 'recruiting', status: 'completed', reboarding: false, restored: [],
       final: { score: 4.2, label: 'Yaxshi', badge: true, ready: true, parts: [], by: 'Yunusobod filiali rahbari', byRole: 'Filial rahbari', at: '2026-07-03' } },
-    { id: 'onb-1', employeeId: 'e-nilufar', startedAt: '2026-10-14', enteredAt: '2026-10-14', source: 'recruiting', status: 'active', reboarding: false, survey: { d8: 4.6, d30: null }, final: null, restored: [] },
-    { id: 'onb-2', employeeId: 'e-jahongir', startedAt: '2026-10-05', enteredAt: '2026-10-06', source: 'recruiting', status: 'active', reboarding: false, survey: { d8: 4.2, d30: 4.5 }, final: null, restored: [] },
-    { id: 'onb-3', employeeId: 'e-sanjar', startedAt: '2026-10-31', enteredAt: '2026-10-31', source: 'branch', status: 'active', reboarding: false, survey: { d8: 3.8, d30: null }, final: null, restored: [] },
-    { id: 'onb-4', employeeId: 'e-ziyoda', startedAt: '2026-10-22', enteredAt: '2026-10-24', source: 'recruiting', status: 'active', reboarding: false, survey: { d8: 3.1, d30: null }, final: null, restored: [] },
+    { id: 'onb-1', employeeId: 'e-nilufar', startedAt: '2026-10-14', enteredAt: '2026-10-14', source: 'recruiting', status: 'active', reboarding: false, final: null, restored: [] },
+    { id: 'onb-2', employeeId: 'e-jahongir', startedAt: '2026-10-05', enteredAt: '2026-10-06', source: 'recruiting', status: 'active', reboarding: false, final: null, restored: [] },
+    { id: 'onb-3', employeeId: 'e-sanjar', startedAt: '2026-10-31', enteredAt: '2026-10-31', source: 'branch', status: 'active', reboarding: false, final: null, restored: [] },
+    { id: 'onb-4', employeeId: 'e-ziyoda', startedAt: '2026-10-22', enteredAt: '2026-10-24', source: 'recruiting', status: 'active', reboarding: false, final: null, restored: [] },
   ];
+  // Nilufar (GE, LT-0) — onboarding kompetensiya kartasi birinchi kundan: rekruting xulosasi shartli, kuzatuvlar qo'shilib boradi.
+  cards.unshift({
+    id: 'c-110', cycleId: 'onboarding', origin: 'onboarding', provisional: true, employeeId: 'e-nilufar', modelVersionId: 'GE@1.0', profileFrom: null, profileTo: 'LT-0',
+    branchId: 'b-yunus', stage: 'evidence', revision: 2, deadline: '2026-12-13', targetRoleId: null, stretchId: null,
+    assessors: { evaluator: 'Shahnoza Mirzayeva (metodist)', calibrator: 'L&D' },
+    scores: {
+      'GEN-01': { final: null, basis: '', evidences: [{ method: 'interview', value: 2, note: 'Rekruting xulosasi (Telegram): sinov darsida maqsad aniq, vaqt nazorati sust', sourceId: 'REC-e-nilufar' }] },
+      'BEH-01': { final: null, basis: '', evidences: [{ method: 'interview', value: 3, note: 'Rekruting xulosasi (Telegram): suhbatda motivatsiya yuqori', sourceId: 'REC-e-nilufar' }] },
+    },
+    hrScores: {}, observations: [], gates: {}, kpi: null, panel: null, appointment: null, published: null, createdAt: '2026-10-14',
+  });
+  onboardings.find((o) => o.id === 'onb-1').cardId = 'c-110';
   const OE = (id, employeeId, onboardingId, courseId, startedAt, deadline, extra) => ({ id, employeeId, courseId, pathId: null, by: 'onboarding', onboardingId, startedAt, deadline, courseVersion: 1, status: 'in_progress', applied: [], progress: {}, ...extra });
   const T100 = (at) => ({ attempts: 1, last: 100, best: 100, at });
   enrollments.push(
@@ -526,15 +563,15 @@ export function createSeed() {
   ];
   // Integratsiya navbati: Jobster ATS → Edu → RegUP hodisalari (demo — bir tugma bilan qabul qilinadi).
   const hrInbox = [
-    { id: 'ev-1', type: 'hire', at: '2026-11-10', stage: 'Induction', payload: { name: 'Shahlo Nazarova', position: 'GE', level: 'LT-0', branchId: 'b-chil', department: 'Akademik bo‘lim', phone: '+998 90 111 22 33', jobsterId: 'JB-5521', eduId: 'EDU-30412', startedAt: '2026-11-09', source: 'recruiting' } },
+    { id: 'ev-1', type: 'hire', at: '2026-11-10', stage: 'Induction', payload: { name: 'Shahlo Nazarova', position: 'GE', level: 'LT-0', branchId: 'b-chil', department: 'Akademik bo‘lim', phone: '+998 90 111 22 33', jobsterId: 'JB-5521', eduId: 'EDU-30412', startedAt: '2026-11-09', source: 'recruiting', recruiting: { via: 'telegram', scores: { 'GEN-01': 2, 'BEH-01': 3, 'BEH-02': 2 }, note: 'sinov darsi va suhbat' } } },
     { id: 'ev-2', type: 'hire', at: '2026-11-10', stage: 'Induction', payload: { name: 'Bobur Xolmatov', position: 'FIN', level: 'MOL', branchId: 'b-serg', department: 'Moliya', phone: '+998 93 444 55 66', jobsterId: 'JB-5534', eduId: 'EDU-30418', startedAt: '2026-11-01', source: 'branch' } },
-    { id: 'ev-3', type: 'hire', at: '2026-11-10', stage: 'Induction', payload: { name: 'Dilnoza Rahimova', position: 'ADM', level: 'ADM', branchId: 'b-yunus', department: 'Markaz admini', phone: '+998 71 200 00 01', jobsterId: 'JB-5540', eduId: 'EDU-30420', startedAt: '2026-11-10', source: 'recruiting' } },
-    { id: 'ev-4', type: 'archive', at: '2026-11-10', stage: 'D30 dan oldin chiqarildi', payload: { employeeId: 'e-ziyoda', reason: 'O‘z xohishi bilan ketdi (D8 dan keyin)', leftAt: '2026-11-07', eduWaitDays: 30 } },
+    { id: 'ev-3', type: 'hire', at: '2026-11-10', stage: 'Induction', payload: { name: 'Dilnoza Rahimova', position: 'ADM', level: 'ADM', branchId: 'b-yunus', department: 'Markaz admini', phone: '+998 71 200 00 01', personalPhone: '+998 97 321 45 67', jobsterId: 'JB-5540', eduId: 'EDU-30420', startedAt: '2026-11-10', source: 'recruiting' } },
+    { id: 'ev-4', type: 'archive', at: '2026-11-10', stage: 'D30 dan oldin chiqarildi', payload: { employeeId: 'e-ziyoda', reason: 'O‘z xohishi bilan ketdi (D8 dan keyin)', exitType: 'self', leftAt: '2026-11-07', eduWaitDays: 30 } },
     { id: 'ev-5', type: 'return', at: '2026-11-10', stage: 'Qayta ishga kirish', payload: { employeeId: 'e-lola', startedAt: '2026-11-10', branchId: 'b-yunus', source: 'recruiting' } },
   ];
 
   return {
-    schema: 16,
+    schema: 17,
     today: TODAY,
     models,
     branches,
@@ -563,6 +600,17 @@ export function createSeed() {
     staff,
     onboardingPrograms,
     onboardingConfig,
+    surveyStats,
+    announceConfig: { dates: ['06-30', '12-25'] },
+    // Kurs fikrlari (anonim, DEMO): dars bahosi, kursdan qoniqish, NPS, ochiq fikr (e'lon qilingan / tekshiruvda)
+    courseFeedback: [
+      { id: 'fb-1', kind: 'lesson', courseId: 'CRS-ON-CORP', lessonId: 'l1', value: 5, branchId: 'b-chil', position: 'GE', at: '2026-10-08' },
+      { id: 'fb-2', kind: 'lesson', courseId: 'CRS-ON-CORP', lessonId: 'l1', value: 4, branchId: 'b-yunus', position: 'GE', at: '2026-10-16' },
+      { id: 'fb-3', kind: 'course', courseId: 'CRS-ON-CORP', satisfaction: 5, nps: 10, comment: 'Birinchi haftada nima qilishni aniq bildim, ayniqsa qadriyatlar haqidagi qism foydali bo‘ldi.', author: 'Jahongir Ortiqov', status: 'published', branchId: 'b-chil', position: 'FIN', at: '2026-10-09' },
+      { id: 'fb-4', kind: 'course', courseId: 'CRS-ON-CORP', satisfaction: 4, nps: 8, comment: 'Video qisqa va tushunarli. Edu bo‘yicha amaliy misol ko‘proq bo‘lsa yaxshi bo‘lardi.', author: null, status: 'pending', branchId: 'b-yunus', position: 'GE', at: '2026-10-20' },
+      { id: 'fb-5', kind: 'course', courseId: 'CRS-ON-CORP', satisfaction: 3, nps: 6, comment: '', author: null, status: null, branchId: 'b-serg', position: 'GE', at: '2026-10-25' },
+    ],
+    dataIssues: { duplicates: 2, lateArchive: 1 }, // DEMO: oktabr tekshiruvida topilgan dublikat va kech arxivlangan akkauntlar
     onboardings,
     observations,
     meetings,

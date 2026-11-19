@@ -6,7 +6,7 @@
 // task — amaliy topshiriq (case | stretch | work), mentor xulosasi bilan tasdiqlanadi.
 // Qoida konteksti: learning — o'quv dalili (odatda test/keys, past chegara); work — real ish dalili (mentor tasdig'i bilan).
 
-const q = (text, options, answer) => ({ text, options, answer });
+const q = (text, options, answer, lvl) => ({ text, options, answer, ...(lvl ? { lvl } : {}) }); // lvl — savol qaysi daraja indikatorini tekshiradi
 const lesson = (id, title, minutes) => ({ id, kind: 'lesson', title, minutes });
 const test = (id, title, passScore, questions) => ({ id, kind: 'test', title, passScore, questions });
 const task = (id, title, taskType, description, criteria) => ({ id, kind: 'task', title, taskType, description, criteria, mentorRequired: true });
@@ -90,8 +90,8 @@ export const COURSES = [
     components: [
       lesson('l1', 'O‘zgarish sabablari va jamoaga yetkazish', 30),
       test('t1', 'O‘zgarishlarni boshqarish testi', 70, [
-        q('Qarshilik bilan ishlashning birinchi qadami?', ['Sababini tinglash', 'Buyruq berish', 'E’tibor bermaslik'], 0),
-        q('Yangi tartibni joriy qilishda nima muhim?', ['Bosqichlar va mas’ullar', 'Faqat e’lon', 'Tezlik'], 0),
+        q('Qarshilik bilan ishlashning birinchi qadami?', ['Sababini tinglash', 'Buyruq berish', 'E’tibor bermaslik'], 0, 1),
+        q('Yangi tartibni joriy qilishda nima muhim?', ['Bosqichlar va mas’ullar', 'Faqat e’lon', 'Tezlik'], 0, 2),
       ]),
       task('a1', 'Keys: filialda yangi jadvalga o‘tish', 'case',
         'Keysdagi filialda yangi dars jadvaliga o‘tish rejasini tuzing: kim, qachon, qanday qarshilik va unga javob.',

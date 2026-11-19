@@ -9,7 +9,7 @@ import { KIND, TASK_TYPE, CTX } from './Courses.jsx';
 const upd = (c, fn, ok) => run(D.updateCourse, { id: c.id, patch: fn }, ok);
 
 function AddComponent({ c }) {
-  const [f, setF] = useState({ kind: 'lesson', title: '', minutes: 30, passScore: 70, taskType: 'work', description: '', criteria: '', qtext: '', options: 'A variant\nB variant\nC variant', answer: 0 });
+  const [f, setF] = useState({ kind: 'lesson', title: '', minutes: 30, passScore: 70, taskType: 'work', description: '', criteria: '', qtext: '', options: 'A variant\nB variant\nC variant', answer: 0, lvl: '' });
   // Identifikator prefikslari: l — dars, t — test, a — amaliy topshiriq; band bo'lsa keyingi raqam.
   const prefix = { lesson: 'l', test: 't', task: 'a' }[f.kind];
   let n = c.components.filter((x) => x.kind === f.kind).length + 1;
@@ -18,7 +18,7 @@ function AddComponent({ c }) {
   const add = () => upd(c, (x) => {
     const base = { id, kind: f.kind, title: f.title.trim() };
     if (f.kind === 'lesson') x.components.push({ ...base, minutes: Number(f.minutes) });
-    if (f.kind === 'test') x.components.push({ ...base, passScore: Number(f.passScore), questions: f.qtext.trim() ? [{ text: f.qtext.trim(), options: f.options.split('\n').map((o) => o.trim()).filter(Boolean), answer: Number(f.answer) }] : [] });
+    if (f.kind === 'test') x.components.push({ ...base, passScore: Number(f.passScore), questions: f.qtext.trim() ? [{ text: f.qtext.trim(), options: f.options.split('\n').map((o) => o.trim()).filter(Boolean), answer: Number(f.answer), ...(f.lvl ? { lvl: Number(f.lvl) } : {}) }] : [] });
     if (f.kind === 'task') x.components.push({ ...base, taskType: f.taskType, description: f.description, criteria: f.criteria, mentorRequired: true });
   }, `${KIND[f.kind]} qo‘shildi`) && setF({ ...f, title: '', qtext: '', description: '', criteria: '' });
   return (
@@ -33,6 +33,7 @@ function AddComponent({ c }) {
           <label className="f" style={{ gridColumn: 'span 2' }}>Birinchi savol<input className="i" value={f.qtext} onChange={(e) => setF({ ...f, qtext: e.target.value })} /></label>
           <label className="f" style={{ gridColumn: 'span 2' }}>Variantlar (har biri yangi qatorda)<textarea className="i" value={f.options} onChange={(e) => setF({ ...f, options: e.target.value })} /></label>
           <label className="f">To‘g‘ri javob (1-dan)<input className="i" type="number" min="1" value={Number(f.answer) + 1} onChange={(e) => setF({ ...f, answer: Number(e.target.value) - 1 })} /></label>
+          <label className="f">Qaysi daraja indikatori<select className="i" value={f.lvl} onChange={(e) => setF({ ...f, lvl: e.target.value })}><option value="">— bog‘lanmagan —</option>{[1, 2, 3, 4, 5].map((l) => <option key={l} value={l}>{l}-daraja</option>)}</select></label>
         </>}
         {f.kind === 'task' && <>
           <label className="f">Topshiriq turi<select className="i" value={f.taskType} onChange={(e) => setF({ ...f, taskType: e.target.value })}>{Object.entries(TASK_TYPE).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
@@ -66,7 +67,33 @@ function AddRule({ s, c }) {
   );
 }
 
-export default function CourseDetail({ id }) {
+function FeedbackPanel({ s, c, user }) {
+  const st = D.courseFeedbackStats(s, c.id);
+  const mod = D.can(user, 'courses.comments');
+  const N = (v) => (v === null ? '—' : (Math.round(v * 10) / 10).toString().replace('.', ','));
+  return (
+    <Panel title={<div><h2>Kurs fikrlari</h2><div className="muted small">Anonim: filial va lavozim kesimida · {st.n} ta kurs bahosi</div></div>}>
+      <div className="grid g3">
+        <div><div className="small muted">Kursdan qoniqish bahosi</div><div className="big-num">{N(st.satisfaction)} <span className="small muted">/ 5</span></div></div>
+        <div><div className="small muted">NPS (tavsiya qilish)</div><div className="big-num">{st.nps === null ? '—' : st.nps}</div><div className="small muted">−100…+100</div></div>
+        <div><div className="small muted">Dars baholari</div>{st.lessons.map((l) => <div key={l.id} className="small">{l.title}: <b>{N(l.avg)}</b> <span className="muted">({l.n})</span></div>)}</div>
+      </div>
+      {st.comments.length > 0 && (
+        <table className="small" style={{ marginTop: 10 }}><tbody>{st.comments.map((x) => (
+          <tr key={x.id}>
+            <td>«{x.comment}»<div className="muted">{x.author || 'Anonim'} · {D.getBranch(s, x.branchId)?.name} · qoniqish {x.satisfaction}/5 · NPS {x.nps}</div></td>
+            <td className="num" style={{ whiteSpace: 'nowrap' }}>{x.status === 'published' ? <Pill tone="good">e’lon qilingan</Pill> : x.status === 'hidden' ? <Pill tone="muted">yashirilgan</Pill> : <Pill tone="warn">tekshiruvda</Pill>}
+              {mod && x.status !== 'published' && <button className="btn sm" style={{ marginLeft: 6 }} onClick={() => run(D.moderateFeedback, { id: x.id, decision: 'published', userId: user.id }, 'E’lon qilindi')}>E’lon qilish</button>}
+              {mod && x.status === 'published' && <button className="btn sm" style={{ marginLeft: 6 }} onClick={() => run(D.moderateFeedback, { id: x.id, decision: 'hidden', userId: user.id }, 'Yashirildi')}>Yashirish</button>}</td>
+          </tr>
+        ))}</tbody></table>
+      )}
+      {!mod && <div className="small muted" style={{ marginTop: 6 }}>Fikrni e’lon qilish uchun «Kurs izohlarini boshqarish» huquqi kerak.</div>}
+    </Panel>
+  );
+}
+
+export default function CourseDetail({ id, user }) {
   const s = useAppState();
   const c = D.getCourse(s, id);
   if (!c) return <Panel>Kurs topilmadi. <a href="#/courses">Kurslarga qaytish</a></Panel>;
@@ -102,7 +129,7 @@ export default function CourseDetail({ id }) {
                       <td><Pill tone={x.kind === 'task' ? 'warn' : x.kind === 'test' ? 'brand' : 'muted'}>{KIND[x.kind]}</Pill></td>
                       <td>
                         <b>{x.title}</b>
-                        {x.kind === 'test' && <div className="muted small">{x.questions.length} savol · o‘tish bali {x.passScore}%</div>}
+                        {x.kind === 'test' && <div className="muted small">{x.questions.length} savol · o‘tish bali {x.passScore}%{x.questions.some((q) => q.lvl) && ` · indikatorlar: ${x.questions.map((q) => (q.lvl ? `${q.lvl}-d.` : '—')).join(', ')}`}</div>}
                         {x.kind === 'task' && <div className="small ink2">{TASK_TYPE[x.taskType]} · {x.description}<div className="muted">Mentor baholaydi: {x.criteria}</div></div>}
                         {x.kind === 'lesson' && <div className="muted small">{x.minutes} daqiqa</div>}
                       </td>
@@ -114,6 +141,8 @@ export default function CourseDetail({ id }) {
             ) : <Empty>Hali komponent yo‘q.</Empty>}
           </Panel>
           {editable && <AddComponent c={c} />}
+
+          <FeedbackPanel s={s} c={c} user={user} />
 
           <Panel title="O‘quvchilar" tight>
             {learners.length ? (
@@ -132,11 +161,12 @@ export default function CourseDetail({ id }) {
         <div className="grid sticky">
           <Panel title="Kompetensiyaga ta’sir">
             <div className="stack">
-              <p className="small ink2">Kurs yakunida avtomatik yoziladi. Ish dalili faqat amaliy topshiriq mentor tomonidan qabul qilinganda; mentor bergan daraja chegaradan oshmaydi. Mavjud yuqori daraja pasaytirilmaydi.</p>
+              <p className="small ink2">Kurs qaysi darajagacha mo‘ljallangani — qoidadagi daraja. Daraja test savollari va amaliy topshiriqda topilgan indikatorlardan qo‘yiladi (chegaradan oshmaydi). Kurs bahosi kamida <b>{D.courseMinGrade(c)}</b> bo‘lsa kurs dalil hisoblanadi. Mavjud yuqori daraja pasaytirilmaydi.</p>
+              <label className="f small">Dalil uchun eng past kurs bahosi<select className="i compact" value={D.courseMinGrade(c)} onChange={(e) => run(D.setCourseMinGrade, { id: c.id, value: e.target.value }, 'Saqlandi')}>{[3, 4, 5].map((v) => <option key={v} value={v}>{v}</option>)}</select></label>
               {c.rules.map((r, i) => (
                 <div key={i} className={`rule-box ${r.context}`}>
                   <div className="row between">
-                    <b>{r.competency} → {r.level}-daraja</b>
+                    <b>{r.competency}: {r.level}-darajagacha</b>
                     <span className={`pill ${CTX[r.context][1]}`}>{CTX[r.context][0]}</span>
                   </div>
                   <div className="small ink2">{lib.find((k) => k.code === r.competency)?.name}</div>

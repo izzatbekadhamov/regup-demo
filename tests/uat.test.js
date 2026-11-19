@@ -402,13 +402,13 @@ describe('Ko‘nikmalar: kompetensiyadan alohida qatlam', () => {
 });
 
 describe('Onboarding (TZ): integratsiya, 30 kunlik moslashuv, rollar, eslatmalar', () => {
-  it('Integratsiya: kartochka ochiladi, Markaz admini o‘tkaziladi, kech kiritilgan belgilanadi, arxiv va reboarding', () => {
+  it('Integratsiya: kartochka ochiladi, Markaz admini shaxsiy raqamga, kech kiritilgan belgilanadi, arxiv va reboarding', () => {
     let s = createSeed();
     const n = s.employees.length;
     s = D.processHrInbox(s);
     expect(s.hrInbox).toHaveLength(0);
-    expect(s.employees.length).toBe(n + 2); // Shahlo va Bobur; Markaz admini — yo'q
-    expect(s.employees.some((e) => e.name === 'Dilnoza Rahimova')).toBe(false);
+    expect(s.employees.length).toBe(n + 3); // Shahlo, Bobur va Dilnoza (Markaz admini — shaxsiy raqam bilan)
+    expect(s.employees.find((e) => e.name === 'Dilnoza Rahimova')).toMatchObject({ phone: '+998 97 321 45 67', centerAccount: '+998 71 200 00 01' });
     const bobur = s.employees.find((e) => e.name === 'Bobur Xolmatov');
     const ob = D.onboardingOf(s, bobur.id);
     expect(D.onbLateDays(ob)).toBe(9);
@@ -527,9 +527,10 @@ describe('Onboarding dashboard analitikasi', () => {
     expect(oct.r60.n).toBe(0);
     const src = Object.fromEntries(A.breakdown(rows, s.today, 'source').map((b) => [b.key, b.r30.pct]));
     expect(src.recruiting).toBeGreaterThan(src.branch);
-    const lv = A.leaveStages(rows);
+    const lv = A.leaveStages(rows, s.today);
     expect(lv.stages.reduce((a, x) => a + x.n, 0)).toBe(lv.total);
-    expect(lv.d8Left).toBeLessThan(lv.d8Stay);
+    expect(lv.early.n).toBeLessThanOrEqual(lv.early.of); // T3: faqat 30 kuni to'lganlardan
+    expect(lv.early.n).toBe(rows.filter((r) => r.leftDay !== null && r.leftDay < 30 && D.addDays(r.startedAt, 30) <= s.today).length);
     // Filtr: filial rahbari faqat o'z filiali
     expect(A.onbRows(s, {}, new Set(['b-chil'])).every((r) => r.branchId === 'b-chil')).toBe(true);
   });
@@ -553,5 +554,111 @@ describe('Onboarding dashboard analitikasi', () => {
     s = D.flagRisk(s, { onboardingId: D.onboardingOf(s, 'e-sanjar').id, reasons: ['boshlamagan'] });
     expect(s.notifications[0]).toMatchObject({ to: 'Gulbahor Rasulova', tg: true });
     expect(() => D.flagRisk(s, { onboardingId: D.onboardingOf(s, 'e-sanjar').id, reasons: ['boshlamagan'] })).toThrow(/allaqachon/);
+  });
+});
+
+describe('Onboarding tizimi (2026-11-19): huquqlar, karta, kurslar, fikrlar, so‘rovnomalar, offboarding', () => {
+  it('Huquq shaxsga beriladi va filial doirasida ishlaydi', () => {
+    let s = createSeed();
+    const u = (id) => D.getStaff(s, id);
+    expect(D.can(u('u-super'), 'team.manage')).toBe(true);
+    expect(D.can(u('u-men-sher'), 'onb.approve')).toBe(false);
+    expect(() => D.approveOnboarding(s, { id: 'onb-2', userId: 'u-men-gul' })).toThrow(/huquqi/);
+    // L&D assistentga tasdiqlash huquqi beriladi — barcha filiallar doirasida ishlaydi
+    s = D.setStaffRight(s, { userId: 'u-lda', right: 'onb.approve', on: true });
+    expect(D.can(D.getStaff(s, 'u-lda'), 'onb.approve')).toBe(true);
+    // Filial rahbari doirasi kengaytiriladi: Yunusobod ham
+    s = D.setStaffScope(s, { userId: 'u-br-chil', kind: 'branches', branchIds: ['b-chil', 'b-yunus'] });
+    expect(D.scopeEmployees(s, D.getStaff(s, 'u-br-chil')).has('e-nilufar')).toBe(true);
+    expect(() => D.setStaffRight(s, { userId: 'u-super', right: 'onb.view', on: false })).toThrow(/Super Admin/);
+    expect(() => D.setStaffScope(s, { userId: 'u-hr', kind: 'branches', branchIds: [] })).toThrow(/filial/);
+    // Buddy biriktirish: huquq va doira kerak; buddy mentorga teng bo'lmasin
+    expect(() => D.assignMentorBuddy(s, { employeeId: 'e-sanjar', mentorId: 'e-gulbahor', buddyId: 'e-gulbahor', userId: 'u-br-chil' })).toThrow(/buddy/);
+    s = D.assignMentorBuddy(s, { employeeId: 'e-sanjar', mentorId: 'e-gulbahor', buddyId: 'e-malika', userId: 'u-br-chil' });
+    expect(D.getEmployee(s, 'e-sanjar').buddyId).toBe('e-malika');
+    expect(() => D.assignMentorBuddy(s, { employeeId: 'e-sanjar', buddyId: 'e-malika', userId: 'u-cur' })).toThrow(/huquqi/);
+  });
+
+  it('Kompetensiya kartasi rekrutingdan: birinchi kundan, baholar shartli, 60-kunda daraja; modelsiz lavozimda karta yo‘q', () => {
+    let s = createSeed();
+    s = D.processHrInbox(s);
+    const sh = s.employees.find((e) => e.name === 'Shahlo Nazarova');
+    const card = D.onboardingCardOf(s, sh.id);
+    expect(card).toMatchObject({ origin: 'onboarding', provisional: true, profileTo: 'LT-0', stage: 'evidence', deadline: '2027-01-08' });
+    expect(card.scores['GEN-01'].evidences[0]).toMatchObject({ method: 'interview', value: 2 });
+    expect(card.scores['GEN-01'].final).toBeNull(); // rekruting bahosi — dalil, yakuniy daraja emas
+    const bobur = s.employees.find((e) => e.name === 'Bobur Xolmatov');
+    expect(D.onboardingCardOf(s, bobur.id)).toBeNull(); // moliya menejeri modeli hali yo'q
+    expect(D.nextAnnounce(s)).toBe('2026-12-25');
+    s = D.setAnnounceDates(s, { dates: ['03-31'] });
+    expect(D.nextAnnounce(s)).toBe('2027-03-31');
+    expect(() => D.setAnnounceDates(s, { dates: ['01-31', '05-31', '09-30'] })).toThrow(/1 yoki 2/);
+  });
+
+  it('Moslashuv dasturi muddati lavozim bo‘yicha sozlanadi; adaptatsiya 60 kun', () => {
+    let s = createSeed();
+    s = D.setProgramDays(s, { position: 'GE', days: 45 });
+    s = D.processHrInbox(s);
+    const sh = s.employees.find((e) => e.name === 'Shahlo Nazarova');
+    const ob = D.onboardingOf(s, sh.id);
+    expect(ob.days).toBe(45);
+    expect(D.onbEnrollments(s, ob)[0].deadline).toBe('2026-12-24');
+    expect(D.adaptPhase(5)[0]).toBe('orientation');
+    expect(D.adaptPhase(40)[0]).toBe('functional');
+    expect(() => D.setProgramDays(s, { position: 'GE', days: 90 })).toThrow(/7–60/);
+  });
+
+  it('Kurs: daraja indikatorlardan topiladi, kurs bahosi alohida, dalil uchun kamida 4', () => {
+    const qs = [{ answer: 0, lvl: 1 }, { answer: 1, lvl: 2 }, { answer: 2, lvl: 3 }];
+    expect(D.foundLevel(qs, [0, 1, 2], 3)).toBe(3);
+    expect(D.foundLevel(qs, [0, 1, 0], 3)).toBe(2);
+    expect(D.foundLevel(qs, [1, 1, 2], 3)).toBe(0); // 1-daraja topilmasa, yuqorisi hisoblanmaydi
+    expect(D.foundLevel([{ answer: 0 }], [0], 3)).toBeNull(); // bog'lanmagan test — eski qoida
+    const course = { components: [{ id: 't1', kind: 'test', passScore: 70 }, { id: 'a1', kind: 'task' }], rules: [] };
+    const enr = { progress: { t1: { best: 75 }, a1: { status: 'accepted', mentor: { grade: 5 } } } };
+    expect(D.courseGrade(course, enr)).toBe(4.5); // 75% → 4 ball, topshiriq 5 → 4,5
+    expect(D.courseMinGrade(course)).toBe(4);
+    let s = createSeed();
+    s = D.setCourseMinGrade(s, { id: 'CRS-LDR-05', value: 5 });
+    expect(D.courseMinGrade(D.getCourse(s, 'CRS-LDR-05'))).toBe(5);
+  });
+
+  it('Kurs fikrlari anonim: ism faqat rozilik bilan, bir marta, e’lonni huquq egasi qiladi', () => {
+    let s = createSeed();
+    const n0 = s.courseFeedback.length;
+    s = D.submitCourseFeedback(s, { enrollmentId: 'enr-1', satisfaction: 4, nps: 9, comment: 'Keys juda amaliy', showName: false });
+    const f = s.courseFeedback.at(-1);
+    expect(s.courseFeedback).toHaveLength(n0 + 1);
+    expect(f).toMatchObject({ author: null, status: 'pending', branchId: 'b-chil', position: 'GE' });
+    expect(f.employeeId).toBeUndefined();
+    expect(() => D.submitCourseFeedback(s, { enrollmentId: 'enr-1', satisfaction: 4, nps: 9 })).toThrow(/allaqachon/);
+    expect(() => D.moderateFeedback(s, { id: f.id, decision: 'published', userId: 'u-cur' })).toThrow(/huquqi/);
+    s = D.moderateFeedback(s, { id: f.id, decision: 'published', userId: 'u-lda' });
+    const st = D.courseFeedbackStats(s, 'CRS-LDR-05');
+    expect(st).toMatchObject({ n: 1, nps: 100, satisfaction: 4 });
+    expect(D.courseFeedbackStats(s, 'CRS-ON-CORP').nps).toBe(0); // 10, 8, 6 → (1 − 1) / 3
+  });
+
+  it('So‘rovnomalar faqat filial kesimida; javob ulushi past filiallarga eslatma bir marta', () => {
+    let s = createSeed();
+    expect(D.surveyBranch(s, 'b-serg').rate).toBe(25);
+    expect(D.CHECKLIST_ITEMS).toHaveLength(8);
+    expect(s.onboardings.every((o) => o.survey === undefined)).toBe(true);
+    s = D.remindLowResponse(s);
+    expect(s.notifications.filter((n) => n.key.startsWith('svrate:'))).toHaveLength(2); // Sergeli 25%, Samarqand 33%
+    expect(() => D.remindLowResponse(s)).toThrow(/yo‘q/);
+  });
+
+  it('Offboarding: ketish turiga qarab so‘rovnoma; haydalish faqat ikki sabab bilan', () => {
+    const s = createSeed();
+    const z = D.getEmployee(s, 'e-ziyoda');
+    expect(D.exitPlan(s, z, { exitType: 'self', leftAt: '2026-11-07' }).survey).toBe('Fail Case 30-day');
+    const old = D.getEmployee(s, 'e-farrux');
+    expect(D.exitPlan(s, old, { exitType: 'fired', fireReason: 'skills', leftAt: '2026-11-10' }).survey).toMatch(/haydalgan/);
+    expect(D.exitPlan(s, old, { exitType: 'fired', fireReason: 'boshqa', leftAt: '2026-11-10' })).toMatchObject({ type: 'self' });
+    expect(D.exitPlan(s, old, { exitType: 'returns', leftAt: '2026-11-10' }).survey).toBeNull();
+    expect(D.exitPlan(s, old, { exitType: 'self', leftAt: '2026-09-01' })).toMatchObject({ survey: null, late: true });
+    const s2 = D.processHrInbox(s);
+    expect(D.getEmployee(s2, 'e-ziyoda').exit).toMatchObject({ type: 'self', survey: 'Fail Case 30-day' });
   });
 });

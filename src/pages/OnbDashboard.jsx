@@ -38,10 +38,10 @@ function Scatter({ pts, metric }) {
   const ticks = []; for (let t = yMin; t <= yMax; t += 5) ticks.push(t);
   return (
     <div className="scatter">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Moslashuv bahosi va 2-oy KPI">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Onboarding bahosi va 2-oy KPI">
         {ticks.map((t) => <g key={t}><line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} className="grid" /><text x={pad.l - 6} y={y(t) + 4} className="ax" textAnchor="end">{t}%</text></g>)}
         {[1, 2, 3, 4, 5].map((t) => <text key={t} x={x(t)} y={H - pad.b + 16} className="ax" textAnchor="middle">{t}</text>)}
-        <text x={(W + pad.l) / 2} y={H - 4} className="ax" textAnchor="middle">30 kunlik moslashuv bahosi (1–5)</text>
+        <text x={(W + pad.l) / 2} y={H - 4} className="ax" textAnchor="middle">Onboarding bahosi (1–5)</text>
         {pts.map((p, i) => (
           <circle key={p.row.id} cx={x(p.x)} cy={y(p.y)} r={hov === i ? 7 : 5} fill={C1} stroke="#fff" strokeWidth="2" onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)} style={{ cursor: 'pointer' }} />
         ))}
@@ -53,7 +53,7 @@ function Scatter({ pts, metric }) {
 
 export default function OnbDashboard({ user }) {
   const s = useAppState();
-  const scope = user.role === 'branch' ? new Set(user.branchIds) : null;
+  const scope = D.scopeBranches(s, user);
   const [f, setF] = useState({ branch: '', position: '', source: '', from: '', to: '' });
   const [dim, setDim] = useState('mentor');
   const [metric, setMetric] = useState('retention');
@@ -62,7 +62,12 @@ export default function OnbDashboard({ user }) {
   const r30 = A.retention(rows, s.today, 30);
   const r60 = A.retention(rows, s.today, 60);
   const coh = A.cohorts(rows, s.today);
-  const leave = A.leaveStages(rows);
+  const leave = A.leaveStages(rows, s.today);
+  const proc = A.processByBranch(s, scope).filter((r) => !f.branch || r.branchId === f.branch);
+  const tot = A.processTotals(proc);
+  const load = A.mentorLoad(s, scope);
+  const dq = A.dataQuality(s, scope);
+
   const active = (s.onboardings || []).filter((o) => o.status === 'active' && (!scope || scope.has(D.getEmployee(s, o.employeeId).branchId))).filter((o) => {
     const e = D.getEmployee(s, o.employeeId);
     return (!f.branch || e.branchId === f.branch) && (!f.position || e.position === f.position) && (!f.source || o.source === f.source);
@@ -71,6 +76,7 @@ export default function OnbDashboard({ user }) {
   const mast = A.masteryStats(rows);
   const teachers = rows.filter((r) => r.position === 'GE');
   const cor = A.correlation(teachers, metric);
+  const corOk = cor.n >= A.CORR_MIN_N;
   const best = [...cor.parts].filter((p) => p.r !== null).sort((a, b) => b.r - a.r);
   const prod = A.productivity(rows);
   const dimRows = A.breakdown(dim === 'mentor' ? teachers : rows, s.today, dim === 'mentor' ? 'mentor' : 'branchId');
@@ -84,7 +90,7 @@ export default function OnbDashboard({ user }) {
       <div className="page-head">
         <div>
           <h1>Onboarding dashboard</h1>
-          <p>Yangi xodimlar ishda qolyaptimi, moslashuv qanday ketyapti, kim xavf ostida va 30 kunlik baho keyingi natijani bashorat qiladimi.</p>
+          <p>Yangi xodimlar ishda qolyaptimi, moslashuv qanday ketyapti, kim xavf ostida va onboarding bahosi keyingi natijani bashorat qiladimi.</p>
           <p className="small"><Pill tone="warn">Demo ma’lumot</Pill> <span className="muted">{histN} ta sun’iy tarixiy yozuv (may–oktabr 2026) + {rows.length - histN} ta jonli moslashuv. Ishchi tizimda Jobster, Edu va RegUP’dan yig‘iladi.</span></p>
         </div>
       </div>
@@ -103,14 +109,16 @@ export default function OnbDashboard({ user }) {
         <Stat k="2 oylik retention" v={P(r60.pct)} s={`${r60.kept} / ${r60.n} xodim 60-kunda ishlayapti`} icon="users" tone={r60.pct !== null && r60.pct < 70 ? 'bad' : ''} />
         <Stat k="Hozir moslashuvda" v={active.length} s={`${stCount.find(([k]) => k === 'ontrack')[1]} tasi reja bo‘yicha · ${risk.length} tasi xavf guruhida`} icon="route" tone={risk.length ? 'warn' : ''} />
         <Stat k="Kurslarni muddatida yakunlash" v={P(mast.onTime)} s={`birinchi urinishda test: ${P(mast.firstPass)}`} icon="cards" />
-        <Stat k="O‘rtacha moslashuv bahosi" v={N1(completed.length ? completed.reduce((a, r) => a + r.score, 0) / completed.length : null)} s={`${completed.length} ta yakunlangan · badge ${P(100 * completed.filter((r) => r.badge).length / (completed.length || 1))}`} icon="check" />
-        <Stat k="Baho ↔ 2-oy KPI (ustozlar)" v={`r = ${R2(cor.r)}`} s={`${A.rWord(cor.r)} bog‘liqlik · ${cor.n} ustoz`} icon="trend" />
+        <Stat k="O‘rtacha onboarding bahosi" v={N1(completed.length ? completed.reduce((a, r) => a + r.score, 0) / completed.length : null)} s={`${completed.length} ta yakunlangan · badge ${P(100 * completed.filter((r) => r.badge).length / (completed.length || 1))}`} icon="check" />
+        <Stat k="30 kun ichida ketganlar" v={P(leave.early.pct)} s={`${leave.early.n} / ${leave.early.of} xodim · 30 kuni to‘lganlardan`} icon="trend" tone={leave.early.pct !== null && leave.early.pct > 20 ? 'bad' : ''} />
+        <Stat k="Standartlar bajarilishi" v={P(tot.checklist)} s={`8 bandli nazorat ro‘yxati · javob ulushi ${P(tot.rate)}`} icon="check" tone={tot.checklist !== null && tot.checklist < 80 ? 'warn' : ''} />
+        <Stat k="eNPS (D30, D60)" v={tot.enps === null ? '—' : Math.round(tot.enps)} s="tavsiya qilish, −100…+100 · anonim" icon="users" />
       </div>
 
       <div className="grid g2">
-        <Panel title={<div><h2>Retention: 1 oy va 2 oy</h2><div className="muted small">Ishga kirgan oy bo‘yicha: 30 va 60 kun o‘tganda nechasi ishlayapti</div></div>} actions={<Legend items={[[C1, '30-kun'], [C2, '60-kun']]} />}>
+        <Panel title={<div><h2>Kohorta bo‘yicha retention: 30, 60, 90 kun</h2><div className="muted small">Ishga kirgan oy bo‘yicha: 30, 60 va 90 kun o‘tganda nechasi ishlayapti</div></div>} actions={<Legend items={[[C1, '30-kun'], [C2, '60-kun']]} />}>
           <table className="small">
-            <thead><tr><th>Ishga kirgan oy</th><th className="num">Kirdi</th><th style={{ width: '58%' }}>Ishda qolganlar</th></tr></thead>
+            <thead><tr><th>Ishga kirgan oy</th><th className="num">Kirdi</th><th style={{ width: '58%' }}>Ishda qolganlar</th><th className="num">90-kun</th></tr></thead>
             <tbody>{coh.map((c) => (
               <tr key={c.month}>
                 <td>{D.monthName(c.month)}</td>
@@ -120,6 +128,7 @@ export default function OnbDashboard({ user }) {
                   <div style={{ height: 4 }} />
                   {c.r60.n ? <HBar v={c.r60.pct} color={C2} label={`${P(c.r60.pct)} (${c.r60.kept}/${c.r60.n})`} /> : <span className="muted">60 kun hali to‘lmagan</span>}
                 </td>
+                <td className="num">{c.r90.n ? <>{P(c.r90.pct)} <span className="muted">{c.r90.kept}/{c.r90.n}</span></> : <span className="muted">—</span>}</td>
               </tr>
             ))}</tbody>
           </table>
@@ -129,7 +138,7 @@ export default function OnbDashboard({ user }) {
           <div className="stack">
             {leave.stages.map((x) => <div key={x.key}><div className="small">{x.label}</div><HBar v={x.n} max={Math.max(1, ...leave.stages.map((y) => y.n))} label={`${x.n} ta`} /></div>)}
             <div className="small"><b>Ketish sabablari (Edu):</b> {leave.reasons.map(([r, n]) => `${r} — ${n}`).join(' · ') || '—'}</div>
-            {leave.d8Left !== null && <div className="callout small">Ketganlarning D8 so‘rovnomasi o‘rtacha <b>{N1(leave.d8Left)}</b>, qolganlarniki <b>{N1(leave.d8Stay)}</b>. Past D8 — erta ogohlantirish belgisi, shuning uchun xavf guruhiga kiritilgan.</div>}
+            <div className="callout small"><b>30 kun ichida ketganlar:</b> {leave.early.n} ta ({P(leave.early.pct)}). Sabablari: {leave.early.reasons.map(([r, n]) => `${r} — ${n}`).join(' · ') || '—'}. Ularga Jobster orqali Fail Case so‘rovnomasi avtomatik boradi.</div>
           </div>
         </Panel>
       </div>
@@ -152,7 +161,7 @@ export default function OnbDashboard({ user }) {
           ) : <Empty>Moslashuvda xodim yo‘q.</Empty>}
         </Panel>
 
-        <Panel title={<div><h2>Xavf guruhi — oldindan ogohlantirish</h2><div className="muted small">Past D8 so‘rovnomasi, ortda qolish, boshlamaslik, kech kiritilish, kuzatuv yo‘qligi</div></div>}>
+        <Panel title={<div><h2>Xavf guruhi — oldindan ogohlantirish</h2><div className="muted small">Ortda qolish, boshlamaslik, kech kiritilish, kuzatuv yo‘qligi. So‘rovnomalar anonim, shuning uchun bu yerda ishlatilmaydi.</div></div>}>
           {risk.length ? <div className="grid g2">{risk.map(({ ob, emp, p, reasons }) => {
             const sent = (ob.riskFlags || []).some((x) => x.at === s.today);
             const mentor = emp.supervisorId ? D.getEmployee(s, emp.supervisorId)?.name : null;
@@ -165,6 +174,39 @@ export default function OnbDashboard({ user }) {
               </div>
             );
           })}</div> : <Empty icon="check">Xavf belgisi bor xodim yo‘q.</Empty>}
+        </Panel>
+      </div>
+
+      <Panel title={<div><h2>Onboarding jarayoni filiallar kesimida</h2><div className="muted small">Anonim so‘rovnomalar (Google Forms → Sheets) va Jobster/EduTizim jamlanmasi · {D.monthName(s.surveyStats.period)} · DEMO raqamlar</div></div>}
+        actions={!scope && <button className="btn sm" disabled={!tot.low} onClick={() => run(D.remindLowResponse, { actor: user.name }, 'Filial rahbarlariga eslatma yuborildi')}>Javob ulushi past filiallarga eslatma ({tot.low})</button>}>
+        <div className="grid g4">
+          <div><div className="small muted">Ma’lumot 3 kun ichida keldi</div><div className="big-num">{P(tot.dataIn3)}</div></div>
+          <div><div className="small muted">Jobster’da o‘z vaqtida tasdiqlandi</div><div className="big-num">{P(tot.jobsterOnTime)}</div></div>
+          <div><div className="small muted">So‘rovnomaga javob ulushi</div><div className="big-num">{P(tot.rate)}</div><div className="small muted">maqsad ≥ {D.SURVEY_MIN_RATE}%</div></div>
+          <div><div className="small muted">Standartlar bajarilishi</div><div className="big-num">{P(tot.checklist)}</div><div className="small muted">maqsad 100%</div></div>
+        </div>
+        <table className="small" style={{ marginTop: 12 }}>
+          <thead><tr><th>Filial</th><th className="num">Yangi xodim</th><th className="num">Javob ulushi</th><th className="num">D8</th><th className="num">D30</th><th className="num">D60</th><th className="num">eNPS</th><th style={{ width: '22%' }}>Standartlar</th></tr></thead>
+          <tbody>{proc.map((r) => <tr key={r.branchId}><td>{D.getBranch(s, r.branchId)?.name}</td><td className="num">{r.hires}</td><td className="num">{r.rate !== null && r.rate < D.SURVEY_MIN_RATE ? <Pill tone="warn">{P(r.rate)}</Pill> : P(r.rate)}</td><td className="num">{N1(r.d8[1])}</td><td className="num">{N1(r.d30[1])}</td><td className="num">{N1(r.d60[1])}</td><td className="num">{r.enps}</td><td><HBar v={r.checklistPct} color={r.checklistPct < 80 ? 'var(--warn)' : 'var(--good)'} /></td></tr>)}</tbody>
+        </table>
+        <h3 className="small" style={{ margin: '14px 0 6px' }}>Nazorat ro‘yxati: har band bo‘yicha «Ha» ulushi</h3>
+        <table className="small"><tbody>{D.CHECKLIST_ITEMS.map(([src, label], i) => <tr key={label}><td><span className="muted">{src}</span> {label}</td><td style={{ width: '34%' }}><HBar v={tot.items[i]} color={tot.items[i] < 80 ? 'var(--warn)' : 'var(--good)'} /></td></tr>)}</tbody></table>
+        <div className="small muted" style={{ marginTop: 6 }}>So‘rovnomalarda xodim ID’si yo‘q: natijalar faqat filial va lavozim bo‘yicha ko‘rsatiladi, alohida xodimga bog‘lanmaydi.</div>
+      </Panel>
+
+      <div className="grid g2">
+        <Panel title={<div><h2>Mentor yuklamasi</h2><div className="muted small">Hozir moslashuvdagi yangi xodimlar, mentor bo‘yicha</div></div>}>
+          {load.length ? <table className="small"><tbody>{load.map(([m, n]) => <tr key={m}><td>{m}</td><td style={{ width: '50%' }}><HBar v={n} max={Math.max(3, ...load.map((x) => x[1]))} label={`${n} ta`} color={m === 'biriktirilmagan' ? 'var(--warn)' : C1} /></td></tr>)}</tbody></table> : <Empty>Moslashuvda xodim yo‘q.</Empty>}
+          <div className="small muted" style={{ marginTop: 6 }}>Mentorlar natijasi pastdagi «Mentorlar kesimida» jadvalida.</div>
+        </Panel>
+        <Panel title={<div><h2>Ma’lumot sifati</h2><div className="muted small">Kech yoki noto‘g‘ri ma’lumot boshqa ko‘rsatkichlarni buzadi</div></div>}>
+          <table className="small"><tbody>
+            <tr><td>EduTizim’ga kech kiritilgan (≥ {s.onboardingConfig.lateDays} kun)</td><td className="num"><b>{dq.late}</b> / {dq.lateOf}</td></tr>
+            <tr><td>Dublikat akkauntlar</td><td className="num"><b>{dq.dups}</b></td></tr>
+            <tr><td>1 oydan kech arxivlangan</td><td className="num"><b>{dq.lateArchive}</b></td></tr>
+            <tr><td>Reboarding — qaytib kelganlar</td><td className="num"><b>{dq.reboarding}</b></td></tr>
+            <tr><td>CEO/HRD uchrashuvida qatnashgan (30 kuni to‘lganlardan)</td><td className="num"><b>{dq.ceo}</b> / {dq.ceoOf}</td></tr>
+          </tbody></table>
         </Panel>
       </div>
 
@@ -182,20 +224,20 @@ export default function OnbDashboard({ user }) {
         {worstCourse && worstCourse.onTime < 50 && <div className="callout warn small" style={{ marginTop: 10 }}>«{D.getCourse(s, worstCourse.courseId)?.title}» kursini muddatida faqat {P(worstCourse.onTime)} yakunlayapti. Kurs hajmini yoki 30 kunlik muddatni qayta ko‘rib chiqish kerak.</div>}
       </Panel>
 
-      <Panel title={<div><h2>Moslashuv bahosi va 2-oy KPI (ustozlar)</h2><div className="muted small">Har nuqta — bitta ustoz. Bog‘liqlik bor degani sabab bor degani emas.</div></div>} actions={
+      <Panel title={<div><h2>Onboarding bahosi va 2-oy KPI (ustozlar)</h2><div className="muted small">Har nuqta — bitta ustoz. Bog‘liqlik bor degani sabab bor degani emas.</div></div>} actions={
         <select className="i compact" value={metric} onChange={(e) => setMetric(e.target.value)}><option value="retention">2-oy o‘quvchi retentioni</option><option value="conversion">2-oy 1-oy konversiyasi</option></select>}>
         <div className="grid g2">
           {cor.pts.length ? <Scatter pts={cor.pts} metric={metric} /> : <Empty>Ma’lumot yetarli emas.</Empty>}
           <div className="stack">
             <div className="row" style={{ gap: 12, alignItems: 'baseline' }}><div className="big-num">r = {R2(cor.r)}</div><span className="small">{A.rWord(cor.r)} bog‘liqlik · {cor.n} ustoz</span></div>
-            {cor.n < 20 && <div className="small muted">Kuzatuv soni kam ({cor.n}) — natija taxminiy, har oy aniqlashadi.</div>}
+            {!corOk && <div className="callout warn small">Xulosa uchun kamida {A.CORR_MIN_N} ta xodim kerak, hozir {cor.n} ta. Raqamlar faqat yo‘nalish ko‘rsatadi, og‘irliklar shunga qarab o‘zgartirilmaydi.</div>}
             <table className="small"><tbody>
               <tr><td>Ball ≥ 4 bo‘lgan ustozlar ({cor.hi.n})</td><td className="num"><b>{N1(cor.hi.kpi)}%</b></td></tr>
               <tr><td>Ball &lt; 3,5 bo‘lgan ustozlar ({cor.lo.n})</td><td className="num"><b>{N1(cor.lo.kpi)}%</b></td></tr>
             </tbody></table>
             <h3 className="small" style={{ margin: '6px 0 0' }}>Metodologiyani tekshirish: qaysi qism KPI’ni yaxshiroq bashorat qiladi</h3>
             <table className="small"><tbody>{cor.parts.map((p) => <tr key={p.key}><td>{p.label}</td><td style={{ width: '45%' }}><HBar v={p.r === null ? 0 : Math.max(0, p.r) * 100} label={`r = ${R2(p.r)}`} /></td></tr>)}</tbody></table>
-            {best.length > 1 && <div className="callout small">Eng kuchli bashoratchi — <b>{best[0].label.toLowerCase()}</b> (r = {R2(best[0].r)}), eng kuchsizi — <b>{best.at(-1).label.toLowerCase()}</b> (r = {R2(best.at(-1).r)}). Taklif: og‘irlikni kuchli qismga oshirish (hozir hammasi {s.onboardingConfig.weights.obs}%) — «Moslashuv» sahifasidagi metodologiya blokida.</div>}
+            {corOk && best.length > 1 && <div className="callout small">Eng kuchli bashoratchi — <b>{best[0].label.toLowerCase()}</b> (r = {R2(best[0].r)}), eng kuchsizi — <b>{best.at(-1).label.toLowerCase()}</b> (r = {R2(best.at(-1).r)}). Taklif: og‘irlikni kuchli qismga oshirish (hozir hammasi {s.onboardingConfig.weights.obs}%) — «Moslashuv» sahifasidagi metodologiya blokida.</div>}
           </div>
         </div>
       </Panel>
@@ -219,7 +261,7 @@ export default function OnbDashboard({ user }) {
             </tbody></table>
             <div className="small muted" style={{ marginTop: 4 }}>{srcRows.map((b) => `${SRC[b.key]}: ${b.n} ta`).join(' · ')}</div>
           </Panel>
-          <Panel title={<div><h2>Samaradorlikka chiqish vaqti</h2><div className="muted small">Yangi ustoz KPI chegarasini (retention 90%) birinchi marta qaysi oyda bajardi</div></div>}>
+          <Panel title={<div><h2>Ishga tayyor bo‘lish vaqti</h2><div className="muted small">Yangi ustoz KPI chegarasini (retention 90%) birinchi marta qaysi oyda bajardi</div></div>}>
             <div className="cols">{prod.buckets.map((b) => (
               <div key={b.label} className="col"><span className="col-v">{b.n}</span><i style={{ height: `${(100 * b.n) / Math.max(1, ...prod.buckets.map((x) => x.n))}%` }} /><span className="col-l">{b.label}</span></div>
             ))}</div>

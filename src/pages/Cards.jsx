@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAppState, run } from '../state/store.js';
 import { Panel, Pill, Person, Empty, go, fmtDate } from '../ui/common.jsx';
 import { cardDecision, getEmployee, getBranch, openCard, activeModel, roleInfo } from '../core/domain.js';
+import * as D from '../core/domain.js';
 import { fmtPct, isNum } from '../core/calc.js';
 import { STAGE_LABELS } from '../data/models.js';
 import { nextProfile } from '../core/modelKit.js';
@@ -65,6 +66,18 @@ const FILTERS = [
   ['all', 'Barchasi', () => true],
 ];
 
+function Announce({ s }) {
+  const [edit, setEdit] = useState(false);
+  const [v, setV] = useState((s.announceConfig?.dates || []).join(', '));
+  return (
+    <p className="small">
+      Rasmiy e’lon yiliga {(s.announceConfig?.dates || []).length} marta ({(s.announceConfig?.dates || []).join(', ')}), keyingisi <b>{fmtDate(D.nextAnnounce(s))}</b>.{' '}
+      {edit ? <span className="row" style={{ display: 'inline-flex', gap: 4 }}><input className="i compact" style={{ width: 130 }} value={v} onChange={(e) => setV(e.target.value)} placeholder="06-30, 12-25" /><button className="btn sm" onClick={() => run(D.setAnnounceDates, { dates: v.split(',') }, 'E’lon sanalari saqlandi') && setEdit(false)}>Saqlash</button></span>
+        : <button className="link-btn small" onClick={() => setEdit(true)}>sanalarni o‘zgartirish</button>}
+    </p>
+  );
+}
+
 export default function Cards() {
   const s = useAppState();
   const [creating, setCreating] = useState(false);
@@ -76,7 +89,8 @@ export default function Cards() {
       <div className="page-head">
         <div>
           <h1>Baholash kartalari</h1>
-          <p>Har bir karta — bitta xodimning bitta darajaga baholanishi. Kartani oching va «Keyingi qadam»ga amal qiling.</p>
+          <p>Har bir karta — bitta xodimning bitta darajaga baholanishi. Yangi xodimga karta rekrutingdan boshlanadi; baholar yil davomida yangilanadi va rasmiy e’longacha «shartli» bo‘ladi.</p>
+          <Announce s={s} />
         </div>
         <button className="btn primary" onClick={() => setCreating(true)}>+ Yangi karta</button>
       </div>
@@ -100,7 +114,7 @@ export default function Cards() {
                   <tr key={c.id} className="clickable" onClick={() => go(`/cards/${c.id}`)}>
                     <td><Person name={e.name} sub={getBranch(s, c.branchId)?.name} /></td>
                     <td style={{ whiteSpace: 'nowrap' }}>{c.profileFrom ? `${c.profileFrom} → ${c.profileTo}` : c.profileTo}<div className="muted small">{model?.name}</div></td>
-                    <td>{STAGE_LABELS[c.stage]}{c.prevCardId && <div className="muted small">qayta baholash</div>}</td>
+                    <td>{STAGE_LABELS[c.stage]}{c.prevCardId && <div className="muted small">qayta baholash</div>}{c.origin === 'onboarding' && <div><Pill tone="brand">onboarding</Pill></div>}{c.stage !== 'published' && <div className="muted small">shartli</div>}</td>
                     <td style={{ whiteSpace: 'nowrap' }}>{fmtDate(c.deadline)} {late && <Pill tone="bad">kechikkan</Pill>}</td>
                     <td className="num">{isNum(d.match.match) ? <b>{fmtPct(d.match.match)}</b> : <span className="muted small">{d.match.counts.scored}/{d.match.counts.total}</span>}</td>
                     <td><Pill tone={d.tone}>{d.label}</Pill></td>

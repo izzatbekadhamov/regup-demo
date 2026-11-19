@@ -5,7 +5,7 @@ import * as D from '../core/domain.js';
 
 function NewMeeting({ user, onDone }) {
   const s = useAppState();
-  const manage = ['super', 'hr'].includes(user.role);
+  const manage = D.can(user, 'onb.meetings') && D.scopeEmployees(s, user) === null;
   const [f, setF] = useState({ title: '', kind: manage ? 'ceo' : 'share', date: D.addDays(s.today, 7), time: '15:00', format: 'online', link: '', place: '' });
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
   return (
@@ -58,7 +58,7 @@ function Invite({ s, m, user }) {
 function MeetingCard({ s, m, user }) {
   const [open, setOpen] = useState(m.kind === 'ceo' && m.date >= s.today);
   const past = m.date <= s.today;
-  const canEdit = ['super', 'hr'].includes(user.role) || m.organizer?.startsWith(user.name);
+  const canEdit = (D.can(user, 'onb.meetings') && D.scopeEmployees(s, user) === null) || m.organizer?.startsWith(user.name);
   return (
     <Panel title={<div><div className="row"><h2>{m.title}</h2>{m.kind === 'ceo' ? <Pill tone="brand">CEO va HRD</Pill> : <Pill tone="teal">bilim almashish</Pill>}{past ? <Pill tone="muted">o‘tgan</Pill> : <Pill tone="good">rejada</Pill>}</div>
       <div className="muted small">{fmtDate(m.date)}, {m.time} · {m.format === 'online' ? <>onlayn · <span className="code">{m.link}</span></> : `oflayn · ${m.place}`} · tashkilotchi: {m.organizer}</div></div>}

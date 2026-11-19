@@ -67,7 +67,7 @@ export default function Dashboard() {
   if (skillClaims) todo.push({ key: 'skills', tone: 'brand', who: `${skillClaims} ta ko‘nikma`, what: 'Xodimlar dalil bilan yuborgan ko‘nikmalarni tasdiqlang', go: '/skills' });
   // Moslashuv (onboarding)
   if (s.hrInbox?.length) todo.push({ key: 'hr-inbox', tone: 'warn', who: `${s.hrInbox.length} ta hodisa`, what: 'Jobster/Edu integratsiya navbati: yangi xodimlar, arxiv va qaytish', go: '/integration' });
-  for (const ob of (s.onboardings || []).filter((o) => o.status === 'active' && (D.onboardingScore(s, o).ready || D.onbDay(s, o) >= D.ONB_DAYS))) todo.push({ key: `onb-${ob.id}`, tone: 'brand', who: getEmployee(s, ob.employeeId).name, what: 'Moslashuv yakunlandi — 30 kunlik bahoni tasdiqlang (filial rahbari)', go: `/onboarding/${ob.id}` });
+  for (const ob of (s.onboardings || []).filter((o) => o.status === 'active' && (D.onboardingScore(s, o).ready || D.onbDay(s, o) >= D.obDays(s, o)))) todo.push({ key: `onb-${ob.id}`, tone: 'brand', who: getEmployee(s, ob.employeeId).name, what: 'Moslashuv dasturi yakunlandi — onboarding bahosini tasdiqlang (filial rahbari)', go: `/onboarding/${ob.id}` });
   const onbTasks = (s.enrollments || []).filter((e) => D.getCourse(s, e.courseId)?.onboarding && e.status !== 'archived').reduce((a, e) => a + Object.values(e.progress).filter((p) => p.status === 'pending').length, 0);
   if (onbTasks) todo.push({ key: 'onb-tasks', tone: 'brand', who: `${onbTasks} ta topshiriq`, what: 'Moslashuv kursidagi topshiriqni baholang (1–5) — mentor yoki kurator', go: '/tasks' });
   const rem = D.dueReminders(s).filter((r) => !s.notifications.some((n) => n.key.startsWith(r.key)));

@@ -590,3 +590,13 @@ ol.crit { margin: 6px 0 2px 18px; padding: 0; color: var(--ink-2); display: grid
 @media (max-width: 700px) { .filter-row .i.compact { flex: 1 1 140px; } .cols { gap: 8px; } }
 .dlg-back { position: fixed; inset: 0; background: rgba(14, 23, 51, 0.45); display: grid; place-items: center; z-index: 100; padding: 16px; }
 .dlg { width: min(440px, 100%); }
+
+/* Jamoa a'zolari: shaxsga beriladigan huquqlar */
+.team-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; }
+.team-row:hover { background: var(--line-2); }
+.team-row.on { background: var(--brand-soft); }
+.right-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.right-row.on { border-color: var(--brand); background: var(--brand-soft); }
+.right-row input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--brand); }
+.link-btn { background: none; border: 0; color: var(--brand); cursor: pointer; padding: 0; font-weight: 600; }
+.caps { text-transform: uppercase; letter-spacing: 0.04em; font-size: 13px; color: var(--ink-3); }

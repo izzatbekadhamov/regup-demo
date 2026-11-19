@@ -17,7 +17,7 @@ function Payload({ s, ev }) {
     );
   }
   const emp = D.getEmployee(s, p.employeeId);
-  if (ev.type === 'archive') return <div className="small"><b>{emp?.name}</b> · ketgan {fmtDate(p.leftAt)} · {p.reason}<div className="muted">Edu kutish muddati: {p.eduWaitDays} kun</div></div>;
+  if (ev.type === 'archive') { const plan = emp && D.exitPlan(s, emp, p); return <div className="small"><b>{emp?.name}</b> · ketgan {fmtDate(p.leftAt)} · {p.reason}<div className="muted">Ketish turi: {D.EXIT_TYPES[plan?.type]}{plan?.survey ? ` · so‘rovnoma «${plan.survey}»` : ' · so‘rovnoma yuborilmaydi'} · Edu kutish muddati: {p.eduWaitDays} kun</div></div>; }
   return <div className="small"><b>{emp?.name}</b> · qayta ishga kirdi {fmtDate(p.startedAt)} · {D.getBranch(s, p.branchId)?.name}<div className="muted">Avval arxivlangan {fmtDate(emp?.archivedAt)} — {emp?.archiveReason}</div></div>;
 }
 
@@ -34,7 +34,7 @@ export default function Integration() {
       </div>
       <div className="flow-strip">{FLOW.map((x, i) => <span key={x} className={i >= 3 ? 'on' : ''}>{x}</span>)}</div>
       <div className="callout small">
-        <b>Qoidalar:</b> kartochka ID, ism-familiya, telefon, lavozim va filial bilan ochiladi. «Markaz admini» bo‘limiga kartochka ochilmaydi, chunki korporativ raqam bir nechta xodimga berilishi mumkin. Ish boshlaganidan ≥ {s.onboardingConfig.lateDays} kun keyin kiritilgan xodim belgilanadi va HR hamda filial rahbariga xabar boradi. Ketgan xodim RegUP’da darhol arxivlanadi (Edu esa 15–30 kun kutadi). Ma’lumotlari o‘chirilmaydi.
+        <b>Qoidalar:</b> kartochka ID, ism-familiya, telefon, lavozim va filial bilan ochiladi. «Markaz admini»: EduTizim’dagi markaz akkaunti keyingi xodimga o‘tadi, shuning uchun u belgilanadi va RegUP akkaunti xodimning shaxsiy raqamiga alohida ochiladi. Kompetensiya modeli bor lavozimda birinchi kundan baholash kartasi ochiladi (rekruting baholari shartli). Ketishda: 30 kun ichida — Fail Case, keyin — «o‘z xohishi» yoki «haydalgan» exit-intervyusi; haydalish faqat ikki sabab bilan; «Qaytadi» va dublikatga so‘rovnoma yuborilmaydi; 1 oydan kech kelgan arxivda xodimga yozilmaydi. Ish boshlaganidan ≥ {s.onboardingConfig.lateDays} kun keyin kiritilgan xodim belgilanadi va HR hamda filial rahbariga xabar boradi. Ketgan xodim RegUP’da darhol arxivlanadi (Edu esa 15–30 kun kutadi). Ma’lumotlari o‘chirilmaydi.
       </div>
       <Panel tight title={<div className="row"><h2>Kutilayotgan hodisalar</h2><span className="muted small">{s.hrInbox.length} ta</span></div>}>
         {s.hrInbox.length ? (

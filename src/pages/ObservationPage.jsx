@@ -34,7 +34,7 @@ function Checklist({ s, emp, user, onDone }) {
       <label className="f" style={{ marginTop: 8 }}>Xulosa va keyingi qadam<textarea className="i" placeholder="Kuzatilgan dalil, kuchli tomon, 1–2 aniq keyingi qadam" value={o.note} onChange={set('note')} /></label>
       <div className="row" style={{ marginTop: 8 }}>
         <button className="btn primary" disabled={rated < 3 || !o.note.trim()} onClick={() => run(D.addOnbObservation, { employeeId: emp.id, methodist: user.role === 'methodist' ? user.name : 'Metodist', ...o, ratings: r, userId: user.id }, 'Kuzatuv saqlandi') && onDone()}>Saqlash ({rated}/{comps.length})</button>
-        <span className="small muted">Kamida 3 band. Ballar 30 kunlik bahoga kiradi; filial rahbari tasdiqlagach kompetensiya profiliga ish dalili sifatida yoziladi.</span>
+        <span className="small muted">Kamida 3 band. Ballar onboarding bahosiga kiradi; filial rahbari tasdiqlagach kompetensiya profiliga ish dalili sifatida yoziladi.</span>
       </div>
     </Panel>
   );
@@ -53,7 +53,7 @@ export default function ObservationPage({ user, focus }) {
       <div className="page-head">
         <div>
           <h1>Dars kuzatuvi (observation)</h1>
-          <p>Metodist moslashuvdagi har bir ustozni 30 kun ichida kamida 2 marta kuzatadi. Checklist GE modelining kompetensiya mezonlariga tayanadi (har ballning ta’rifi ko‘rinadi). Ballar 30 kunlik bahoga kiradi, yakuniy qarorni filial rahbari tasdiqlaydi.</p>
+          <p>Metodist moslashuvdagi har bir ustozni moslashuv dasturi davomida kamida 2 marta kuzatadi. Checklist GE modelining kompetensiya mezonlariga tayanadi (har ballning ta’rifi ko‘rinadi). Ballar 30 kunlik bahoga kiradi, yakuniy qarorni filial rahbari tasdiqlaydi.</p>
         </div>
       </div>
       {emp && <Checklist key={emp.id} s={s} emp={emp} user={user} onDone={() => setOpen(null)} />}
@@ -67,7 +67,7 @@ export default function ObservationPage({ user, focus }) {
               return (
                 <tr key={ob.id}>
                   <td><Person name={e.name} sub={`${e.currentLevel} · ${D.getBranch(s, e.branchId)?.name}`} /></td>
-                  <td className="small">{day} / {D.ONB_DAYS}{list.length < need && day >= 20 && <div><Pill tone="warn">muddat yaqin</Pill></div>}</td>
+                  <td className="small">{day} / {D.obDays(s, ob)}{list.length < need && day >= 20 && <div><Pill tone="warn">muddat yaqin</Pill></div>}</td>
                   <td className="small">{list.length} / {need}{list.map((o) => <div key={o.id} className="muted">{fmtDate(o.date)} · o‘rtacha {String(Math.round(D.obsMean(o) * 10) / 10).replace('.', ',')}</div>)}</td>
                   <td className="num"><button className="btn sm" onClick={() => setOpen(e.id)}>{list.length < need ? 'Kuzatuv kiritish' : 'Yana kuzatuv'}</button></td>
                 </tr>

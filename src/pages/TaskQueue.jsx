@@ -54,7 +54,7 @@ export default function TaskQueue({ user }) {
         <div>
           <h1>Topshiriqlarni tekshirish</h1>
           <p>Bitta topshiriqni bitta mas’ul tekshiradi: kursga kurator biriktirilgan bo‘lsa — kurator, aks holda xodimning mentori. Moslashuv kursida 1–5 baho qo‘yiladi (30 kunlik bahoga kiradi), boshqa kurslarda kompetensiya darajasi.</p>
-          {!['super', 'hr'].includes(user.role) && <p className="small muted">{user.title}: faqat siz tekshiradigan topshiriqlar.</p>}
+          {!D.can(user, 'courses.manage') && <p className="small muted">{user.title}: faqat siz tekshiradigan topshiriqlar.</p>}
         </div>
       </div>
       <Panel tight title={<div className="row"><h2>Tekshiruv navbati</h2><span className="muted small">{items.length} ta</span></div>}>

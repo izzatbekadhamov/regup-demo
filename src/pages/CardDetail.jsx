@@ -426,6 +426,14 @@ export default function CardDetail({ id }) {
                 <span>Baholovchi: {card.assessors?.evaluator}</span>
                 <span className="muted" title={`Model versiyasi ${model.id}, formula ${model.formulaVersion}, reviziya r${card.revision}`}>Karta {card.id}</span>
               </div>
+              {card.stage !== 'published' && (
+                <div className="callout small" style={{ marginTop: 8 }}>
+                  <Pill tone="warn">Shartli</Pill>{' '}
+                  {card.origin === 'onboarding'
+                    ? <>Onboarding kartasi: rekrutingdan boshlangan, baholar hali e’lon qilinmagan. Birinchi lavozim darajasi adaptatsiya oxirida — <b>{fmtDate(card.deadline)}</b> gacha to‘liq tasdiqlanadi va e’lon qilinadi.</>
+                    : <>Baholar yil davomida kompetensiya bo‘yicha birma-bir yangilanadi. Lavozim va maoshga faqat rasmiy e’londan keyin ta’sir qiladi — keyingi e’lon <b>{fmtDate(D.nextAnnounce(s))}</b>.</>}
+                </div>
+              )}
             </div>
           </div>
           <Pill tone={d.tone}>{d.label}</Pill>

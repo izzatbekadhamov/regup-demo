@@ -10,7 +10,7 @@ function TestBlock({ enr, c, p, readOnly }) {
   const passed = (p?.best ?? -1) >= c.passScore;
   return (
     <div className="stack">
-      {p && <div className={`callout small ${passed ? 'good' : 'warn'}`}>Oxirgi natija: {p.last}% · eng yaxshi: {p.best}% · {p.attempts} urinish. {passed ? 'Test topshirildi.' : `O‘tish uchun ${c.passScore}% kerak — qayta urinib ko‘ring.`}</div>}
+      {p && <div className={`callout small ${passed ? 'good' : 'warn'}`}>Oxirgi natija: {p.last}% · eng yaxshi: {p.best}% ({D.testBall(p.best)} ball) · {p.attempts} urinish. {passed ? 'Test topshirildi.' : `O‘tish uchun ${c.passScore}% kerak — qayta urinib ko‘ring.`}{typeof p.found === 'number' && passed && <> Savollar indikatorlarga bog‘langan: <b>{p.found ? `${p.found}-daraja indikatorlari topildi` : 'birinchi daraja indikatorlari ham topilmadi'}</b>.</>}</div>}
       {!passed && !readOnly && (
         <>
           {c.questions.map((qq, i) => (
@@ -28,6 +28,33 @@ function TestBlock({ enr, c, p, readOnly }) {
   );
 }
 
+function LessonRate({ enr, c }) {
+  if (enr.lessonRated?.[c.id]) return <div className="small muted">✓ Dars baholandi — rahmat. Baholar anonim.</div>;
+  return (
+    <div className="row small" style={{ gap: 6 }}>
+      <span>Dars bahosi (ixtiyoriy):</span>
+      {[1, 2, 3, 4, 5].map((v) => <button key={v} className="btn sm" onClick={() => run(D.rateLesson, { enrollmentId: enr.id, componentId: c.id, value: v }, 'Rahmat!')}>{v}</button>)}
+      <span className="muted">anonim</span>
+    </div>
+  );
+}
+
+function CourseFeedback({ enr }) {
+  const [f, setF] = useState({ satisfaction: 0, nps: -1, comment: '', showName: false });
+  if (enr.feedbackGiven) return <div className="callout good small">Fikringiz uchun rahmat. Baholar anonim hisoblanadi.</div>;
+  return (
+    <Panel title="Kurs haqida fikringiz">
+      <div className="stack">
+        <div className="small"><b>Kursdan qoniqish bahosi</b> (1–5)<div className="row" style={{ gap: 4, marginTop: 4 }}>{[1, 2, 3, 4, 5].map((v) => <button key={v} className={`btn sm ${f.satisfaction === v ? 'primary' : ''}`} onClick={() => setF({ ...f, satisfaction: v })}>{v}</button>)}</div></div>
+        <div className="small"><b>Bu kursni hamkasbingizga tavsiya qilasizmi?</b> (0–10)<div className="row" style={{ gap: 3, marginTop: 4, flexWrap: 'wrap' }}>{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v) => <button key={v} className={`btn sm ${f.nps === v ? 'primary' : ''}`} onClick={() => setF({ ...f, nps: v })}>{v}</button>)}</div></div>
+        <label className="f small">O‘quv dastur haqida fikringiz (ixtiyoriy)<textarea className="i" value={f.comment} onChange={(e) => setF({ ...f, comment: e.target.value })} placeholder="Nima foydali bo‘ldi, nimani yaxshilash kerak" /></label>
+        {f.comment.trim() && <label className="chk small"><input type="checkbox" checked={f.showName} onChange={(e) => setF({ ...f, showName: e.target.checked })} /> Fikrim e’lon qilinsa, ismim ko‘rsatilsin</label>}
+        <div className="row"><button className="btn primary" disabled={!f.satisfaction || f.nps < 0} onClick={() => run(D.submitCourseFeedback, { enrollmentId: enr.id, ...f }, 'Fikr yuborildi')}>Yuborish</button><span className="small muted">Baholar anonim: faqat filial va lavozim kesimida hisoblanadi.</span></div>
+      </div>
+    </Panel>
+  );
+}
+
 function TaskBlock({ enr, c, p, readOnly }) {
   const [f, setF] = useState({ text: '', link: '', origin: 'self', assignedBy: '' });
   const status = p?.status;
@@ -36,7 +63,7 @@ function TaskBlock({ enr, c, p, readOnly }) {
       <div className="small"><b>Vazifa:</b> {c.description}</div>
       <div className="small ink2"><b>Mentor nimaga qarab baholaydi:</b> {c.criteria}</div>
       {status === 'pending' && <div className="callout warn small">Natijangiz {fmtDate(p.submittedAt)} da yuborildi — mentor xulosasi kutilmoqda. {p.origin === 'manager' ? `Topshiriq bergan: ${p.assignedBy}.` : 'O‘z tashabbusingiz bilan.'}</div>}
-      {status === 'accepted' && <div className="callout good small"><b>Qabul qilindi — {p.mentor.grade ? `${p.mentor.grade} / 5 ball` : `${p.mentor.level}-daraja`}.</b> {p.mentor.note} <span className="muted">({p.mentor.by}, {fmtDate(p.mentor.at)})</span></div>}
+      {status === 'accepted' && <div className="callout good small"><b>Qabul qilindi — {[p.mentor.grade ? `kurs bahosi ${p.mentor.grade} / 5` : null, p.mentor.level ? `${p.mentor.level}-daraja indikatorlari topildi` : null].filter(Boolean).join(', ')}.</b> {p.mentor.note} <span className="muted">({p.mentor.by}, {fmtDate(p.mentor.at)})</span></div>}
       {status === 'returned' && <div className="callout bad small"><b>Qaytarildi:</b> {p.mentor.note} <span className="muted">({p.mentor.by})</span></div>}
       {!readOnly && status !== 'pending' && status !== 'accepted' && (
         <div className="panel add-box">
@@ -67,15 +94,18 @@ export default function Learn({ id, emp }) {
   const done = course.components.filter((x) => D.componentDone(course, enr, x.id)).length;
   const first = course.components.find((x) => !D.componentDone(course, enr, x.id))?.id;
   const cur = open ?? first;
+  const grade = D.courseGrade(course, enr);
+  const minGrade = D.courseMinGrade(course);
+  const published = D.courseFeedbackStats(s, course.id).comments.filter((x) => x.status === 'published');
   return (
     <>
       <section className="panel hero compact-hero">
         <div className="crumbs"><a href="#/learning"><Icon name="back" size={13} /> Kurslarim</a>{enr.pathId && <span>{D.getPath(s, enr.pathId)?.title}</span>}</div>
-        <div className="row" style={{ marginTop: 4 }}><h1>{course.title}</h1>{enr.status === 'completed' ? <Pill tone="good">yakunlangan</Pill> : <Pill tone="brand">{done} / {course.components.length}</Pill>}</div>
+        <div className="row" style={{ marginTop: 4 }}><h1>{course.title}</h1>{enr.status === 'completed' ? <Pill tone="good">yakunlangan</Pill> : <Pill tone="brand">{done} / {course.components.length}</Pill>}{grade !== null && <Pill tone={grade >= minGrade ? 'good' : 'warn'}>Kurs bahosi: {String(grade).replace('.', ',')} / 5</Pill>}</div>
         <p className="ink2">{course.summary}</p>
         <div className="near-bar" style={{ maxWidth: 420 }}><i style={{ width: `${(100 * done) / course.components.length}%` }} /></div>
         {enr.mandatory && enr.status !== 'completed' && (() => { const r = s.kpiRules.find((x) => x.id === enr.mandatory.ruleId); return <div className="callout warn small"><b>Majburiy kurs</b> — {D.monthName(enr.mandatory.month)}: {D.KPI_METRICS[r.metric].label} {enr.mandatory.value.toFixed(1).replace('.', ',')}%, chegara {enr.mandatory.min}%. Muddat: {fmtDate(enr.mandatory.deadline)}. Mas’ulingiz natijani kuzatib boradi.</div>; })()}
-        {enr.onboardingId && enr.status !== 'completed' && <div className="callout small"><b>Moslashuv kursi</b> — muddat {fmtDate(enr.deadline)}. Test va topshiriq 1–5 ballga aylanadi va 30 kunlik bahoga kiradi. Topshiriqni {D.taskReviewer(s, enr).kind === 'curator' ? `kurs kuratori (${D.taskReviewer(s, enr).user.name})` : 'mentoringiz'} tekshiradi.</div>}
+        {enr.onboardingId && enr.status !== 'completed' && <div className="callout small"><b>Moslashuv kursi</b> — muddat {fmtDate(enr.deadline)}. Test va topshiriq 1–5 ballga aylanadi va onboarding bahosiga kiradi. Topshiriqni {D.taskReviewer(s, enr).kind === 'curator' ? `kurs kuratori (${D.taskReviewer(s, enr).user.name})` : 'mentoringiz'} tekshiradi.</div>}
         {locked && <div className="callout warn small">Bu kurs Learning Path’dagi oldingi kurs yakunlangach ochiladi.</div>}
       </section>
       <div className="split">
@@ -97,6 +127,7 @@ export default function Learn({ id, emp }) {
                       <div className="stack">
                         <div className="lesson-stub"><Icon name="cards" size={18} /> Dars materiali (video / matn): «{c.title}»</div>
                         {!ok && !locked && <div><button className="btn primary sm" onClick={() => run(D.completeLesson, { enrollmentId: enr.id, componentId: c.id }, 'Dars o‘qildi')}>O‘qidim — keyingisi</button></div>}
+                        {ok && <LessonRate enr={enr} c={c} />}
                       </div>
                     )}
                     {c.kind === 'test' && <TestBlock enr={enr} c={c} p={p} readOnly={locked} />}
@@ -113,11 +144,15 @@ export default function Learn({ id, emp }) {
               {course.rules.map((r, i) => {
                 const applied = enr.applied?.includes(i);
                 const lvl = D.ruleOutcome(course, enr, r);
+                const cname = lib.find((k) => k.code === r.competency)?.name || r.competency;
                 return (
                   <div key={i} className={`rule-box ${r.context} ${applied ? 'applied' : ''}`}>
-                    <div className="row between"><b>{r.competency} → {applied && lvl !== null ? lvl : r.level}-daraja</b><span className={`pill ${CTX[r.context][1]}`}>{CTX[r.context][0]}</span></div>
-                    <div className="small ink2">{lib.find((k) => k.code === r.competency)?.name}</div>
-                    <div className="small muted">{applied ? '✓ Profilingizga yozildi' : `Shart: ${r.needs.map((n) => course.components.find((x) => x.id === n)?.title).join(' + ')}`}</div>
+                    <div className="row between"><b>{r.competency}: {r.level}-darajagacha</b><span className={`pill ${CTX[r.context][1]}`}>{CTX[r.context][0]}</span></div>
+                    <div className="small ink2">{cname}</div>
+                    {applied ? <div className="small"><b>Kurs bahosi: {grade === null ? '—' : String(grade).replace('.', ',')}.</b> Bu kurs «{cname}» bo‘yicha <b>{lvl}-daraja</b> mezoniga dalil beradi.</div>
+                      : lvl !== null && lvl >= 1 && grade !== null && grade < minGrade ? <div className="small" style={{ color: 'var(--warn)' }}>Kurs bahosi {String(grade).replace('.', ',')} — dalil bo‘lishi uchun kamida {minGrade} kerak.</div>
+                        : lvl === 0 ? <div className="small" style={{ color: 'var(--warn)' }}>Kurs yakunlandi, lekin 1-daraja indikatorlari ham topilmadi.</div>
+                          : <div className="small muted">Shart: {r.needs.map((n) => course.components.find((x) => x.id === n)?.title).join(' + ')}. Topshiriqlarda qaysi daraja indikatorlari topilsa, shu daraja qo‘yiladi (ko‘pi bilan {r.level}). Kurs bahosi kamida {minGrade} bo‘lishi kerak.</div>}
                   </div>
                 );
               })}
@@ -131,10 +166,16 @@ export default function Learn({ id, emp }) {
                   </div>
                 );
               })}
-              {course.onboarding && <p className="small">Bu moslashuv kursi: kompetensiya darajasi bermaydi, natijasi 30 kunlik moslashuv bahosiga kiradi (test foizi → 1–5 ball, topshiriq — mentor/kurator bahosi).</p>}
-              <p className="small muted">Ish dalili darajasini mentor amaliy topshiriq natijasiga qarab belgilaydi (ko‘rsatilgan darajagacha). Lavozimga o‘tish uchun baholash kartasi va panel qarori alohida.</p>
+              {course.onboarding && <p className="small">Bu moslashuv kursi: kompetensiya darajasi bermaydi, natijasi onboarding bahosiga kiradi (test foizi → 1–5 ball, topshiriq — mentor/kurator bahosi).</p>}
+              <p className="small muted"><b>Kurs bahosi</b> — kursni qanchalik yaxshi yakunlaganingiz. <b>Kompetensiya darajasi</b> — topshiriqlarda topilgan indikatorlar; u kurs qaysi darajagacha mo‘ljallanganiga bog‘liq. Shuning uchun 3-daraja kursini 5 ga yakunlash 3-daraja dalilini beradi. Lavozimga o‘tish — baholash kartasi va panel orqali.</p>
             </div>
           </Panel>
+          {enr.status === 'completed' && <CourseFeedback enr={enr} />}
+          {published.length > 0 && (
+            <Panel title="Hamkasblar fikri">
+              <div className="stack">{published.slice(0, 3).map((x) => <div key={x.id} className="small"><div>«{x.comment}»</div><div className="muted">— {x.author || 'Anonim'}, kursdan qoniqish {x.satisfaction} / 5</div></div>)}</div>
+            </Panel>
+          )}
         </div>
       </div>
     </>

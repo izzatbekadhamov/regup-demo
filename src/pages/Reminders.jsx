@@ -17,7 +17,7 @@ const RULES = [
 export default function Reminders({ user }) {
   const s = useAppState();
   const scope = D.scopeEmployees(s, user);
-  const manage = !user || ['super', 'hr'].includes(user.role);
+  const manage = !user || D.can(user, 'onb.reminders');
   const [date, setDate] = useState(s.today);
   const due = D.dueReminders(s, date).filter((r) => !scope || scope.has(r.employeeId));
   const sentKeys = (r) => s.notifications.some((n) => n.key.startsWith(r.key));

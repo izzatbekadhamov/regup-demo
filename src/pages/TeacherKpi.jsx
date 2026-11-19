@@ -188,7 +188,7 @@ function ManualEntry({ s, onDone }) {
 export default function TeacherKpi({ user }) {
   const s = useAppState();
   const scope = D.scopeEmployees(s, user);
-  const manage = !user || ['super', 'hr'].includes(user.role);
+  const manage = !user || D.scopeEmployees(s, user) === null;
   const months = D.kpiMonths(s);
   const [month, setMonth] = useState(null);
   const [sup, setSup] = useState('');
