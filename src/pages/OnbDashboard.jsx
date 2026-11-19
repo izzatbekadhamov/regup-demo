@@ -38,10 +38,10 @@ function Scatter({ pts, metric }) {
   const ticks = []; for (let t = yMin; t <= yMax; t += 5) ticks.push(t);
   return (
     <div className="scatter">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Onboarding bahosi va 2-oy KPI">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Onboarding natijasi va 2-oy KPI">
         {ticks.map((t) => <g key={t}><line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} className="grid" /><text x={pad.l - 6} y={y(t) + 4} className="ax" textAnchor="end">{t}%</text></g>)}
         {[1, 2, 3, 4, 5].map((t) => <text key={t} x={x(t)} y={H - pad.b + 16} className="ax" textAnchor="middle">{t}</text>)}
-        <text x={(W + pad.l) / 2} y={H - 4} className="ax" textAnchor="middle">Onboarding bahosi (1–5)</text>
+        <text x={(W + pad.l) / 2} y={H - 4} className="ax" textAnchor="middle">Onboarding natijasi (1–5)</text>
         {pts.map((p, i) => (
           <circle key={p.row.id} cx={x(p.x)} cy={y(p.y)} r={hov === i ? 7 : 5} fill={C1} stroke="#fff" strokeWidth="2" onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)} style={{ cursor: 'pointer' }} />
         ))}
@@ -85,12 +85,13 @@ export default function OnbDashboard({ user }) {
   const stCount = Object.keys(A.LIVE_STATUS).map((k) => [k, active.filter((a) => a.p.status === k).length]);
   const worstCourse = [...mast.byCourse].sort((a, b) => a.onTime - b.onTime)[0];
   const completed = rows.filter((r) => r.score !== null);
+  const progs = A.programStats(rows);
   return (
     <>
       <div className="page-head">
         <div>
           <h1>Onboarding dashboard</h1>
-          <p>Yangi xodimlar ishda qolyaptimi, moslashuv qanday ketyapti, kim xavf ostida va onboarding bahosi keyingi natijani bashorat qiladimi.</p>
+          <p>Yangi xodimlar ishda qolyaptimi, moslashuv qanday ketyapti, kim xavf ostida va onboarding natijasi keyingi natijani bashorat qiladimi.</p>
           <p className="small"><Pill tone="warn">Demo ma’lumot</Pill> <span className="muted">{histN} ta sun’iy tarixiy yozuv (may–oktabr 2026) + {rows.length - histN} ta jonli moslashuv. Ishchi tizimda Jobster, Edu va RegUP’dan yig‘iladi.</span></p>
         </div>
       </div>
@@ -108,8 +109,8 @@ export default function OnbDashboard({ user }) {
         <Stat k="1 oylik retention" v={P(r30.pct)} s={`${r30.kept} / ${r30.n} xodim 30-kunda ishlayapti`} icon="users" tone={r30.pct !== null && r30.pct < 75 ? 'bad' : ''} />
         <Stat k="2 oylik retention" v={P(r60.pct)} s={`${r60.kept} / ${r60.n} xodim 60-kunda ishlayapti`} icon="users" tone={r60.pct !== null && r60.pct < 70 ? 'bad' : ''} />
         <Stat k="Hozir moslashuvda" v={active.length} s={`${stCount.find(([k]) => k === 'ontrack')[1]} tasi reja bo‘yicha · ${risk.length} tasi xavf guruhida`} icon="route" tone={risk.length ? 'warn' : ''} />
-        <Stat k="Kurslarni muddatida yakunlash" v={P(mast.onTime)} s={`birinchi urinishda test: ${P(mast.firstPass)}`} icon="cards" />
-        <Stat k="O‘rtacha onboarding bahosi" v={N1(completed.length ? completed.reduce((a, r) => a + r.score, 0) / completed.length : null)} s={`${completed.length} ta yakunlangan · badge ${P(100 * completed.filter((r) => r.badge).length / (completed.length || 1))}`} icon="check" />
+        <Stat k="Kurslar bajarilishi" v={P(mast.pct)} s={`o‘rtacha kurs bahosi ${N1(mast.grade)} · muddatida ${P(mast.onTime)}`} icon="cards" />
+        <Stat k="O‘rtacha onboarding natijasi" v={N1(completed.length ? completed.reduce((a, r) => a + r.score, 0) / completed.length : null)} s={`${completed.length} ta yakunlangan · muvaffaqiyatli ${P(100 * completed.filter((r) => r.passed).length / (completed.length || 1))}`} icon="check" />
         <Stat k="30 kun ichida ketganlar" v={P(leave.early.pct)} s={`${leave.early.n} / ${leave.early.of} xodim · 30 kuni to‘lganlardan`} icon="trend" tone={leave.early.pct !== null && leave.early.pct > 20 ? 'bad' : ''} />
         <Stat k="Standartlar bajarilishi" v={P(tot.checklist)} s={`8 bandli nazorat ro‘yxati · javob ulushi ${P(tot.rate)}`} icon="check" tone={tot.checklist !== null && tot.checklist < 80 ? 'warn' : ''} />
         <Stat k="eNPS (D30, D60)" v={tot.enps === null ? '—' : Math.round(tot.enps)} s="tavsiya qilish, −100…+100 · anonim" icon="users" />
@@ -144,7 +145,7 @@ export default function OnbDashboard({ user }) {
       </div>
 
       <div className="stack">
-        <Panel title={<div><h2>Jarayondagilar holati</h2><div className="muted small">O‘zlashtirish indeksi = bajarilgani ÷ shu kungacha rejadagisi</div></div>}>
+        <Panel title={<div><h2>Jarayondagilar holati</h2><div className="muted small">Bajarilish indeksi = bajarilgani ÷ shu kungacha rejadagisi</div></div>}>
           {active.length ? (
             <div className="stack">
               <div className="stackbar">{stCount.filter(([, n]) => n).map(([k, n]) => <i key={k} className={A.LIVE_STATUS[k][1]} style={{ flex: n }} title={`${A.LIVE_STATUS[k][0]}: ${n}`} />)}</div>
@@ -210,7 +211,11 @@ export default function OnbDashboard({ user }) {
         </Panel>
       </div>
 
-      <Panel title={<div><h2>O‘zlashtirish ko‘rsatkichi</h2><div className="muted small">Moslashuv kurslari bo‘yicha: {mast.n} ta kurs yozuvi</div></div>}>
+      <Panel title={<div><h2>Onboarding kurslari: baho va bajarilish</h2><div className="muted small">Faqat onboarding kurslari va lavozim onboarding dasturlari (Learning Path) · {mast.n} ta kurs yozuvi</div></div>}>
+        <table className="small" style={{ marginBottom: 12 }}>
+          <thead><tr><th>Onboarding dasturi (Learning Path)</th><th className="num">Xodim</th><th className="num">O‘rt. kurs bahosi</th><th style={{ width: '26%' }}>Kurslar bajarilishi</th><th>Kurslar bo‘yicha</th></tr></thead>
+          <tbody>{progs.map((p) => <tr key={p.position}><td><b>{POS[p.position] || p.position}</b><div className="muted">{N1(p.done)} / {p.total} kurs yakunlangan (o‘rtacha)</div></td><td className="num">{p.n}</td><td className="num"><b>{N1(p.grade)}</b></td><td><HBar v={p.pct} /></td><td className="muted">{p.byCourse.map((c) => `${D.getCourse(s, c.courseId)?.title}: ${N1(c.grade)}`).join(' · ')}</td></tr>)}</tbody>
+        </table>
         <div className="grid g4">
           <div><div className="small muted">Muddatida yakunlandi</div><div className="big-num">{P(mast.onTime)}</div></div>
           <div><div className="small muted">Testni birinchi urinishda topshirdi</div><div className="big-num">{P(mast.firstPass)}</div></div>
@@ -218,13 +223,13 @@ export default function OnbDashboard({ user }) {
           <div><div className="small muted">O‘rtacha yakunlash vaqti</div><div className="big-num">{N1(mast.days)} kun</div></div>
         </div>
         <table className="small" style={{ marginTop: 12 }}>
-          <thead><tr><th>Kurs</th><th className="num">Yozuv</th><th style={{ width: '24%' }}>Muddatida</th><th style={{ width: '24%' }}>1-urinishda test</th><th className="num">O‘rt. test</th><th className="num">O‘rt. kun</th></tr></thead>
-          <tbody>{mast.byCourse.map((c) => <tr key={c.courseId}><td>{D.getCourse(s, c.courseId)?.title}</td><td className="num">{c.n}</td><td><HBar v={c.onTime} /></td><td><HBar v={c.firstPass} /></td><td className="num">{P(c.test)}</td><td className="num">{N1(c.days)}</td></tr>)}</tbody>
+          <thead><tr><th>Kurs</th><th className="num">Yozuv</th><th className="num">Kurs bahosi</th><th className="num">Bajarilishi</th><th style={{ width: '20%' }}>Muddatida</th><th style={{ width: '20%' }}>1-urinishda test</th><th className="num">O‘rt. test</th><th className="num">O‘rt. kun</th></tr></thead>
+          <tbody>{mast.byCourse.map((c) => <tr key={c.courseId}><td>{D.getCourse(s, c.courseId)?.title}</td><td className="num">{c.n}</td><td className="num"><b>{N1(c.grade)}</b></td><td className="num">{P(c.pct)}</td><td><HBar v={c.onTime} /></td><td><HBar v={c.firstPass} /></td><td className="num">{P(c.test)}</td><td className="num">{N1(c.days)}</td></tr>)}</tbody>
         </table>
         {worstCourse && worstCourse.onTime < 50 && <div className="callout warn small" style={{ marginTop: 10 }}>«{D.getCourse(s, worstCourse.courseId)?.title}» kursini muddatida faqat {P(worstCourse.onTime)} yakunlayapti. Kurs hajmini yoki 30 kunlik muddatni qayta ko‘rib chiqish kerak.</div>}
       </Panel>
 
-      <Panel title={<div><h2>Onboarding bahosi va 2-oy KPI (ustozlar)</h2><div className="muted small">Har nuqta — bitta ustoz. Bog‘liqlik bor degani sabab bor degani emas.</div></div>} actions={
+      <Panel title={<div><h2>Onboarding natijasi va 2-oy KPI (ustozlar)</h2><div className="muted small">Har nuqta — bitta ustoz. Bog‘liqlik bor degani sabab bor degani emas.</div></div>} actions={
         <select className="i compact" value={metric} onChange={(e) => setMetric(e.target.value)}><option value="retention">2-oy o‘quvchi retentioni</option><option value="conversion">2-oy 1-oy konversiyasi</option></select>}>
         <div className="grid g2">
           {cor.pts.length ? <Scatter pts={cor.pts} metric={metric} /> : <Empty>Ma’lumot yetarli emas.</Empty>}
@@ -237,7 +242,7 @@ export default function OnbDashboard({ user }) {
             </tbody></table>
             <h3 className="small" style={{ margin: '6px 0 0' }}>Metodologiyani tekshirish: qaysi qism KPI’ni yaxshiroq bashorat qiladi</h3>
             <table className="small"><tbody>{cor.parts.map((p) => <tr key={p.key}><td>{p.label}</td><td style={{ width: '45%' }}><HBar v={p.r === null ? 0 : Math.max(0, p.r) * 100} label={`r = ${R2(p.r)}`} /></td></tr>)}</tbody></table>
-            {corOk && best.length > 1 && <div className="callout small">Eng kuchli bashoratchi — <b>{best[0].label.toLowerCase()}</b> (r = {R2(best[0].r)}), eng kuchsizi — <b>{best.at(-1).label.toLowerCase()}</b> (r = {R2(best.at(-1).r)}). Taklif: og‘irlikni kuchli qismga oshirish (hozir hammasi {s.onboardingConfig.weights.obs}%) — «Moslashuv» sahifasidagi metodologiya blokida.</div>}
+            {corOk && best.length > 1 && <div className="callout small">Eng kuchli bashoratchi — <b>{best[0].label.toLowerCase()}</b> (r = {R2(best[0].r)}), eng kuchsizi — <b>{best.at(-1).label.toLowerCase()}</b> (r = {R2(best.at(-1).r)}). Bu lavozim kartasidagi qismlar va minimumni qayta ko‘rib chiqish uchun ishora — «Moslashuv» sahifasidagi karta sozlamalarida.</div>}
           </div>
         </div>
       </Panel>

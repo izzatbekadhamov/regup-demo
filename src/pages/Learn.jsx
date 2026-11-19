@@ -101,11 +101,11 @@ export default function Learn({ id, emp }) {
     <>
       <section className="panel hero compact-hero">
         <div className="crumbs"><a href="#/learning"><Icon name="back" size={13} /> Kurslarim</a>{enr.pathId && <span>{D.getPath(s, enr.pathId)?.title}</span>}</div>
-        <div className="row" style={{ marginTop: 4 }}><h1>{course.title}</h1>{enr.status === 'completed' ? <Pill tone="good">yakunlangan</Pill> : <Pill tone="brand">{done} / {course.components.length}</Pill>}{grade !== null && <Pill tone={grade >= minGrade ? 'good' : 'warn'}>Kurs bahosi: {String(grade).replace('.', ',')} / 5</Pill>}</div>
+        <div className="row" style={{ marginTop: 4 }}><h1>{course.title}</h1>{enr.status === 'completed' ? <Pill tone="good">yakunlangan</Pill> : <Pill tone="brand">Kurslar bajarilishi {Math.round((100 * done) / course.components.length)}% · {done} / {course.components.length}</Pill>}{grade !== null && <Pill tone={grade >= minGrade ? 'good' : 'warn'}>Kurs bahosi: {String(grade).replace('.', ',')} / 5</Pill>}</div>
         <p className="ink2">{course.summary}</p>
         <div className="near-bar" style={{ maxWidth: 420 }}><i style={{ width: `${(100 * done) / course.components.length}%` }} /></div>
         {enr.mandatory && enr.status !== 'completed' && (() => { const r = s.kpiRules.find((x) => x.id === enr.mandatory.ruleId); return <div className="callout warn small"><b>Majburiy kurs</b> — {D.monthName(enr.mandatory.month)}: {D.KPI_METRICS[r.metric].label} {enr.mandatory.value.toFixed(1).replace('.', ',')}%, chegara {enr.mandatory.min}%. Muddat: {fmtDate(enr.mandatory.deadline)}. Mas’ulingiz natijani kuzatib boradi.</div>; })()}
-        {enr.onboardingId && enr.status !== 'completed' && <div className="callout small"><b>Moslashuv kursi</b> — muddat {fmtDate(enr.deadline)}. Test va topshiriq 1–5 ballga aylanadi va onboarding bahosiga kiradi. Topshiriqni {D.taskReviewer(s, enr).kind === 'curator' ? `kurs kuratori (${D.taskReviewer(s, enr).user.name})` : 'mentoringiz'} tekshiradi.</div>}
+        {enr.onboardingId && enr.status !== 'completed' && <div className="callout small"><b>Moslashuv kursi</b> — muddat {fmtDate(enr.deadline)}. Test va topshiriq kurs bahosini beradi, u onboarding natijasiga kiradi. Topshiriqni {D.taskReviewer(s, enr).kind === 'curator' ? `kurs kuratori (${D.taskReviewer(s, enr).user.name})` : 'mentoringiz'} tekshiradi.</div>}
         {locked && <div className="callout warn small">Bu kurs Learning Path’dagi oldingi kurs yakunlangach ochiladi.</div>}
       </section>
       <div className="split">
@@ -166,7 +166,7 @@ export default function Learn({ id, emp }) {
                   </div>
                 );
               })}
-              {course.onboarding && <p className="small">Bu moslashuv kursi: kompetensiya darajasi bermaydi, natijasi onboarding bahosiga kiradi (test foizi → 1–5 ball, topshiriq — mentor/kurator bahosi).</p>}
+              {course.onboarding && <p className="small">Bu moslashuv kursi: kompetensiya darajasi bermaydi. Kurs bahosi (testlar va topshiriqlar o‘rtachasi) onboarding natijasining «Kurs bahosi» qismiga kiradi.</p>}
               <p className="small muted"><b>Kurs bahosi</b> — kursni qanchalik yaxshi yakunlaganingiz. <b>Kompetensiya darajasi</b> — topshiriqlarda topilgan indikatorlar; u kurs qaysi darajagacha mo‘ljallanganiga bog‘liq. Shuning uchun 3-daraja kursini 5 ga yakunlash 3-daraja dalilini beradi. Lavozimga o‘tish — baholash kartasi va panel orqali.</p>
             </div>
           </Panel>

@@ -46,13 +46,17 @@ Chap pastdagi «Demoni qayta boshlash» tugmasi demoni boshlang'ich holatga qayt
 
 ## Onboarding tizimi (2026-11-19 yangilanishi)
 Tizim hujjati — «RegUP onboarding tizimi» (Claude Doc). Prototipda:
-- **60 kunlik adaptatsiya** (orientation 1–7, functional 8–60); moslashuv dasturi muddati lavozim bo'yicha sozlanadi (standart 30 kun), onboarding bahosi shu muddat yakunida.
-- **Huquqlar shaxsga beriladi** («Jamoa a'zolari»): har huquq filial doirasi bilan (barcha / tanlangan / o'ziga biriktirilganlar). TZ'dagi 6 ta qat'iy rol o'rniga. Mentor va **buddy** biriktiriladi.
+- **60 kunlik adaptatsiya** (orientation 1–7, functional 8–60); moslashuv dasturi muddati lavozim bo'yicha sozlanadi (standart 30 kun), onboarding natijasi shu muddat yakunida.
+- **Huquqlar shaxsga beriladi** («Adminlar»): har huquq doirasi bilan — barcha filiallar, tanlangan filiallar, bo'limlar, barcha filiallardagi bir lavozim yoki o'ziga biriktirilganlar. TZ'dagi 6 ta qat'iy rol o'rniga. Mentor va **buddy** biriktiriladi.
 - **Kompetensiya kartasi rekrutingdan**: modeli bor lavozimda birinchi kundan ochiladi, rekruting baholari shartli; 60-kunda birinchi lavozim darajasi. Rasmiy e'lon yiliga 1–2 marta (sozlanadi). Modeli yo'q lavozimda karta yo'q, kurslar ishlaydi.
 - **Kurs ↔ kompetensiya**: test savollari daraja indikatoriga bog'lanadi, daraja topilgan indikatorlardan; kurs bahosi alohida, dalil uchun kamida 4 (sozlanadi).
 - **Kurs fikrlari** (barcha kurslar): dars bahosi, «Kursdan qoniqish bahosi» (1–5), NPS (0–10), ochiq fikr — anonim; e'lonni «Kurs izohlarini boshqarish» huquqi egasi qiladi.
 - **So'rovnomalar anonim**: D8/D30/D60/Fail Case faqat filial va lavozim kesimida; 8 bandli standartlar nazorat ro'yxati; javob ulushi past filiallarga eslatma.
 - **Offboarding**: ketish turiga qarab Fail Case yoki exit-intervyu; haydalish faqat ikki sabab bilan; «Qaytadi» va dublikatga so'rovnoma yo'q. «Markaz admini» — shaxsiy raqamga alohida akkaunt.
+- **Onboarding natijasi** — lavozimga moslanadigan karta: kursni muddatida yakunlash (ixtiyoriy), kurs bahosi, kursdan tashqari amaliy topshiriqlar, ish amaliyotidagi kuzatuv (ustozda metodist, menejerda ish ko'rsatkichlari). Har qism minimumdan (standart 3) o'tishi shart, umumiy natija — o'rtacha. Minimumdan o'tish badge emas, «muvaffaqiyatli yakunlandi» holati.
+- **Kurslar bajarilishi** (0–100%, har element teng); Learning Path'da «X / N kurs» va kurs baholari o'rtachasi, bosilganda har kurs bahosi.
+- **Gamifikatsiya**: ballar (reyting shu asosda), badge katalogi faqat noodatiy natija uchun («Gamifikatsiyani boshqarish» huquqi).
+- **Tashkiliy tuzilma** (filial → bo'lim) LMS'da qo'lda; «Umumiy jamoa a'zolari» — admin doirasidagi xodimlar, profil (EduTizim ma'lumotlari) va to'liq foydalanuvchi tarixi. Xodim kabinetida «Jamoadoshlar»: sukut bo'yicha o'z filiali, doira sozlanadi; hamkasbga yakunlangan kurslar, yutuqlar va badge'lar ko'rinadi.
 - Dashboard'dagi ko'rsatkichlar kelishilgan ro'yxat bo'yicha (kohorta retention 30/60/90, 30 kun ichida ketganlar, mentor yuklamasi, eNPS, ma'lumot sifati, reboarding, ishga tayyor bo'lish vaqti; baho ↔ KPI bog'liqligi faqat 100+ xodimdan keyin xulosa).
 
 ## Moslashuvchan model

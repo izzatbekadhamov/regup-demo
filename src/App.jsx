@@ -36,6 +36,10 @@ import ObservationPage from './pages/ObservationPage.jsx';
 import MyOnboarding from './pages/MyOnboarding.jsx';
 import OnbDashboard from './pages/OnbDashboard.jsx';
 import Team from './pages/Team.jsx';
+import People from './pages/People.jsx';
+import Gamification from './pages/Gamification.jsx';
+import Colleagues from './pages/Colleagues.jsx';
+import MyRating from './pages/MyRating.jsx';
 import { kpiValue, kpiResult, kpiMonths } from './core/domain.js';
 import * as D from './core/domain.js';
 import { OTHER_POSITIONS } from './core/modelKit.js';
@@ -67,7 +71,9 @@ const ADMIN_NAV = [
   ['Sozlamalar', [
     ['models', 'Lavozim modellari', null, 'layers'],
     ['kpi', 'Yangi filial KPI', null, 'chart'],
-    ['team', 'Jamoa a’zolari', null, 'users'],
+    ['people', 'Umumiy jamoa a’zolari', null, 'users'],
+    ['gamification', 'Gamifikatsiya', null, 'target'],
+    ['team', 'Adminlar', null, 'user'],
   ]],
   ['Tizim', [
     ['audit', 'O‘zgarishlar jurnali', null, 'list'],
@@ -82,7 +88,7 @@ const ROUTE_RIGHTS = {
   idp: ['talent.view'], candidates: ['talent.view'], succession: ['talent.view'], skills: ['talent.view'], teachers: ['kpi.view'], kpi: ['kpi.view'],
   'onb-dashboard': ['onb.view'], onboarding: ['onb.view'], integration: ['onb.integration'], tasks: ['courses.review', 'courses.manage'],
   observations: ['onb.observe'], meetings: ['onb.meetings'], reminders: ['onb.reminders'],
-  courses: ['courses.view', 'courses.manage'], paths: ['courses.view', 'courses.manage'], models: ['models.manage'], team: ['team.manage'],
+  courses: ['courses.view', 'courses.manage'], paths: ['courses.view', 'courses.manage'], models: ['models.manage'], team: ['team.manage'], people: ['people.view', 'org.manage'], gamification: ['gami.manage'],
   audit: ['audit.view'], import: ['system.import'], uat: ['system.import'],
 };
 const allowed = (user, path) => user.role === 'super' || D.canAny(user, ROUTE_RIGHTS[path] || []);
@@ -98,6 +104,8 @@ const EMP_NAV = [
     ['career', 'Karyera yo‘lim', null, 'trend'],
     ['kpi', 'KPI ko‘rsatkichlari', null, 'chart', (s, sess) => { const e = s.employees.find((x) => x.id === sess.employeeId); return e && (s.kpiRules.some((r) => r.position === e.position) || s.employees.some((x) => x.supervisorId === e.id)); }],
     ['stretch', 'Stretch vazifam', null, 'target'],
+    ['colleagues', 'Jamoadoshlar', null, 'users'],
+    ['rating', 'Reyting va yutuqlar', null, 'trend'],
     ['inbox', 'Bildirishnomalar', (s, sess) => s.notifications.filter((n) => n.to === s.employees.find((e) => e.id === sess.employeeId)?.name && !n.read).length, 'bell'],
   ]],
 ];
@@ -136,10 +144,12 @@ export default function App() {
 
   let page;
   if (admin && !allowed(user, p0 || '')) {
-    page = <div className="panel panel-body"><b>{user.name}</b>da bu bo‘lim uchun huquq yo‘q. Huquqlarni «Jamoa a’zolari» bo‘limida Super Admin beradi. <a href={`#/${firstRoute(user)}`}>Mening bo‘limlarim</a></div>;
+    page = <div className="panel panel-body"><b>{user.name}</b>da bu bo‘lim uchun huquq yo‘q. Huquqlarni «Adminlar» bo‘limida Super Admin beradi. <a href={`#/${firstRoute(user)}`}>Mening bo‘limlarim</a></div>;
   } else if (admin) {
     if (!p0) page = <Dashboard />;
     else if (p0 === 'team') page = <Team user={user} focus={p1} />;
+    else if (p0 === 'people') page = <People key={user.id} user={user} focus={p1} />;
+    else if (p0 === 'gamification') page = <Gamification key={user.id} user={user} />;
     else if (p0 === 'onb-dashboard') page = <OnbDashboard key={user.id} user={user} />;
     else if (p0 === 'onboarding') page = <Onboarding key={user.id} user={user} focus={p1} />;
     else if (p0 === 'integration') page = <Integration user={user} />;
@@ -176,6 +186,8 @@ export default function App() {
     else if (p0 === 'skills') page = <MySkills key={emp.id} emp={emp} />;
     else if (p0 === 'stretch') page = <MyStretch key={emp.id} emp={emp} />;
     else if (p0 === 'inbox') page = <Notifications key={emp.id} emp={emp} />;
+    else if (p0 === 'colleagues') page = <Colleagues key={emp.id} emp={emp} focus={p1} />;
+    else if (p0 === 'rating') page = <MyRating key={emp.id} emp={emp} />;
   }
   if (!page) page = <div className="panel panel-body">Sahifa topilmadi. <a href="#/">Bosh sahifa</a></div>;
 
@@ -202,7 +214,7 @@ export default function App() {
             <button className={!admin ? 'on' : ''} title="Xodim o‘z kabinetini qanday ko‘radi" onClick={() => { setSession({ mode: 'employee' }); go('/'); }}>Xodim</button>
           </div>
           {admin ? (
-            <label className="who" title="Har bir jamoa a’zosi o‘ziga berilgan huquqlar va filial doirasi bo‘yicha ishlaydi">
+            <label className="who" title="Har bir admin o‘ziga berilgan huquqlar va doira bo‘yicha ishlaydi">
               <Avatar name={user.role === 'super' ? 'HR LD' : user.name} />
               <select className="i compact" value={user.id} onChange={(e) => { const u = D.getStaff(state, e.target.value); setSession({ userId: u.id }); go(`/${firstRoute(u)}`); }}>
                 {state.staff.filter((u) => u.active !== false).map((u) => <option key={u.id} value={u.id}>{u.role === 'super' ? 'Super Admin' : `${u.name} · ${u.title}`}</option>)}

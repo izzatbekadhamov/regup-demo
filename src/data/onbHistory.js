@@ -58,17 +58,20 @@ export function createOnbHistory(today) {
       return { courseId, testPct: Math.round(clamp(78 + 12 * k, 45, 100)), firstPass: k > -0.45, onTime: k > -0.3, days: Math.round(clamp(16 - 7 * k, 4, 34)), done: finished || leftDay > 20 };
     });
     const ball = (pct) => (pct >= 90 ? 5 : pct >= 75 ? 4 : pct >= 60 ? 3 : pct >= 40 ? 2 : 1);
+    // Onboarding natijasi kartasi: muddatida yakunlash (FR'da yo'q), kurs bahosi, kursdan tashqari topshiriq, ish amaliyotidagi kuzatuv.
+    const testsAvg = courses.reduce((a, c) => a + ball(c.testPct), 0) / courses.length;
+    const taskV = finished ? clamp(3.6 + 0.7 * q + norm() * 1.0, 1, 5) : null;
     const parts = finished ? {
-      courses: r1(1 + 4 * (courses.filter((c) => c.onTime).length / courses.length)),
-      tests: r1(courses.reduce((a, c) => a + ball(c.testPct), 0) / courses.length),
-      tasks: r1(clamp(3.6 + 0.7 * q + norm() * 1.0, 1, 5)),
-      obs: position === 'GE' ? r1(clamp(3.4 + 1.2 * q + norm() * 0.35, 1, 5)) : null,
+      onTime: position === 'FR' ? null : r1(1 + 4 * (courses.filter((c) => c.onTime).length / courses.length)),
+      courses: r1((testsAvg + taskV) / 2),
+      tasks: position === 'FR' ? null : r1(clamp(taskV + 0.3 * q, 1, 5)),
+      practice: position === 'GE' ? r1(clamp(3.4 + 1.2 * q + norm() * 0.35, 1, 5)) : r1(clamp(3.7 + 0.8 * q, 1, 5)),
     } : null;
     const vals = parts ? Object.values(parts).filter((v) => v !== null) : [];
     const score = parts ? r1(vals.reduce((a, b) => a + b, 0) / vals.length) : null;
     // 2-oy KPI (faqat ustozlar, 60 kun ishlagan bo'lsa): o'quvchi retentioni va 1-oy konversiyasi.
     const has60 = addDays(startedAt, 60) <= today && (!leftAt || leftDay >= 60);
-    const qObs = parts?.obs ?? 3.4;
+    const qObs = position === 'GE' ? (parts?.practice ?? 3.4) : 3.4;
     const kpi2 = position === 'GE' && has60 ? {
       retention: r1(clamp(86 + 2.6 * (qObs - 3.4) + 0.8 * q + norm() * 3.4, 70, 99)),
       conversion: r1(clamp(70 + 4 * (qObs - 3.4) + norm() * 7, 40, 95)),
@@ -77,7 +80,7 @@ export function createOnbHistory(today) {
     rows.push({
       id: `h-${i + 1}`, name, position, branchId, mentor, source, startedAt, leftAt, leftDay, reason,
       survey: { d8: leftDay !== null && leftDay < 8 ? null : d8, d30: finished ? r1(clamp(d8 + norm() * 0.3, 2.4, 5)) : null },
-      courses, parts, score, kpi2, kpiReachedMonth: reached, badge: score !== null && score >= 3 && finished,
+      courses, parts, score, kpi2, kpiReachedMonth: reached, passed: score !== null && finished && vals.every((v) => v >= 3),
     });
   }
   return rows;

@@ -147,11 +147,11 @@ export default function CourseDetail({ id, user }) {
           <Panel title="O‘quvchilar" tight>
             {learners.length ? (
               <table>
-                <thead><tr><th>Xodim</th><th>Boshlagan</th><th className="num">Bajarilgan</th><th>Holat</th></tr></thead>
+                <thead><tr><th>Xodim</th><th>Boshlagan</th><th className="num">Kurslar bajarilishi</th><th className="num">Kurs bahosi</th><th>Holat</th></tr></thead>
                 <tbody>{learners.map((e) => {
                   const done = c.components.filter((x) => D.componentDone(c, e, x.id)).length;
                   const pend = Object.values(e.progress).some((p) => p.status === 'pending');
-                  return <tr key={e.id}><td><Person name={D.getEmployee(s, e.employeeId).name} sub={e.pathId ? D.getPath(s, e.pathId)?.title : 'alohida kurs'} /></td><td className="small">{fmtDate(e.startedAt)}{e.by !== 'employee' && <div className="muted">HR biriktirgan</div>}</td><td className="num">{done} / {c.components.length}</td><td>{e.status === 'completed' ? <Pill tone="good">yakunlangan {fmtDate(e.completedAt)}</Pill> : pend ? <Pill tone="warn">mentor tekshiruvi</Pill> : D.courseLocked(s, e) ? <Pill tone="muted">navbatda</Pill> : <Pill tone="brand">o‘qimoqda</Pill>}</td></tr>;
+                  return <tr key={e.id}><td><Person name={D.getEmployee(s, e.employeeId).name} sub={e.pathId ? D.getPath(s, e.pathId)?.title : 'alohida kurs'} /></td><td className="small">{fmtDate(e.startedAt)}{e.by !== 'employee' && <div className="muted">HR biriktirgan</div>}</td><td className="num">{Math.round((100 * done) / (c.components.length || 1))}% <span className="muted">{done}/{c.components.length}</span></td><td className="num">{D.courseGrade(c, e) === null ? '—' : String(D.courseGrade(c, e)).replace('.', ',')}</td><td>{e.status === 'completed' ? <Pill tone="good">yakunlangan {fmtDate(e.completedAt)}</Pill> : pend ? <Pill tone="warn">mentor tekshiruvi</Pill> : D.courseLocked(s, e) ? <Pill tone="muted">navbatda</Pill> : <Pill tone="brand">o‘qimoqda</Pill>}</td></tr>;
                 })}</tbody>
               </table>
             ) : <Empty>Hali hech kim yozilmagan.</Empty>}

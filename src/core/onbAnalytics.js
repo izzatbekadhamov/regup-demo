@@ -1,4 +1,4 @@
-// Onboarding dashboard analitikasi: retention (30/60 kun), jarayon holati, o'zlashtirish,
+// Onboarding dashboard analitikasi: retention (30/60 kun), jarayon holati, kurslar bajarilishi va kurs bahosi,
 // ball va 2-oy KPI bog'liqligi, ketish nuqtalari, mentor/filial va manba kesimlari.
 // Manba: demo tarixiy kogorta (s.onbHistory) + jonli moslashuvlar (s.onboardings).
 import * as D from './domain.js';
@@ -17,13 +17,14 @@ function liveRow(s, ob) {
     const c = D.getCourse(s, e.courseId);
     const t = c.components.find((x) => x.kind === 'test');
     const p = t && e.progress[t.id];
-    return { courseId: e.courseId, testPct: typeof p?.best === 'number' ? p.best : null, firstPass: p ? p.attempts === 1 && p.best >= t.passScore : null,
+    const doneN = c.components.filter((x) => D.componentDone(c, e, x.id)).length;
+    return { courseId: e.courseId, grade: D.courseGrade(c, e), pct: c.components.length ? (100 * doneN) / c.components.length : 0, testPct: typeof p?.best === 'number' ? p.best : null, firstPass: p ? p.attempts === 1 && p.best >= t.passScore : null,
       onTime: e.status === 'completed' ? e.completedAt <= e.deadline : e.deadline < s.today ? false : null, days: e.status === 'completed' ? D.daysBetween(e.startedAt, e.completedAt) : null, done: e.status === 'completed' };
   });
   const parts = Object.fromEntries(r.parts.map((p) => [p.key, p.value]));
   return { id: ob.id, live: true, ob, name: emp.name, position: emp.position, branchId: emp.branchId, mentor: emp.supervisorId ? D.getEmployee(s, emp.supervisorId)?.name : '—', source: ob.source,
     startedAt: ob.startedAt, leftAt, leftDay: leftAt ? D.daysBetween(ob.startedAt, leftAt) : null, reason: leftAt ? emp.archiveReason : null,
-    courses, parts, score: ob.final?.score ?? (ob.status === 'completed' ? r.score : null), kpi2: null, kpiReachedMonth: null, badge: !!ob.final?.badge, active: ob.status === 'active' };
+    courses, parts, score: ob.final?.score ?? (ob.status === 'completed' ? r.score : null), kpi2: null, kpiReachedMonth: null, passed: !!ob.final?.passed, active: ob.status === 'active' };
 }
 
 export function onbRows(s, f = {}, scope = null) {
@@ -49,7 +50,7 @@ export function breakdown(rows, today, dim) {
   const keys = [...new Set(rows.map((r) => r[dim]))];
   return keys.map((k) => {
     const g = rows.filter((r) => r[dim] === k);
-    return { key: k, n: g.length, r30: retention(g, today, 30), r60: retention(g, today, 60), score: avg(g.map((r) => r.score)), kpi: avg(g.map((r) => r.kpi2?.retention ?? null)), badge: pct(g.filter((r) => r.badge).length, g.filter((r) => r.score !== null).length) };
+    return { key: k, n: g.length, r30: retention(g, today, 30), r60: retention(g, today, 60), score: avg(g.map((r) => r.score)), kpi: avg(g.map((r) => r.kpi2?.retention ?? null)), passed: pct(g.filter((r) => r.passed).length, g.filter((r) => r.score !== null).length) };
   }).sort((a, b) => b.n - a.n);
 }
 
@@ -65,7 +66,7 @@ export function leaveStages(rows, today) {
   return { total: left.length, stages, reasons, early: { n: early.length, of: el.length, pct: pct(early.length, el.length), reasons: earlyReasons } };
 }
 
-/** Jonli xodimning o'zlashtirish indeksi: bajarilgan qism ÷ shu kungacha rejadagi qism. */
+/** Jonli xodimning bajarilish indeksi: bajarilgan qism ÷ shu kungacha rejadagi qism. */
 export function liveProgress(s, ob) {
   const day = D.onbDay(s, ob);
   const enrs = D.onbEnrollments(s, ob);
@@ -102,13 +103,30 @@ export function riskList(s, scope = null) {
   }).filter((x) => x.reasons.length).sort((a, b) => b.reasons.length - a.reasons.length);
 }
 
+const ballOf = (pctv) => (pctv === null || pctv === undefined ? null : pctv >= 90 ? 5 : pctv >= 75 ? 4 : pctv >= 60 ? 3 : pctv >= 40 ? 2 : 1);
+const gradeOf = (c) => c.grade ?? ballOf(c.testPct);
+const pctOf = (c) => c.pct ?? (c.done ? 100 : 50);
+/** Onboarding dasturi (lavozim Learning Path'i) bo'yicha: o'rtacha kurs bahosi, kurslar bajarilishi, kurs bo'yicha tafsilot. */
+export function programStats(rows) {
+  const ps = [...new Set(rows.map((r) => r.position))];
+  return ps.map((position) => {
+    const g = rows.filter((r) => r.position === position);
+    const cs = g.flatMap((r) => r.courses);
+    const ids = [...new Set(cs.map((c) => c.courseId))];
+    return {
+      position, n: g.length, grade: avg(cs.map(gradeOf)), pct: avg(cs.map(pctOf)), done: avg(g.map((r) => r.courses.filter((c) => c.done).length)), total: ids.length,
+      byCourse: ids.map((id) => { const x = cs.filter((c) => c.courseId === id); return { courseId: id, n: x.length, grade: avg(x.map(gradeOf)), pct: avg(x.map(pctOf)) }; }),
+    };
+  }).sort((a, b) => b.n - a.n);
+}
+
 export function masteryStats(rows) {
   const cs = rows.flatMap((r) => r.courses.filter((c) => c.done || c.onTime === false).map((c) => ({ ...c, row: r })));
   const byCourse = [...new Set(cs.map((c) => c.courseId))].map((id) => {
     const g = cs.filter((c) => c.courseId === id);
-    return { courseId: id, n: g.length, onTime: pct(g.filter((c) => c.onTime).length, g.length), firstPass: pct(g.filter((c) => c.firstPass).length, g.filter((c) => c.firstPass !== null).length), test: avg(g.map((c) => c.testPct)), days: avg(g.map((c) => c.days)) };
+    return { courseId: id, n: g.length, grade: avg(g.map(gradeOf)), pct: avg(g.map(pctOf)), onTime: pct(g.filter((c) => c.onTime).length, g.length), firstPass: pct(g.filter((c) => c.firstPass).length, g.filter((c) => c.firstPass !== null).length), test: avg(g.map((c) => c.testPct)), days: avg(g.map((c) => c.days)) };
   });
-  return { n: cs.length, onTime: pct(cs.filter((c) => c.onTime).length, cs.length), firstPass: pct(cs.filter((c) => c.firstPass).length, cs.filter((c) => c.firstPass !== null).length), test: avg(cs.map((c) => c.testPct)), days: avg(cs.map((c) => c.days)), byCourse };
+  return { n: cs.length, grade: avg(cs.map(gradeOf)), pct: avg(cs.map(pctOf)), onTime: pct(cs.filter((c) => c.onTime).length, cs.length), firstPass: pct(cs.filter((c) => c.firstPass).length, cs.filter((c) => c.firstPass !== null).length), test: avg(cs.map((c) => c.testPct)), days: avg(cs.map((c) => c.days)), byCourse };
 }
 
 export function pearson(xs, ys) {

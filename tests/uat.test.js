@@ -438,23 +438,39 @@ describe('Onboarding (TZ): integratsiya, 30 kunlik moslashuv, rollar, eslatmalar
     expect(s.hrLog[0].tone).toBe('bad');
   });
 
-  it('Yakuniy baho: komponentlar, muddati kelmagan kurs jazolanmaydi, filial rahbari tasdiqlaydi, badge', () => {
+  it('Onboarding natijasi: lavozim kartasi, har qism minimumi, o‘rtacha, filial rahbari tasdiqlaydi (badge emas)', () => {
     let s = createSeed();
     const sanjar = D.onboardingScore(s, D.onboardingOf(s, 'e-sanjar'));
-    expect(sanjar.score).toBeNull(); // 10-kun, hali hech narsa — «Past» emas
+    expect(sanjar.score).toBeNull(); // hali hech narsa — «Past» emas
     const nil = D.onboardingScore(s, D.onboardingOf(s, 'e-nilufar'));
-    expect(nil).toMatchObject({ ready: false, obs: 1, needObs: 2, coursesDone: 1 });
-    expect(nil.parts.find((p) => p.key === 'tests').value).toBe(4.5); // 100% → 5, 75% → 4
+    expect(nil).toMatchObject({ ready: false, obs: 1, needObs: 2, coursesDone: 1, min: 3 });
+    expect(nil.parts.map((p) => p.key)).toEqual(['onTime', 'courses', 'tasks', 'practice']);
+    expect(nil.parts.find((p) => p.key === 'courses').value).toBe(4.5); // kurs baholari: 5 va 4
     expect(() => D.approveOnboarding(s, { id: 'onb-1', userId: 'u-hr' })).toThrow(/erta/);
-    // Faqat o'z filiali rahbari: Chilonzor rahbari Yunusobod xodimini tasdiqlay olmaydi
     expect(() => D.approveOnboarding(s, { id: 'onb-1', userId: 'u-br-chil' })).toThrow(/filial rahbari/);
+    // Moliya menejeri: kursdan tashqari topshiriq va ish ko'rsatkichlari kuzatuvi (metodist emas)
+    const fin = D.onboardingScore(s, D.onboardingOf(s, 'e-jahongir'));
+    expect(fin).toMatchObject({ ready: false, needObs: 0, need: 1 });
+    expect(() => D.gradeOnbTask(s, { onboardingId: 'onb-2', taskId: 'ft1', grade: 4, userId: 'u-cur' })).toThrow(/mentor/);
+    s = D.gradeOnbTask(s, { onboardingId: 'onb-2', taskId: 'ft1', grade: 4, userId: 'u-br-chil' });
+    expect(() => D.addWorkCheck(s, { employeeId: 'e-jahongir', ratings: { 'Mijoz va ota-onani kutib olish': 4 }, userId: 'u-br-chil' })).toThrow(/Barcha/);
+    s = D.addWorkCheck(s, { employeeId: 'e-jahongir', ratings: { 'Mijoz va ota-onani kutib olish': 4, 'To‘lov va hujjatlarni to‘g‘ri rasmiylashtirish': 4, 'Topshiriqni bajarish sifati va muddati': 3 }, userId: 'u-br-chil' });
+    const r = D.onboardingScore(s, D.onboardingOf(s, 'e-jahongir'));
+    expect(r.parts.map((p) => [p.key, p.value])).toEqual([['onTime', 5], ['courses', 4.8], ['tasks', 4], ['practice', 3.7]]);
+    expect(r).toMatchObject({ ready: true, passed: true, score: 4.4 });
     s = D.approveOnboarding(s, { id: 'onb-2', userId: 'u-br-chil' });
     const f = D.getOnboarding(s, 'onb-2').final;
-    expect(f).toMatchObject({ score: 4.7, label: 'A’lo', badge: true, by: 'Anvar Qosimov' });
-    expect(s.notifications.find((n) => n.to === 'Jahongir Ortiqov' && n.text.includes('badge')).tg).toBe(true);
-    // Og'irliklar sozlanadi
-    s = D.setOnboardingWeights(s, { weights: { courses: 0, tests: 100, tasks: 0, obs: 0 }, badgeMin: 3 });
-    expect(D.onboardingScore(s, D.onboardingOf(s, 'e-nilufar')).score).toBe(4.5);
+    expect(f).toMatchObject({ score: 4.4, label: 'Yaxshi', passed: true, by: 'Anvar Qosimov' });
+    expect(f.badge).toBeUndefined();
+    expect(s.notifications.find((n) => n.to === 'Jahongir Ortiqov' && n.text.includes('muvaffaqiyatli')).tg).toBe(true);
+    // Minimum sozlanadi: 4 bo'lsa, ish kuzatuvi (3,7) o'tmaydi
+    s = D.setOnbCard(s, { position: 'FIN', patch: { min: 4 } });
+    const r4 = D.onboardingScore(s, D.onboardingOf(s, 'e-jahongir'));
+    expect(r4.passed).toBe(false);
+    expect(r4.parts.find((p) => !p.ok).key).toBe('practice');
+    // Muddatida yakunlash qismi ixtiyoriy
+    s = D.setOnbCard(s, { position: 'GE', patch: { onTime: false } });
+    expect(D.onboardingScore(s, D.onboardingOf(s, 'e-nilufar')).parts.map((p) => p.key)).toEqual(['courses', 'tasks', 'practice']);
   });
 
   it('Kuzatuv metodistdan, topshiriqni bitta mas’ul tekshiradi (kurator yoki mentor), kuzatuv kompetensiyaga yoziladi', () => {
@@ -469,6 +485,8 @@ describe('Onboarding (TZ): integratsiya, 30 kunlik moslashuv, rollar, eslatmalar
     expect(() => D.reviewTask(s, { enrollmentId: 'enr-o2', componentId: 'a1', decision: 'accepted', note: 'ok', reviewerId: 'u-men-sher' })).toThrow(/1–5/);
     s = D.reviewTask(s, { enrollmentId: 'enr-o2', componentId: 'a1', decision: 'accepted', grade: 4, note: 'Maqsad aniq', mentor: 'Sherzod Ismoilov', reviewerId: 'u-men-sher' });
     expect(D.getEnrollment(s, 'enr-o2').status).toBe('completed');
+    expect(D.onboardingScore(s, D.onboardingOf(s, 'e-nilufar')).ready).toBe(false); // kursdan tashqari topshiriq hali baholanmagan
+    s = D.gradeOnbTask(s, { onboardingId: 'onb-1', taskId: 'gt1', grade: 4, userId: 'u-men-sher' });
     const r = D.onboardingScore(s, D.onboardingOf(s, 'e-nilufar'));
     expect(r.ready).toBe(true);
     // Yunusobod rahbari vakant — HR tasdiqlaydi; kuzatuv o'rtachasi ish dalili sifatida yoziladi
@@ -535,7 +553,7 @@ describe('Onboarding dashboard analitikasi', () => {
     expect(A.onbRows(s, {}, new Set(['b-chil'])).every((r) => r.branchId === 'b-chil')).toBe(true);
   });
 
-  it('Bog‘liqlik, metodologiya tekshiruvi, o‘zlashtirish va xavf guruhi', async () => {
+  it('Bog‘liqlik, metodologiya tekshiruvi, kurslar bajarilishi va xavf guruhi', async () => {
     const A = await import('../src/core/onbAnalytics.js');
     let s = createSeed();
     expect(A.pearson([1, 2, 3, 4], [2, 4, 6, 8])).toBeCloseTo(1);
@@ -543,7 +561,7 @@ describe('Onboarding dashboard analitikasi', () => {
     const c = A.correlation(A.onbRows(s).filter((r) => r.position === 'GE'));
     expect(c.r).toBeGreaterThan(0.4);
     const best = [...c.parts].sort((a, b) => b.r - a.r)[0];
-    expect(best.key).toBe('obs');
+    expect(best.key).toBe('practice'); // dars kuzatuvi
     expect(c.hi.kpi).toBeGreaterThan(c.lo.kpi);
     const m = A.masteryStats(A.onbRows(s));
     expect(m.byCourse.find((x) => x.courseId === 'CRS-ON-GE').onTime).toBeLessThan(m.byCourse.find((x) => x.courseId === 'CRS-ON-CORP').onTime);
@@ -661,5 +679,70 @@ describe('Onboarding tizimi (2026-11-19): huquqlar, karta, kurslar, fikrlar, so�
     expect(D.exitPlan(s, old, { exitType: 'self', leftAt: '2026-09-01' })).toMatchObject({ survey: null, late: true });
     const s2 = D.processHrInbox(s);
     expect(D.getEmployee(s2, 'e-ziyoda').exit).toMatchObject({ type: 'self', survey: 'Fail Case 30-day' });
+  });
+});
+
+describe('Kurslar bajarilishi, gamifikatsiya, tashkiliy tuzilma va jamoadoshlar', () => {
+  it('Kurslar bajarilishi har element teng; Learning Path kurs baholari o‘rtachasi va X / N kurs', () => {
+    const s = createSeed();
+    const enr = D.getEnrollment(s, 'enr-o2');
+    const c = D.getCourse(s, enr.courseId);
+    const pr = D.courseProgress(c, enr);
+    expect(pr.pct).toBe(Math.round((100 * pr.done) / pr.total));
+    const res = D.pathResult(s, 'e-nilufar', ['CRS-ON-CORP', 'CRS-ON-GE']);
+    expect(res).toMatchObject({ coursesDone: 1, total: 2 });
+    expect(res.rows.map((r) => r.grade)).toEqual([5, 4]); // CORP 100% → 5; GE test 75% → 4 (topshiriq tekshiruvda)
+    expect(res.grade).toBe(4.5);
+  });
+
+  it('Ballar, badge katalogi va reyting; badge sharti sozlanadi', () => {
+    let s = createSeed();
+    const p = D.employeePoints(s, 'e-jahongir');
+    expect(p.total).toBeGreaterThan(0);
+    expect(p.items.some((x) => x.kind === 'grade5')).toBe(true); // CORP 5 bilan yakunlangan
+    expect(D.employeeBadges(s, 'e-jahongir').map((b) => b.name)).toContain('A’lochi');
+    expect(() => D.saveBadge(s, { badge: { name: '', kind: 'points', n: 10 } })).toThrow(/nom/);
+    s = D.saveBadge(s, { badge: { name: 'Faol', icon: '🚀', kind: 'points', n: 10, desc: '10 ball' } });
+    expect(D.employeeBadges(s, 'e-jahongir').map((b) => b.name)).toContain('Faol');
+    s = D.setPointRule(s, { kind: 'course', points: 100 });
+    expect(D.employeePoints(s, 'e-jahongir').total).toBeGreaterThan(p.total);
+    const r = D.ratingList(s, { position: 'FIN' });
+    expect(r[0].rank).toBe(1);
+    expect(r.every((x, i) => i === 0 || r[i - 1].points >= x.points)).toBe(true);
+  });
+
+  it('Admin doirasi: bo‘lim yoki barcha filiallardagi bir lavozim; Umumiy jamoa a’zolari', () => {
+    let s = createSeed();
+    s = D.setStaffScope(s, { userId: 'u-lda', kind: 'positions', positions: ['GE'] });
+    const ge = D.scopeEmployees(s, D.getStaff(s, 'u-lda'));
+    expect([...ge].every((id) => D.getEmployee(s, id).position === 'GE')).toBe(true);
+    expect(new Set([...ge].map((id) => D.getEmployee(s, id).branchId)).size).toBeGreaterThan(1); // barcha filiallarda
+    s = D.setStaffScope(s, { userId: 'u-lda', kind: 'departments', departmentIds: ['d-fin'], branchIds: ['b-chil'] });
+    const fin = D.scopeEmployees(s, D.getStaff(s, 'u-lda'));
+    expect([...fin].every((id) => D.getEmployee(s, id).departmentId === 'd-fin' && D.getEmployee(s, id).branchId === 'b-chil')).toBe(true);
+    expect(() => D.setStaffScope(s, { userId: 'u-lda', kind: 'departments', departmentIds: [] })).toThrow(/bo‘lim/);
+    // Tashkiliy tuzilma LMS'da qo'lda
+    expect(() => D.saveDepartment(s, { name: 'Marketing', userId: 'u-lda' })).toThrow(/huquq/);
+    s = D.saveDepartment(s, { name: 'Marketing', branchIds: ['b-chil'], userId: 'u-hr' });
+    const mk = s.departments.find((d) => d.name === 'Marketing');
+    expect(() => D.setEmployeeDepartment(s, { employeeId: 'e-aziza', departmentId: mk.id, userId: 'u-hr' })).toThrow(/filialida/);
+    s = D.setEmployeeDepartment(s, { employeeId: 'e-rustam', departmentId: mk.id, userId: 'u-hr' });
+    expect(() => D.removeDepartment(s, { id: mk.id, userId: 'u-hr' })).toThrow(/xodim bor/);
+    // Foydalanuvchi tarixi va sertifikat
+    const h = D.userHistory(s, 'e-jahongir');
+    expect(h.every((x) => x.startedAt)).toBe(true);
+    expect(D.certificates(s, 'e-jahongir').length).toBe(2);
+  });
+
+  it('Jamoadoshlar: sukut bo‘yicha o‘z filiali; bo‘lim yoki bir necha filialga sozlanadi', () => {
+    let s = createSeed();
+    const sanjar = D.getEmployee(s, 'e-sanjar');
+    const def = D.colleaguesOf(s, sanjar);
+    expect(def.every((e) => e.branchId === 'b-chil' && e.id !== 'e-sanjar')).toBe(true);
+    s = D.setColleaguesScope(s, { employeeId: 'e-sanjar', kind: 'department', userId: 'u-hr' });
+    expect(D.colleaguesOf(s, D.getEmployee(s, 'e-sanjar')).every((e) => e.departmentId === 'd-acad' && e.branchId === 'b-chil')).toBe(true);
+    s = D.setColleaguesScope(s, { employeeId: 'e-sanjar', kind: 'branches', branchIds: ['b-yunus'], userId: 'u-hr' });
+    expect(new Set(D.colleaguesOf(s, D.getEmployee(s, 'e-sanjar')).map((e) => e.branchId))).toEqual(new Set(['b-chil', 'b-yunus']));
+    expect(() => D.setColleaguesScope(s, { employeeId: 'e-sanjar', kind: 'branch', userId: 'u-men-gul' })).toThrow(/Huquq/);
   });
 });

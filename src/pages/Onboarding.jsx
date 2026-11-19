@@ -6,11 +6,11 @@ import { positionName } from '../core/modelKit.js';
 
 const num = (v) => (v === null || v === undefined ? '—' : String(v).replace('.', ','));
 
-/** Moslashuv bahosi — kompetensiya darajasidan farqli ko'rinish: «4,2 / 5 ball» (K1). */
+/** Onboarding natijasi — kompetensiya darajasidan farqli ko'rinish: «4,2 / 5» (K1). */
 export function OnbScore({ v, big }) {
   const tone = v === null ? 'muted' : v >= 4.5 ? 'good' : v >= 3.5 ? 'teal' : v >= 2.5 ? 'warn' : 'bad';
   return (
-    <span className={`onb-score ${tone} ${big ? 'big' : ''}`} title="Onboarding bahosi (1–5 ball). Kompetensiya darajasi emas.">
+    <span className={`onb-score ${tone} ${big ? 'big' : ''}`} title="Onboarding natijasi (1–5). Kompetensiya darajasi emas.">
       <b>{num(v)}</b><small> / 5 ball</small>{big && v !== null && <em>{D.ONB_LABEL(v)}</em>}
     </span>
   );
@@ -36,7 +36,7 @@ export function OnbTags({ s, ob }) {
       {ob.reboarding && <span className="pill brand">Reboarding</span>}
       {late >= s.onboardingConfig.lateDays && <span className="pill warn">Kech kiritildi: {late} kun</span>}
       {ob.source === 'branch' && <span className="pill muted">Filial o‘zi olgan</span>}
-      {ob.final?.badge && <span className="pill good">Badge</span>}
+      {ob.final?.passed && <span className="pill good">Muvaffaqiyatli yakunlandi</span>}
     </span>
   );
 }
@@ -44,6 +44,60 @@ export function OnbTags({ s, ob }) {
 function reviewerText(s, enr) {
   const r = D.taskReviewer(s, enr);
   return r.kind === 'curator' ? `kurator ${r.user.name}` : r.kind === 'mentor' ? `mentor ${r.user.name}` : 'HR';
+}
+
+const progressText = (r) => [`kurslar ${r.coursesDone}/${r.courses}`, r.card.tasks.length ? `topshiriqlar ${r.tasksDone}/${r.card.tasks.length}` : null, r.need ? `${r.card.practice === 'lesson' ? 'dars kuzatuvi' : 'ish kuzatuvi'} ${r.checks}/${r.need}` : null].filter(Boolean).join(', ');
+
+/** Kursdan tashqari amaliy topshiriqlar: mentor yoki mas'ul shaxs 1–5 baholaydi. */
+function OnbTasks({ s, ob, r, user }) {
+  const emp = D.getEmployee(s, ob.employeeId);
+  const can = ob.status === 'active' && D.canAny(user, ['onb.assign', 'onb.approve']) && D.inScope(s, user, emp);
+  const [g, setG] = useState({});
+  return (
+    <>
+      <h3>Amaliy topshiriqlar (kursdan tashqari) — {r.tasksDone} / {r.card.tasks.length}</h3>
+      {r.card.tasks.map((t) => {
+        const done = ob.taskGrades?.[t.id];
+        return (
+          <div key={t.id} className="onb-course">
+            <div className="row between"><b>{t.name}</b>{done ? <Pill tone="good">{done.grade} / 5 · {done.by}</Pill> : <Pill tone="muted">baholanmagan</Pill>}</div>
+            {done?.note && <div className="small ink2">{done.note}</div>}
+            {can && (
+              <div className="row" style={{ gap: 6, marginTop: 6 }}>
+                <select className="i compact" value={g[t.id] || ''} onChange={(e) => setG({ ...g, [t.id]: e.target.value })}><option value="">baho</option>{[5, 4, 3, 2, 1].map((x) => <option key={x} value={x}>{x}</option>)}</select>
+                <button className="btn sm" disabled={!g[t.id]} onClick={() => run(D.gradeOnbTask, { onboardingId: ob.id, taskId: t.id, grade: g[t.id], userId: user.id }, 'Topshiriq baholandi')}>{done ? 'Qayta baholash' : 'Baholash'}</button>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+/** Menejerlar uchun ish amaliyotidagi kuzatuv: lavozim kartasidagi ko'rsatkichlar. */
+function WorkChecks({ s, ob, emp, r, user }) {
+  const list = D.onbWorkChecks(s, ob);
+  const can = ob.status === 'active' && D.canAny(user, ['onb.observe', 'onb.approve']) && D.inScope(s, user, emp);
+  const [f, setF] = useState({});
+  const [note, setNote] = useState('');
+  return (
+    <>
+      <h3>Ish amaliyotidagi kuzatuv — {list.length} / {r.need}</h3>
+      {list.map((w) => <div key={w.id} className="obs-card small"><div className="row between"><b>{fmtDate(w.date)}</b><span className="muted">{w.by}</span></div><div style={{ marginTop: 4 }}>{Object.entries(w.ratings).map(([k, v]) => `${k}: ${v}`).join(' · ')} · o‘rtacha <b>{num(Math.round(D.obsMean(w) * 10) / 10)}</b>{w.note ? ` — ${w.note}` : ''}</div></div>)}
+      {!list.length && <div className="muted small">Hali kuzatuv yo‘q — filial rahbari ish ko‘rsatkichlarini 1–5 baholaydi.</div>}
+      {can && (
+        <div className="panel add-box">
+          <b className="small">Ish kuzatuvini kiritish</b>
+          <div className="stack" style={{ gap: 6, marginTop: 6 }}>
+            {r.card.indicators.map((k) => <label key={k} className="row between small">{k}<select className="i compact" value={f[k] || ''} onChange={(e) => setF({ ...f, [k]: e.target.value })}><option value="">—</option>{[5, 4, 3, 2, 1].map((x) => <option key={x} value={x}>{x}</option>)}</select></label>)}
+            <input className="i compact" placeholder="Izoh (ixtiyoriy)" value={note} onChange={(e) => setNote(e.target.value)} />
+            <button className="btn sm" disabled={r.card.indicators.some((k) => !f[k])} onClick={() => run(D.addWorkCheck, { employeeId: emp.id, ratings: f, note, userId: user.id }, 'Kuzatuv saqlandi') && (setF({}), setNote(''))}>Saqlash</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
 
 /** Kurslar, kuzatuv, uchrashuv, so'rovnoma va ball tarkibi. */
@@ -79,10 +133,13 @@ export function OnbDetail({ s, ob, user }) {
                 <div className="small ink2">
                   {t && <>Test: {typeof tp?.best === 'number' ? `${tp.best}% → ${D.testBall(tp.best)} ball` : 'topshirilmagan'}</>}
                   {a && <> · Topshiriq: {ap?.status === 'accepted' ? `${ap.mentor.grade} ball (${ap.mentor.by})` : ap?.status === 'pending' ? `tekshiruvda — ${reviewerText(s, enr)}` : ap?.status === 'returned' ? 'qaytarilgan' : 'yuborilmagan'}</>}
+                  {' · '}Kurs bahosi: <b>{num(D.courseGrade(c, enr))}</b>
                 </div>
               </div>
             );
           })}
+          {r.card.tasks.length > 0 && <OnbTasks s={s} ob={ob} r={r} user={user} />}
+          {r.card.practice === 'work' && r.need > 0 && <WorkChecks s={s} ob={ob} emp={emp} r={r} user={user} />}
           {ob.restored?.length > 0 && <div className="callout small"><b>Reboarding:</b> {ob.restored.map((x) => x.text).join('; ')}.</div>}
           {r.needObs > 0 && (
             <>
@@ -97,11 +154,11 @@ export function OnbDetail({ s, ob, user }) {
           )}
         </div>
         <div className="stack">
-          <h3>Joriy natija</h3>
+          <h3>Onboarding natijasi</h3>
           <div className="row" style={{ gap: 14 }}><OnbScore v={ob.final?.score ?? r.score} big />{ob.final ? <span className="small">Tasdiqladi: {ob.final.by} ({ob.final.byRole}), {fmtDate(ob.final.at)}</span> : <span className="small muted">Taxminiy — yakuniy bahoni filial rahbari tasdiqlaydi</span>}</div>
           <table className="small">
             <tbody>
-              {r.parts.map((p) => <tr key={p.key}><td>{p.label}<div className="muted">{p.hint}</div></td><td className="num">{p.weight}%</td><td className="num"><b>{num(p.value)}</b></td></tr>)}
+              {r.parts.map((p) => <tr key={p.key}><td>{p.label}<div className="muted">{p.hint}</div></td><td className="num"><b>{num(p.value)}</b></td><td className="num">{p.value === null ? <span className="muted">—</span> : p.ok ? <Pill tone="good">≥ {r.min}</Pill> : <Pill tone="bad">&lt; {r.min}</Pill>}</td></tr>)}
             </tbody>
           </table>
           <div className="small ink2">
@@ -110,15 +167,16 @@ export function OnbDetail({ s, ob, user }) {
             <div>CEO va HRD bilan uchrashuv: {mt ? (mt.attended.includes(emp.id) ? <b style={{ color: 'var(--good)' }}>qatnashdi ({fmtDate(mt.date)})</b> : mt.date >= s.today ? `taklif qilingan (${fmtDate(mt.date)})` : 'qatnashmadi') : 'hali taklif qilinmagan'}</div>
             <div>Mentor: {mentor?.name || '—'} · Buddy: {buddy?.name || '—'} · Filial rahbari: {head?.name || 'vakant — HR tasdiqlaydi'} · Ish boshlagan {fmtDate(ob.startedAt)}, tizimga kiritilgan {fmtDate(ob.enteredAt)}</div>
           </div>
+          <div className="small muted">Umumiy natija — qismlar o‘rtachasi. Har bir qism kamida {r.min} bo‘lishi shart; hammasi o‘tsa, onboarding muvaffaqiyatli yakunlanadi (bu holat, badge emas).</div>
           {ob.status === 'active' && (
-            <div className={`callout small ${r.ready ? 'good' : day >= days ? 'warn' : ''}`}>
-              {r.ready ? `Dastur bajarildi: kurslar ${r.coursesDone}/${r.courses}${r.needObs ? `, kuzatuv ${r.obs}/${r.needObs}` : ''}. ${r.badge ? 'Badge sharti bajarilgan.' : `Badge uchun ball ≥ ${num(s.onboardingConfig.badgeMin)} kerak.`}`
-                : day >= days ? `${days} kunlik dastur muddati o‘tdi, to‘liq bajarilmagan (kurslar ${r.coursesDone}/${r.courses}${r.needObs ? `, kuzatuv ${r.obs}/${r.needObs}` : ''}). Tasdiqlansa badge berilmaydi.`
-                  : `Dastur tugashiga ${days - day} kun qoldi: kurslar ${r.coursesDone}/${r.courses}${r.needObs ? `, kuzatuv ${r.obs}/${r.needObs}` : ''}.`}
+            <div className={`callout small ${r.ready ? (r.passed ? 'good' : 'warn') : day >= days ? 'warn' : ''}`}>
+              {r.ready ? (r.passed ? `Dastur bajarildi, barcha qismlar minimumdan (${r.min}) o‘tdi.` : `Dastur bajarildi, lekin minimumdan o‘tmagan qism bor: ${r.parts.filter((p) => !p.ok).map((p) => p.label).join(', ')}.`)
+                : day >= days ? `${days} kunlik dastur muddati o‘tdi, to‘liq bajarilmagan (${progressText(r)}).`
+                  : `Dastur tugashiga ${days - day} kun qoldi: ${progressText(r)}.`}
             </div>
           )}
-          {canApprove && (r.ready || day >= days) && <div><button className="btn primary" onClick={() => run(D.approveOnboarding, { id: ob.id, userId: user.id }, 'Yakuniy baho tasdiqlandi')}>Yakuniy bahoni tasdiqlash</button> <span className="small muted">Kuzatuv ballari kompetensiya profiliga ish dalili sifatida yoziladi.</span></div>}
-          {ob.final && <div className={`callout small ${ob.final.badge ? 'good' : 'warn'}`}>{ob.final.badge ? '🏅 «Moslashuv yakunlandi» badge’i berilgan.' : 'Badge berilmagan — mentor bilan rivojlanish rejasi tuziladi.'} 30 kundan keyin KPI Edu’dan olinadi; 60-kunda kompetensiya kartasi bo‘yicha birinchi lavozim darajasi beriladi.</div>}
+          {canApprove && (r.ready || day >= days) && <div><button className="btn primary" onClick={() => run(D.approveOnboarding, { id: ob.id, userId: user.id }, 'Onboarding natijasi tasdiqlandi')}>Onboarding natijasini tasdiqlash</button> <span className="small muted">Kuzatuv ballari kompetensiya profiliga ish dalili sifatida yoziladi.</span></div>}
+          {ob.final && <div className={`callout small ${ob.final.passed ? 'good' : 'warn'}`}>{ob.final.passed ? 'Onboarding muvaffaqiyatli yakunlandi: barcha qismlar minimumdan o‘tgan.' : 'Minimumdan o‘tmagan qism bor — mentor bilan rivojlanish rejasi tuziladi.'} 30 kundan keyin KPI Edu’dan olinadi; 60-kunda kompetensiya kartasi bo‘yicha birinchi lavozim darajasi beriladi.</div>}
           {D.can(user, 'onb.assign') && ob.status === 'active' && <AssignPeople s={s} emp={emp} user={user} />}
           {user?.role === 'mentor' && ob.status === 'active' && <AssignCourse s={s} emp={emp} user={user} />}
         </div>
@@ -164,20 +222,39 @@ function ProgDays({ p }) {
   return <label className="f small">{p.position}<span className="row" style={{ gap: 4 }}><input className="i compact" style={{ width: 64 }} type="number" value={d} onChange={(e) => setD(e.target.value)} /><button className="btn sm" disabled={Number(d) === (p.days || D.ONB_DAYS)} onClick={() => run(D.setProgramDays, { position: p.position, days: d }, 'Muddat saqlandi')}>OK</button></span></label>;
 }
 
-function Weights({ s }) {
-  const [w, setW] = useState({ ...s.onboardingConfig.weights, badgeMin: s.onboardingConfig.badgeMin });
+function CardConfig({ s, p }) {
+  const c = D.onbCard(p);
+  const [f, setF] = useState({ onTime: c.onTime, min: c.min, practice: c.practice, checks: c.practice === 'work' ? c.need : 1, observations: p.observations || 2, indicators: c.indicators.join('\n'), tasks: c.tasks });
+  const save = () => run(D.setOnbCard, { position: p.position, patch: { onTime: f.onTime, min: f.min, practice: f.practice, checks: Number(f.checks), observations: f.observations, indicators: f.indicators.split('\n'), tasks: f.tasks } }, 'Karta saqlandi');
   return (
-    <Panel title="Yakuniy baho metodologiyasi (taklif — L&D tasdiqlaydi)">
-      <div className="small ink2" style={{ marginBottom: 8 }}>Yakuniy ball = komponentlarning og‘irlikli o‘rtachasi (1–5). Ma’lumoti yo‘q komponent hisobga olinmaydi; ustoz bo‘lmaganlarda kuzatuv yo‘q. Badge: barcha kurslar yakunlangan, ustozda ≥ 2 kuzatuv va ball ≥ chegara.</div>
-      <div className="row" style={{ marginBottom: 10 }}>
-        <span className="small"><b>Moslashuv dasturi muddati</b> (lavozim bo‘yicha, standart 30 kun; onboarding bahosi shu muddat yakunida):</span>
-        {s.onboardingPrograms.map((p) => <ProgDays key={p.position} p={p} />)}
+    <div className="onb-course">
+      <div className="row between"><b>{p.position === 'GE' ? 'Ustoz (GE)' : p.position === 'FIN' ? 'Moliya menejeri' : p.position === 'FR' ? 'Filial rahbari' : p.position === 'ADM' ? 'Markaz admini' : p.position}</b><ProgDays p={p} /></div>
+      <div className="row small" style={{ gap: 14, flexWrap: 'wrap', marginTop: 6 }}>
+        <label className="row" style={{ gap: 4 }}><input type="checkbox" checked={f.onTime} onChange={(e) => setF({ ...f, onTime: e.target.checked })} /> Kursni muddatida yakunlash</label>
+        <span>Kurs bahosi — doim</span>
+        <label className="row" style={{ gap: 4 }}>Kuzatuv<select className="i compact" value={f.practice} onChange={(e) => setF({ ...f, practice: e.target.value })}>{Object.entries(D.PRACTICE_KIND).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
+        {f.practice === 'lesson'
+          ? <label className="row" style={{ gap: 4 }}>soni<input className="i compact" style={{ width: 56 }} type="number" value={f.observations} onChange={(e) => setF({ ...f, observations: e.target.value })} /></label>
+          : <label className="row" style={{ gap: 4 }}>soni<input className="i compact" style={{ width: 56 }} type="number" value={f.checks} onChange={(e) => setF({ ...f, checks: e.target.value })} /></label>}
+        <label className="row" style={{ gap: 4 }}>Har qism minimumi<input className="i compact" style={{ width: 56 }} type="number" step="0.5" value={f.min} onChange={(e) => setF({ ...f, min: e.target.value })} /></label>
       </div>
-      <div className="row">
-        {Object.entries(D.ONB_PARTS).map(([k, [l]]) => <label key={k} className="f">{l}, %<input className="i compact" style={{ width: 80 }} type="number" value={w[k]} onChange={(e) => setW({ ...w, [k]: e.target.value })} /></label>)}
-        <label className="f">Badge chegarasi<input className="i compact" style={{ width: 80 }} type="number" step="0.1" value={w.badgeMin} onChange={(e) => setW({ ...w, badgeMin: e.target.value })} /></label>
-        <button className="btn sm" onClick={() => run(D.setOnboardingWeights, { weights: w, badgeMin: w.badgeMin }, 'Metodologiya saqlandi')}>Saqlash</button>
+      <div className="grid g2" style={{ marginTop: 6 }}>
+        <div>
+          <div className="small muted">Kursdan tashqari amaliy topshiriqlar</div>
+          {f.tasks.map((t, i) => <div key={t.id} className="row" style={{ gap: 4, marginTop: 4 }}><input className="i compact" style={{ flex: 1 }} value={t.name} onChange={(e) => setF({ ...f, tasks: f.tasks.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)) })} /><button className="btn sm" onClick={() => setF({ ...f, tasks: f.tasks.filter((_, j) => j !== i) })}>×</button></div>)}
+          <button className="link-btn small" onClick={() => setF({ ...f, tasks: [...f.tasks, { id: `t${Date.now().toString(36)}`, name: '' }] })}>+ topshiriq qo‘shish</button>
+        </div>
+        {f.practice === 'work' && <label className="f small">Ish ko‘rsatkichlari (har qatorda bittasi)<textarea className="i" rows={3} value={f.indicators} onChange={(e) => setF({ ...f, indicators: e.target.value })} /></label>}
       </div>
+      <button className="btn sm" style={{ marginTop: 6 }} onClick={save}>Saqlash</button>
+    </div>
+  );
+}
+
+function CardsConfig({ s }) {
+  return (
+    <Panel title={<div><h2>Onboarding natijasi kartasi — lavozimlar bo‘yicha</h2><div className="muted small">Umumiy natija = kiritilgan qismlarning o‘rtachasi (1–5). Har qism minimumdan o‘tsa — onboarding muvaffaqiyatli yakunlanadi. Bu badge emas: badge faqat noodatiy natija uchun.</div></div>}>
+      <div className="stack">{s.onboardingPrograms.map((p) => <CardConfig key={p.position + JSON.stringify(p.card || {})} s={s} p={p} />)}</div>
     </Panel>
   );
 }
@@ -205,7 +282,7 @@ export default function Onboarding({ user, focus }) {
   const ready = active.filter(({ ob }) => D.onboardingScore(s, ob).ready || D.onbDay(s, ob) >= D.obDays(s, ob)).length;
   const late = active.filter(({ ob }) => D.onbLateDays(ob) >= s.onboardingConfig.lateDays).length;
   const own = active.filter(({ ob }) => ob.source === 'branch').length;
-  const badges = all.filter(({ ob }) => ob.final?.badge).length;
+  const passed = all.filter(({ ob }) => ob.final?.passed).length;
   const archived = s.employees.filter((e) => e.status === 'archived' && (!scope || scope.has(e.id)));
   const branches = [...new Set(all.map((x) => x.emp.branchId))];
   const positions = [...new Set(all.map((x) => x.emp.position))];
@@ -214,7 +291,7 @@ export default function Onboarding({ user, focus }) {
       <div className="page-head">
         <div>
           <h1>Moslashuv — 60 kunlik adaptatsiya</h1>
-          <p>Xodim Jobster’da Induction ustuniga o‘tganda EduTizim, keyin RegUP LMS kartasi avtomatik ochiladi va lavozimiga mos kurslar biriktiriladi. Adaptatsiya 60 kun: orientation (1–7) va functional onboarding (8–60). Moslashuv dasturi lavozim uchun belgilangan muddatda (standart 30 kun) tugaydi va onboarding bahosi (1–5) chiqadi. Birinchi 30 kunda KPI «O‘lchanmagan»; 60-kunda birinchi lavozim darajasi beriladi.</p>
+          <p>Xodim Jobster’da Induction ustuniga o‘tganda EduTizim, keyin RegUP LMS kartasi avtomatik ochiladi va lavozimiga mos kurslar biriktiriladi. Adaptatsiya 60 kun: orientation (1–7) va functional onboarding (8–60). Moslashuv dasturi lavozim uchun belgilangan muddatda (standart 30 kun) tugaydi va onboarding natijasi (1–5) chiqadi. Birinchi 30 kunda KPI «O‘lchanmagan»; 60-kunda birinchi lavozim darajasi beriladi.</p>
           {!manage && <p className="small muted">{user.title}: faqat sizga biriktirilgan xodimlar ko‘rinadi.</p>}
         </div>
       </div>
@@ -223,7 +300,7 @@ export default function Onboarding({ user, focus }) {
         <Stat k="Moslashuvda" v={active.length} s={`${own} tasi filial o‘zi olgan`} icon="users" />
         <Stat k="Yakuniy bahoga tayyor" v={ready} s="dastur bajarilgan yoki muddati o‘tgan" icon="check" tone={ready ? 'warn' : ''} />
         <Stat k="Kech kiritilgan" v={late} s={`ish boshlaganidan ≥ ${s.onboardingConfig.lateDays} kun keyin`} icon="clock" tone={late ? 'bad' : ''} />
-        <Stat k="Badge olgan" v={badges} s="moslashuvni yakunlaganlar" icon="target" />
+        <Stat k="Muvaffaqiyatli yakunlagan" v={passed} s="barcha qismlar minimumdan o‘tgan" icon="target" />
       </div>
       {!manage && <StaffInbox s={s} user={user} />}
       <Panel tight title={<div className="row"><h2>Xodimlar</h2><span className="muted small">qatorni bosing — kurslar, kuzatuv, ball tarkibi</span></div>} actions={
@@ -236,7 +313,7 @@ export default function Onboarding({ user, focus }) {
       }>
         {list.length ? (
           <table>
-            <thead><tr><th>Xodim</th><th>Bosqich</th><th className="num">Kurslar</th><th className="num">Kuzatuv</th><th>CEO/HRD</th><th>Mentor / buddy</th><th className="num">Ball</th></tr></thead>
+            <thead><tr><th>Xodim</th><th>Bosqich</th><th className="num">Kurslar</th><th className="num">Kuzatuv</th><th>CEO/HRD</th><th>Mentor / buddy</th><th className="num">Natija</th></tr></thead>
             <tbody>{list.map(({ ob, emp }) => {
               const r = D.onboardingScore(s, ob);
               const mt = D.ceoMeetingOf(s, emp.id);
@@ -267,7 +344,7 @@ export default function Onboarding({ user, focus }) {
           </table>
         </Panel>
       )}
-      {manage && <Weights s={s} />}
+      {manage && <CardsConfig s={s} />}
     </>
   );
 }

@@ -25,7 +25,9 @@ export function pathStatus(s, emp, path) {
     tenureMin && { label: `Joriy lavozimda staj ≥ ${tenureMin} oy`, ok: tenure >= tenureMin, value: `${tenure} oy` },
     kpiMin && { label: `KPI ≥ ${kpiMin}%`, ok: (emp.kpi10m ?? 0) >= kpiMin, value: emp.kpi10m ? `${emp.kpi10m}%` : 'ma’lumot yo‘q' },
   ].filter(Boolean);
-  return { model, profile, ready, courses, extra, coursesDone: courses.filter((c) => c.completed).length };
+  const res = D.pathResult(s, emp.id, path.courses);
+  courses.forEach((c, i) => Object.assign(c, { grade: res.rows[i].grade, pct: res.rows[i].pct }));
+  return { model, profile, ready, courses, extra, coursesDone: courses.filter((c) => c.completed).length, grade: res.grade, pct: res.pct };
 }
 
 export default function PathDetail({ id }) {
@@ -66,7 +68,7 @@ export default function PathDetail({ id }) {
           }>
             {learners.length ? (
               <table>
-                <thead><tr><th>Xodim</th><th className="num">Kurslar</th><th style={{ minWidth: 170 }}>{profile?.code} ga tayyorlik</th><th>KPI va staj</th><th>Holat</th></tr></thead>
+                <thead><tr><th>Xodim</th><th className="num">Kurslar</th><th className="num">Kurslar bajarilishi</th><th className="num">O‘rt. kurs bahosi</th><th style={{ minWidth: 170 }}>{profile?.code} ga tayyorlik</th><th>KPI va staj</th><th>Holat</th></tr></thead>
                 <tbody>{learners.map((l) => {
                   const e = D.getEmployee(s, l.employeeId);
                   const st = pathStatus(s, e, path);
@@ -74,6 +76,8 @@ export default function PathDetail({ id }) {
                     <tr key={l.id}>
                       <td><Person name={e.name} sub={`${positionName(s.models, e.currentLevel)} · ${fmtDate(l.startedAt)} dan${l.by === 'hr' ? ' · HR biriktirgan' : ''}`} /></td>
                       <td className="num"><b>{st.coursesDone}</b> / {path.courses.length}{st.courses.some((c) => c.pending) && <div className="small" style={{ color: 'var(--warn)' }}>topshiriq tekshiruvda</div>}</td>
+                      <td className="num">{st.pct}%</td>
+                      <td className="num" title={st.courses.map((c) => `${c.course.title}: ${c.grade === null ? '—' : String(c.grade).replace('.', ',')}`).join('\n')}><b>{st.grade === null ? '—' : String(st.grade).replace('.', ',')}</b><div className="muted small">{st.courses.map((c) => (c.grade === null ? '—' : String(c.grade).replace('.', ','))).join(' · ')}</div></td>
                       <td><div className="row" style={{ flexWrap: 'nowrap', gap: 8 }}><div className="near-bar"><i style={{ width: `${st.ready?.near || 0}%` }} /></div><b className="small">{fmtPct(st.ready?.near || 0, 0)}</b></div><div className="muted small">{st.ready?.met} / {st.ready?.total} talab</div></td>
                       <td className="small">{st.extra.map((x) => <div key={x.label} style={{ color: x.ok ? 'var(--good)' : 'var(--warn)' }}>{x.ok ? '✓' : '○'} {x.label} ({x.value})</div>)}</td>
                       <td>{l.status === 'completed' ? <Pill tone="good">yakunlangan</Pill> : <Pill tone="brand">jarayonda</Pill>}</td>

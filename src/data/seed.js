@@ -469,9 +469,9 @@ export function createSeed() {
   // ---------------- Onboarding (TZ): rollar, moslashuv dasturlari, integratsiya navbati, uchrashuvlar ----------------
   // Jamoa a'zolari: huquqlar shaxsga beriladi, har biriga filial doirasi (role — faqat lavozim shabloni).
   const PRESET = {
-    hr: ['onb.view', 'onb.approve', 'onb.assign', 'onb.observe', 'onb.integration', 'onb.meetings', 'onb.reminders', 'cards.assign', 'cards.assess', 'cards.publish', 'talent.view', 'courses.view', 'courses.manage', 'courses.review', 'courses.comments', 'kpi.view', 'audit.view'],
-    lda: ['onb.view', 'onb.assign', 'onb.integration', 'onb.meetings', 'onb.reminders', 'cards.assign', 'courses.view', 'courses.comments'],
-    branch: ['onb.view', 'onb.approve', 'onb.assign', 'onb.meetings', 'onb.reminders', 'cards.assign', 'kpi.view', 'courses.view'],
+    hr: ['onb.view', 'onb.approve', 'onb.assign', 'onb.observe', 'onb.integration', 'onb.meetings', 'onb.reminders', 'cards.assign', 'cards.assess', 'cards.publish', 'talent.view', 'courses.view', 'courses.manage', 'courses.review', 'courses.comments', 'kpi.view', 'audit.view', 'people.view', 'org.manage'],
+    lda: ['onb.view', 'onb.assign', 'onb.integration', 'onb.meetings', 'onb.reminders', 'cards.assign', 'courses.view', 'courses.comments', 'people.view', 'gami.manage'],
+    branch: ['onb.view', 'onb.approve', 'onb.assign', 'onb.observe', 'onb.meetings', 'onb.reminders', 'cards.assign', 'kpi.view', 'courses.view', 'people.view'],
     mentor: ['onb.view', 'onb.assign', 'cards.assign', 'courses.review', 'kpi.view', 'onb.meetings'],
     methodist: ['onb.view', 'onb.observe', 'cards.assess', 'onb.meetings'],
     curator: ['courses.review', 'courses.view'],
@@ -487,13 +487,18 @@ export function createSeed() {
     { id: 'u-cur', role: 'curator', name: 'Laylo Karimova', title: 'Kurator — korporativ va moliya kurslari', courseIds: ['CRS-ON-CORP', 'CRS-ON-FIN'], rights: PRESET.curator, scope: { kind: 'assigned' }, active: true },
   ];
   const onboardingPrograms = [
-    { position: 'GE', courses: ['CRS-ON-CORP', 'CRS-ON-GE'], observations: 2, days: 30 },
-    { position: 'FIN', courses: ['CRS-ON-CORP', 'CRS-ON-FIN'], observations: 0, days: 30 },
-    { position: 'FR', courses: ['CRS-ON-CORP'], observations: 0, days: 45 },
-    { position: 'ADM', courses: ['CRS-ON-CORP'], observations: 0, days: 30 },
+    // card — onboarding natijasi kartasi (lavozimga moslanadi): muddatida yakunlash qismi, har qism minimumi, kursdan tashqari topshiriqlar, ish amaliyotidagi kuzatuv.
+    { position: 'GE', courses: ['CRS-ON-CORP', 'CRS-ON-GE'], observations: 2, days: 30,
+      card: { onTime: true, min: 3, practice: 'lesson', tasks: [{ id: 'gt1', name: 'Ochiq mini-dars: hamkasblar oldida 20 daqiqa' }], indicators: [] } },
+    { position: 'FIN', courses: ['CRS-ON-CORP', 'CRS-ON-FIN'], observations: 0, days: 30,
+      card: { onTime: true, min: 3, practice: 'work', checks: 1, tasks: [{ id: 'ft1', name: 'Birinchi oy to‘lovlar hisoboti (filial rahbariga)' }], indicators: ['Mijoz va ota-onani kutib olish', 'To‘lov va hujjatlarni to‘g‘ri rasmiylashtirish', 'Topshiriqni bajarish sifati va muddati'] } },
+    { position: 'FR', courses: ['CRS-ON-CORP'], observations: 0, days: 45,
+      card: { onTime: false, min: 3, practice: 'work', checks: 1, tasks: [], indicators: ['Jamoa yig‘ilishini o‘tkazish', 'Mijoz bilan muloqot', 'Topshiriqni bajarish sifati'] } },
+    { position: 'ADM', courses: ['CRS-ON-CORP'], observations: 0, days: 30,
+      card: { onTime: true, min: 3, practice: 'work', checks: 1, tasks: [], indicators: ['Mijozni kutib olish', 'Qo‘ng‘iroq va murojaatlarga javob', 'Topshiriqni bajarish sifati'] } },
   ];
   const onboardingConfig = {
-    weights: { courses: 25, tests: 25, tasks: 25, obs: 25 }, badgeMin: 3, lateDays: 7,
+    lateDays: 7,
     obsCodes: ['GEN-01', 'GEN-03', 'GEN-04', 'GEN-05', 'BEH-01', 'BEH-02'],
     mentors: { 'GE:b-chil': 'e-gulbahor', 'GE:b-yunus': 'e-sherzod', 'FIN:b-chil': 'e-rustam' },
   };
@@ -514,7 +519,8 @@ export function createSeed() {
   };
   const onboardings = [
     { id: 'onb-0', employeeId: 'e-lola', startedAt: '2026-06-02', enteredAt: '2026-06-02', source: 'recruiting', status: 'completed', reboarding: false, restored: [],
-      final: { score: 4.2, label: 'Yaxshi', badge: true, ready: true, parts: [], by: 'Yunusobod filiali rahbari', byRole: 'Filial rahbari', at: '2026-07-03' } },
+      taskGrades: { gt1: { grade: 4, note: 'Vaqtni yaxshi taqsimladi.', by: 'Sherzod Ismoilov', at: '2026-06-26' } },
+      final: { score: 4.2, label: 'Yaxshi', passed: true, min: 3, ready: true, parts: [], by: 'Yunusobod filiali rahbari', byRole: 'Filial rahbari', at: '2026-07-03' } },
     { id: 'onb-1', employeeId: 'e-nilufar', startedAt: '2026-10-14', enteredAt: '2026-10-14', source: 'recruiting', status: 'active', reboarding: false, final: null, restored: [] },
     { id: 'onb-2', employeeId: 'e-jahongir', startedAt: '2026-10-05', enteredAt: '2026-10-06', source: 'recruiting', status: 'active', reboarding: false, final: null, restored: [] },
     { id: 'onb-3', employeeId: 'e-sanjar', startedAt: '2026-10-31', enteredAt: '2026-10-31', source: 'branch', status: 'active', reboarding: false, final: null, restored: [] },
@@ -570,11 +576,46 @@ export function createSeed() {
     { id: 'ev-5', type: 'return', at: '2026-11-10', stage: 'Qayta ishga kirish', payload: { employeeId: 'e-lola', startedAt: '2026-11-10', branchId: 'b-yunus', source: 'recruiting' } },
   ];
 
+  // Tashkiliy tuzilma (LMS'da qo'lda): bo'limlar; branchIds bo'sh — barcha filiallarda bor.
+  const departments = [
+    { id: 'd-acad', name: 'Akademik bo‘lim', branchIds: [] },
+    { id: 'd-fin', name: 'Moliya bo‘limi', branchIds: [] },
+    { id: 'd-sales', name: 'Sotuv bo‘limi', branchIds: [] },
+    { id: 'd-adm', name: 'Administratsiya', branchIds: [] },
+    { id: 'd-mgmt', name: 'Filial boshqaruvi', branchIds: [] },
+  ];
+  // EduTizim'dan keladigan profil ma'lumotlari (DEMO): jins, shahar, Telegram, telefon, tug'ilgan kun, Gmail, shaxsiy ma'lumot.
+  const DEPT = { GE: 'd-acad', FIN: 'd-fin', FR: 'd-mgmt', ADM: 'd-adm' };
+  const ABOUT = {
+    GE: 'Ingliz tili ustozi. Darslarda o‘yin va juftlik ishini ko‘p ishlataman.',
+    FIN: 'Filial moliyasi va to‘lovlar bilan ishlayman. Excel va Sheets — asosiy qurolim.',
+    FR: 'Filialni boshqaraman: jamoa, sotuv va o‘quvchilar natijasi.',
+    ADM: 'Mijozlarni kutib olaman, qo‘ng‘iroq va murojaatlarga javob beraman.',
+  };
+  const lat = (x) => x.toLowerCase().replace(/[‘’ʻ']/g, '').replace(/[^a-z]/g, '');
+  employees.forEach((e, i) => {
+    const [first, last = ''] = e.name.split(' ');
+    e.departmentId ||= DEPT[e.position] || null;
+    e.profile ||= {
+      gender: /(ova|eva|ina)$/.test(last) ? 'Ayol' : 'Erkak',
+      city: branches.find((b) => b.id === e.branchId)?.region || '',
+      telegram: `@${lat(first)}_${lat(last).slice(0, 4)}`,
+      phone: `+998 9${i % 10} ${String(100 + ((i * 37) % 900)).padStart(3, '0')} ${String(10 + ((i * 13) % 90))} ${String(10 + ((i * 29) % 90))}`,
+      birthday: `${1988 + (i % 12)}-${String(1 + ((i * 5) % 12)).padStart(2, '0')}-${String(1 + ((i * 7) % 28)).padStart(2, '0')}`,
+      email: `${lat(first)}.${lat(last)}@gmail.com`,
+      about: ABOUT[e.position] || '',
+    };
+  });
+  // Demo: Malika o'z filiali bilan birga Yunusobod jamoasini ham ko'radi (sozlangan doira).
+  const malika = employees.find((e) => e.id === 'e-malika');
+  if (malika) malika.colleagues = { kind: 'branches', branchIds: ['b-yunus'] };
+
   return {
-    schema: 17,
+    schema: 18,
     today: TODAY,
     models,
     branches,
+    departments,
     roles,
     employees,
     cycles,
@@ -600,6 +641,13 @@ export function createSeed() {
     staff,
     onboardingPrograms,
     onboardingConfig,
+    // Gamifikatsiya: ball qoidalari (bo'sh — standart qiymatlar) va badge katalogi. Badge faqat noodatiy natija uchun.
+    gamification: { points: {}, badges: [
+      { id: 'bdg-1', name: 'A’lochi', icon: '⭐', kind: 'grade5', n: 1, desc: 'Kursni 5 kurs bahosi bilan yakunlash', active: true },
+      { id: 'bdg-2', name: 'Bilim ustasi', icon: '🎓', kind: 'grade5', n: 3, desc: 'Uchta kursni 5 kurs bahosi bilan yakunlash', active: true },
+      { id: 'bdg-3', name: 'Uzluksiz o‘quvchi', icon: '🔥', kind: 'streak', n: 4, desc: 'Bir oy davomida har hafta o‘qib borish', active: true },
+      { id: 'bdg-4', name: '500 ball', icon: '🏆', kind: 'points', n: 500, desc: 'Belgilangan miqdordagi ball to‘plash', active: true },
+    ] },
     surveyStats,
     announceConfig: { dates: ['06-30', '12-25'] },
     // Kurs fikrlari (anonim, DEMO): dars bahosi, kursdan qoniqish, NPS, ochiq fikr (e'lon qilingan / tekshiruvda)
@@ -613,6 +661,7 @@ export function createSeed() {
     dataIssues: { duplicates: 2, lateArchive: 1 }, // DEMO: oktabr tekshiruvida topilgan dublikat va kech arxivlangan akkauntlar
     onboardings,
     observations,
+    workChecks: [],
     meetings,
     hrInbox,
     hrLog: [],

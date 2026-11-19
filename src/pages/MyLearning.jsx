@@ -4,15 +4,20 @@ import * as D from '../core/domain.js';
 import { fmtPct } from '../core/calc.js';
 import { nextProfile } from '../core/modelKit.js';
 import { RuleChips } from './Courses.jsx';
+import { useState } from 'react';
 import { pathStatus } from './PathDetail.jsx';
+
+const n1 = (v) => (v === null || v === undefined ? '—' : String(v).replace('.', ','));
 
 function PathCard({ s, emp, path, pe }) {
   const st = pathStatus(s, emp, path);
   const allDone = st.coursesDone === path.courses.length;
   const readyAll = st.ready?.complete && st.extra.every((x) => x.ok);
+  const [open, setOpen] = useState(false);
   return (
     <Panel title={<div><div className="row"><h2>{path.title}</h2><Pill tone="teal">→ {st.profile?.code} {st.profile?.name}</Pill></div><div className="muted small">{fmtDate(pe.startedAt)} dan · {path.weeks} hafta{pe.by === 'hr' ? ' · HR biriktirgan' : ''}</div></div>}
-      actions={<Pill tone={pe.status === 'completed' ? 'good' : 'brand'}>{st.coursesDone} / {path.courses.length} kurs</Pill>}>
+      actions={<div className="row" style={{ gap: 6 }}><Pill tone={pe.status === 'completed' ? 'good' : 'brand'}>{st.coursesDone} / {path.courses.length} kurs</Pill><Pill tone="muted">Kurslar bajarilishi {st.pct}%</Pill><button className="btn sm" title="Har bir kurs bahosini ko‘rish" onClick={() => setOpen(!open)}>O‘rtacha kurs bahosi: <b>{n1(st.grade)}</b> {open ? '▴' : '▾'}</button></div>}>
+      {open && <table className="small" style={{ marginBottom: 10 }}><thead><tr><th>Kurs</th><th className="num">Bajarilishi</th><th className="num">Kurs bahosi</th></tr></thead><tbody>{st.courses.map((c) => <tr key={c.course.id}><td>{c.course.title}</td><td className="num">{c.pct}%</td><td className="num"><b>{n1(c.grade)}</b></td></tr>)}<tr><td><b>O‘rtacha</b></td><td className="num">{st.pct}%</td><td className="num"><b>{n1(st.grade)}</b></td></tr></tbody></table>}
       <div className="split" style={{ gridTemplateColumns: 'minmax(0,1fr) 300px' }}>
         <ol className="path-track">
           {st.courses.map((c, i) => (
@@ -20,7 +25,7 @@ function PathCard({ s, emp, path, pe }) {
               <span className="pt-n">{c.completed ? '✓' : i + 1}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <b>{c.course.title}</b>
-                <div className="small muted">{c.completed ? `Yakunlangan ${fmtDate(c.enr.completedAt)}` : c.locked ? 'Oldingi kurs yakunlangach ochiladi' : `${c.done} / ${c.total} bajarildi${c.pending ? ' · topshiriq mentor tekshiruvida' : ''}`}</div>
+                <div className="small muted">{c.completed ? `Yakunlangan ${fmtDate(c.enr.completedAt)} · kurs bahosi ${n1(c.grade)}` : c.locked ? 'Oldingi kurs yakunlangach ochiladi' : `Kurslar bajarilishi ${c.pct}% (${c.done} / ${c.total})${c.grade !== null ? ` · kurs bahosi ${n1(c.grade)}` : ''}${c.pending ? ' · topshiriq mentor tekshiruvida' : ''}`}</div>
                 <div style={{ marginTop: 4 }}><RuleChips s={s} course={c.course} compact /></div>
               </div>
               {c.enr && !c.locked && !c.completed && <button className="btn sm primary" onClick={() => go(`/learn/${c.enr.id}`)}>Davom ettirish</button>}
@@ -69,8 +74,9 @@ export default function MyLearning({ emp }) {
         <Panel title="Alohida kurslar" tight>
           <table><tbody>{solo.map((e) => {
             const c = D.getCourse(s, e.courseId);
-            const done = c.components.filter((x) => D.componentDone(c, e, x.id)).length;
-            return <tr key={e.id} className="clickable" onClick={() => go(`/learn/${e.id}`)}><td><b>{c.title}</b>{e.mandatory && e.status !== 'completed' && <> <Pill tone={e.mandatory.deadline < s.today ? 'bad' : 'warn'}>majburiy · muddat {fmtDate(e.mandatory.deadline)}</Pill></>}<div className="muted small">{done} / {c.components.length} bajarildi{e.mandatory ? ` · KPI bo‘yicha biriktirilgan (${D.monthName(e.mandatory.month)})` : ''}</div></td><td><RuleChips s={s} course={c} compact /></td><td>{e.status === 'completed' ? <Pill tone="good">yakunlangan</Pill> : <Pill tone="brand">o‘qimoqda</Pill>}</td></tr>;
+            const pr = D.courseProgress(c, e);
+            const g = D.courseGrade(c, e);
+            return <tr key={e.id} className="clickable" onClick={() => go(`/learn/${e.id}`)}><td><b>{c.title}</b>{e.mandatory && e.status !== 'completed' && <> <Pill tone={e.mandatory.deadline < s.today ? 'bad' : 'warn'}>majburiy · muddat {fmtDate(e.mandatory.deadline)}</Pill></>}<div className="muted small">Kurslar bajarilishi {pr.pct}% ({pr.done} / {pr.total}){g !== null ? ` · kurs bahosi ${n1(g)}` : ''}{e.mandatory ? ` · KPI bo‘yicha biriktirilgan (${D.monthName(e.mandatory.month)})` : ''}</div></td><td><RuleChips s={s} course={c} compact /></td><td>{e.status === 'completed' ? <Pill tone="good">yakunlangan</Pill> : <Pill tone="brand">o‘qimoqda</Pill>}</td></tr>;
           })}</tbody></table>
         </Panel>
       )}

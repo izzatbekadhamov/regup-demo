@@ -911,6 +911,23 @@ export function courseGrade(course, enr) {
   return xs.length ? Math.round((10 * xs.reduce((a, b) => a + b, 0)) / xs.length) / 10 : null;
 }
 export const courseMinGrade = (course) => course.minGrade ?? COURSE_MIN_GRADE;
+/** Kurslar bajarilishi: kurs kontentining (dars, test, topshiriq) necha foizi bajarilgan; har element teng. */
+export function courseProgress(course, enr) {
+  const total = course.components.length;
+  const done = enr ? course.components.filter((c) => componentDone(course, enr, c.id)).length : 0;
+  return { done, total, pct: total ? Math.round((100 * done) / total) : 0 };
+}
+/** Learning Path natijasi: kurs baholari o'rtachasi (bosilganda har kurs), kurslar bajarilishi va «X / N kurs». */
+export function pathResult(s, employeeId, courseIds) {
+  const rows = courseIds.map((cid) => {
+    const course = getCourse(s, cid);
+    const enr = (s.enrollments || []).filter((e) => e.employeeId === employeeId && e.courseId === cid).sort((a) => (a.status === 'completed' ? -1 : 1))[0] || null;
+    return { course, enr, grade: enr ? courseGrade(course, enr) : null, ...courseProgress(course, enr), completed: enr?.status === 'completed' };
+  });
+  const gs = rows.map((r) => r.grade).filter(isNum);
+  const all = rows.reduce((a, r) => a + r.total, 0);
+  return { rows, grade: gs.length ? Math.round((10 * gs.reduce((a, b) => a + b, 0)) / gs.length) / 10 : null, pct: all ? Math.round((100 * rows.reduce((a, r) => a + r.done, 0)) / all) : 0, coursesDone: rows.filter((r) => r.completed).length, total: rows.length };
+}
 /** Test savollari indikator darajasiga bog'langan bo'lsa (q.lvl): topilgan daraja — shu va undan past darajalarning barcha savollari to'g'ri. */
 export function foundLevel(questions, answers, cap) {
   if (!questions.some((qq) => isNum(qq.lvl))) return null;
@@ -1476,7 +1493,7 @@ export function setSkillProfile(state, { profileCode, skillId, level, actor = 'H
 
 // ---------------------------------------------------------------------------
 // Onboarding (TZ): Jobster ATS → Edu → RegUP. Kartochka integratsiyadan ochiladi,
-// 30 kunlik moslashuv dasturi, yakuniy 1–5 baho (filial rahbari tasdiqlaydi), badge.
+// 30 kunlik moslashuv dasturi, onboarding natijasi 1–5 (lavozim kartasi, minimum sharti; filial rahbari tasdiqlaydi).
 // Arxivlash va reboarding, CEO/HRD uchrashuvlari, eslatmalar, rollar.
 // ---------------------------------------------------------------------------
 export const ONB_DAYS = 30; // moslashuv dasturining standart muddati (lavozimda sozlanadi)
@@ -1506,51 +1523,69 @@ export const enrDeadline = (enr) => enr.deadline || enr.mandatory?.deadline || n
 /** Test foizi → 1–5 ball (Q1 taklifi; admin metodologiyani keyin almashtiradi). */
 export const testBall = (pct) => (pct >= 90 ? 5 : pct >= 75 ? 4 : pct >= 60 ? 3 : pct >= 40 ? 2 : 1);
 export const ONB_LABEL = (v) => (v === null ? '—' : v >= 4.5 ? 'A’lo' : v >= 3.5 ? 'Yaxshi' : v >= 2.5 ? 'Qoniqarli' : 'Past');
+// Onboarding natijasi — lavozimga moslanadigan baholash kartasi (har qism 1–5). Badge emas: minimumdan o'tish = «muvaffaqiyatli yakunlandi».
 export const ONB_PARTS = {
-  courses: ['Kurslarni muddatida yakunlash', 'Barcha kurslar muddatida yakunlansa — 5, hech biri — 1'],
-  tests: ['Testlar', 'Eng yaxshi natija: 90%+ → 5, 75–89 → 4, 60–74 → 3, 40–59 → 2, past → 1'],
-  tasks: ['Amaliy topshiriqlar', 'Mentor yoki kurator qo‘ygan 1–5 baho'],
-  obs: ['Dars kuzatuvi (observation)', 'Metodist checklisti, 1–5 ball o‘rtachasi (faqat ustozlar)'],
+  onTime: ['Kursni muddatida yakunlash', 'Barcha onboarding kurslari muddatida — 5, hech biri — 1. Ixtiyoriy qism'],
+  courses: ['Kurs bahosi', 'Onboarding kurslari baholarining o‘rtachasi; kurs bahosi kursning o‘z testlari va amaliy topshiriqlaridan'],
+  tasks: ['Amaliy topshiriqlar bahosi', 'Kursdan tashqari, nomi bilan belgilangan maxsus topshiriqlar; mentor 1–5 baholaydi'],
+  practice: ['Ish amaliyotidagi kuzatuv', 'Ustozda metodistning dars kuzatuvi, menejerda ish ko‘rsatkichlari; 1–5 o‘rtacha'],
 };
+export const ONB_MIN = 3;
+export const PRACTICE_KIND = { lesson: 'Dars kuzatuvi (metodist)', work: 'Ish ko‘rsatkichlari (filial rahbari)' };
 const avg = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
 const r1 = (v) => (v === null ? null : Math.round(v * 10) / 10);
 export const obsMean = (o) => avg(Object.values(o.ratings).map(Number));
+/** Lavozim kartasi: qaysi qismlar kiradi, minimum, kursdan tashqari topshiriqlar, kuzatuv turi va soni. */
+export function onbCard(prog) {
+  const c = prog?.card || {};
+  const kind = c.practice || (prog?.observations ? 'lesson' : 'work');
+  return {
+    onTime: c.onTime !== false,
+    min: c.min ?? ONB_MIN,
+    tasks: c.tasks || [],
+    practice: kind,
+    need: kind === 'lesson' ? (prog?.observations || 0) : (c.checks ?? 1),
+    indicators: c.indicators || [],
+  };
+}
+export const onbWorkChecks = (s, ob) => (s.workChecks || []).filter((w) => w.employeeId === ob.employeeId && w.date >= ob.startedAt);
 
-/** Moslashuv natijasi: komponentlar, yakuniy ball, tayyorlik va badge sharti. */
+/** Onboarding natijasi: qismlar, umumiy o'rtacha, minimum sharti va tayyorlik. */
 export function onboardingScore(s, ob) {
   const emp = getEmployee(s, ob.employeeId);
   const prog = onbProgram(s, emp);
+  const card = onbCard(prog);
   const enrs = onbEnrollments(s, ob);
-  const tests = [];
-  const tasks = [];
+  const grades = [];
   let onTime = 0;
   let due = 0; // muddati kelgan yoki yakunlangan kurslar — hali muddati bor kurs jazolanmaydi
   for (const enr of enrs) {
-    const course = getCourse(s, enr.courseId);
-    for (const c of course.components) {
-      const p = enr.progress[c.id];
-      if (c.kind === 'test' && isNum(p?.best)) tests.push(testBall(p.best));
-      if (c.kind === 'task' && p?.status === 'accepted' && isNum(p.mentor?.grade)) tasks.push(p.mentor.grade);
-    }
+    const g = courseGrade(getCourse(s, enr.courseId), enr);
+    if (g !== null) grades.push(g);
     if (enr.status === 'completed' || (enr.deadline && enr.deadline < s.today)) due += 1;
     if (enr.status === 'completed' && (!enr.deadline || enr.completedAt <= enr.deadline)) onTime += 1;
   }
-  const obs = onbObservations(s, ob);
-  const needObs = prog?.observations || 0;
+  const taskGrades = card.tasks.map((t) => ob.taskGrades?.[t.id]?.grade).filter(isNum);
+  const checks = card.practice === 'lesson' ? onbObservations(s, ob) : onbWorkChecks(s, ob);
   const vals = {
-    courses: due ? 1 + (4 * onTime) / due : null,
-    tests: avg(tests),
-    tasks: avg(tasks),
-    obs: needObs ? avg(obs.map(obsMean)) : null,
+    onTime: due ? 1 + (4 * onTime) / due : null,
+    courses: avg(grades),
+    tasks: avg(taskGrades),
+    practice: card.need ? avg(checks.map(obsMean)) : null,
   };
-  const w = s.onboardingConfig.weights;
-  const parts = Object.keys(ONB_PARTS).filter((k) => k !== 'obs' || needObs).map((k) => ({ key: k, label: ONB_PARTS[k][0], hint: ONB_PARTS[k][1], value: r1(vals[k]), weight: w[k] }));
-  const used = parts.filter((p) => p.value !== null && p.weight > 0);
-  const tw = used.reduce((a, p) => a + p.weight, 0);
-  const score = tw ? r1(used.reduce((a, p) => a + p.value * p.weight, 0) / tw) : null;
+  const on = { onTime: card.onTime, courses: true, tasks: card.tasks.length > 0, practice: card.need > 0 };
+  const parts = Object.keys(ONB_PARTS).filter((k) => on[k]).map((k) => {
+    const value = r1(vals[k]);
+    return { key: k, label: ONB_PARTS[k][0], hint: k === 'practice' ? PRACTICE_KIND[card.practice] : k === 'tasks' ? card.tasks.map((t) => t.name).join('; ') : ONB_PARTS[k][1], value, ok: value !== null && value >= card.min };
+  });
+  const used = parts.filter((p) => p.value !== null);
+  const score = used.length ? r1(avg(used.map((p) => p.value))) : null;
   const coursesDone = enrs.filter((e) => e.status === 'completed').length;
-  const ready = enrs.length > 0 && coursesDone === enrs.length && obs.length >= needObs;
-  return { parts, score, label: ONB_LABEL(score), ready, coursesDone, courses: enrs.length, obs: obs.length, needObs, badge: ready && score !== null && score >= s.onboardingConfig.badgeMin };
+  const tasksDone = taskGrades.length;
+  const ready = enrs.length > 0 && coursesDone === enrs.length && checks.length >= card.need && tasksDone === card.tasks.length;
+  const passed = ready && parts.every((p) => p.ok);
+  const obs = card.practice === 'lesson' ? checks.length : 0;
+  return { parts, score, label: ONB_LABEL(score), ready, passed, min: card.min, card, coursesDone, courses: enrs.length, tasksDone, checks: checks.length, need: card.need, obs, needObs: card.practice === 'lesson' ? card.need : 0 };
 }
 
 function onbNotify(s, key, to, text) {
@@ -1673,6 +1708,8 @@ function applyHrEvent(s, ev, actor) {
     const emp = { id, name: p.name, position: p.position, currentLevel: p.level, branchId: p.branchId, phone, centerAccount: centerAdmin ? p.phone : null, jobsterId: p.jobsterId, eduId: p.eduId, source: p.source,
       hiredAt: p.startedAt, levelSince: p.startedAt, kpi10m: null, status: 'active', supervisorId: (s.onboardingConfig.mentors || {})[`${p.position}:${p.branchId}`] || null,
       history: [{ level: p.level, from: p.startedAt, doc: `Jobster ATS · ${p.jobsterId}` }], records: {} };
+    emp.departmentId = deptFor(s, p.position, p.department);
+    emp.profile = { gender: p.gender || null, city: getBranch(s, p.branchId)?.region || '', telegram: p.telegram || '', birthday: p.birthday || null, email: p.email || '', about: '' };
     s.employees.push(emp);
     const ob = startOnboarding(s, emp, { startedAt: p.startedAt, enteredAt: s.today, source: p.source, actor });
     const cardId = openOnboardingCard(s, emp, ob, p.recruiting);
@@ -1727,19 +1764,19 @@ export function approveOnboarding(state, { id, userId = 'u-super' }) {
     const head = branchHead(s, emp.branchId);
     if (!user || !can(user, 'onb.approve') || !inScope(s, user, emp)) fail('Yakuniy bahoni tasdiqlash huquqi va xodim doirasi kerak (odatda filial rahbari)');
     const r = onboardingScore(s, ob);
-    if (!r.ready && onbDay(s, ob) < obDays(s, ob)) fail(`Hali erta: ${onbDay(s, ob)}-kun, kurslar ${r.coursesDone}/${r.courses}${r.needObs ? `, kuzatuv ${r.obs}/${r.needObs}` : ''}`);
+    if (!r.ready && onbDay(s, ob) < obDays(s, ob)) fail(`Hali erta: ${onbDay(s, ob)}-kun, kurslar ${r.coursesDone}/${r.courses}${r.card.tasks.length ? `, topshiriqlar ${r.tasksDone}/${r.card.tasks.length}` : ''}${r.need ? `, kuzatuv ${r.checks}/${r.need}` : ''}`);
     ob.status = 'completed';
-    ob.final = { score: r.score, label: r.label, badge: r.badge, ready: r.ready, parts: r.parts, by: user.name, at: s.today, byRole: user.role === 'branch' ? 'Filial rahbari' : head ? user.title : `${user.title} (filial rahbari vakant)` };
+    ob.final = { score: r.score, label: r.label, passed: r.passed, min: r.min, ready: r.ready, parts: r.parts, by: user.name, at: s.today, byRole: user.role === 'branch' ? 'Filial rahbari' : head ? user.title : `${user.title} (filial rahbari vakant)` };
     const obs = onbObservations(s, ob);
     const codes = [...new Set(obs.flatMap((o) => Object.keys(o.ratings)))];
     for (const code of codes) {
       const lv = Math.round(avg(obs.map((o) => Number(o.ratings[code])).filter(isNum)));
       emp.records[code] = [...(emp.records[code] || []), { level: lv, context: 'work', source: `Moslashuv: dars kuzatuvlari (${obs.length}), ${user.name} tasdig‘i`, date: s.today }];
     }
-    onbNotify(s, `onb-done:${id}`, emp.name, r.badge
-      ? `Moslashuv dasturi yakunlandi: ${String(r.score).replace('.', ',')} / 5 (${r.label}). Sizga «Moslashuv yakunlandi» badge’i berildi!`
-      : `Moslashuv dasturi yakunlandi: ${r.score === null ? '—' : String(r.score).replace('.', ',')} / 5 (${r.label}). Badge sharti bajarilmadi — mentoringiz bilan rivojlanish rejasi tuziladi.`);
-    log(s, user.name, 'Moslashuv yakuniy bahosi tasdiqlandi', `${emp.id} · ${id}`, { after: String(r.score), badge: r.badge });
+    onbNotify(s, `onb-done:${id}`, emp.name, r.passed
+      ? `Onboarding muvaffaqiyatli yakunlandi: natija ${String(r.score).replace('.', ',')} / 5 (${r.label}). Barcha qismlar minimumdan (${r.min}) o‘tdi.`
+      : `Onboarding yakunlandi: natija ${r.score === null ? '—' : String(r.score).replace('.', ',')} / 5 (${r.label}). Minimumdan o‘tmagan qism: ${r.parts.filter((p) => !p.ok).map((p) => p.label).join(', ') || 'dastur to‘liq bajarilmagan'} — mentoringiz bilan rivojlanish rejasi tuziladi.`);
+    log(s, user.name, 'Onboarding natijasi tasdiqlandi', `${emp.id} · ${id}`, { after: String(r.score), passed: r.passed });
   });
 }
 
@@ -1756,16 +1793,61 @@ export function setProgramDays(state, { position, days, actor = 'HR/L&D' }) {
   });
 }
 
-export function setOnboardingWeights(state, { weights, badgeMin, actor = 'HR/L&D' }) {
+/** Lavozimning onboarding natijasi kartasini sozlash: muddatida yakunlash qismi, minimum, kursdan tashqari topshiriqlar, kuzatuv turi. */
+export function setOnbCard(state, { position, patch, actor = 'HR/L&D' }) {
   return mutate(state, (s) => {
-    const w = Object.fromEntries(Object.keys(ONB_PARTS).map((k) => [k, Number(weights[k])]));
-    if (Object.values(w).some((v) => !(v >= 0 && v <= 100))) fail('Og‘irlik 0–100 oralig‘ida');
-    if (!Object.values(w).some((v) => v > 0)) fail('Kamida bitta komponent og‘irligi 0 dan katta bo‘lsin');
-    const b = Number(badgeMin);
-    if (!(b >= 1 && b <= 5)) fail('Badge chegarasi 1–5');
-    const before = { ...s.onboardingConfig.weights, badgeMin: s.onboardingConfig.badgeMin };
-    Object.assign(s.onboardingConfig, { weights: w, badgeMin: b });
-    log(s, actor, 'Moslashuv baholash og‘irliklari', 'onboarding', { before, after: { ...w, badgeMin: b } });
+    const prog = s.onboardingPrograms.find((p) => p.position === position);
+    if (!prog) fail('Bu lavozim uchun moslashuv dasturi yo‘q');
+    const card = { ...onbCard(prog), ...(prog.card || {}), ...patch };
+    const min = Number(card.min);
+    if (!(min >= 1 && min <= 5)) fail('Minimum 1–5 oralig‘ida');
+    if (!PRACTICE_KIND[card.practice]) fail('Kuzatuv turi noto‘g‘ri');
+    const tasks = (card.tasks || []).map((t) => ({ ...t, name: String(t.name || '').trim() })).filter((t) => t.name);
+    const indicators = (card.indicators || []).map((x) => String(x).trim()).filter(Boolean);
+    if (card.practice === 'work' && Number(card.checks ?? 1) > 0 && !indicators.length) fail('Ish ko‘rsatkichlari ro‘yxatini kiriting');
+    const before = JSON.stringify(onbCard(prog));
+    prog.card = { onTime: !!card.onTime, min, tasks, practice: card.practice, checks: Number(card.checks ?? 1), indicators };
+    if (card.practice === 'lesson' && patch.observations !== undefined) prog.observations = Number(patch.observations);
+    if (card.practice === 'work') prog.observations = 0;
+    else if (!prog.observations) prog.observations = 2;
+    log(s, actor, 'Onboarding natijasi kartasi', position, { before, after: JSON.stringify(onbCard(prog)) });
+  });
+}
+
+/** Kursdan tashqari amaliy topshiriqqa baho (mentor yoki mas'ul shaxs). */
+export function gradeOnbTask(state, { onboardingId, taskId, grade, note = '', userId }) {
+  return mutate(state, (s) => {
+    const ob = getOnboarding(s, onboardingId);
+    if (!ob || ob.status !== 'active') fail('Faol moslashuv topilmadi');
+    const emp = getEmployee(s, ob.employeeId);
+    const user = getStaff(s, userId);
+    if (!user || !canAny(user, ['onb.assign', 'onb.approve']) || !inScope(s, user, emp)) fail('Topshiriqni mentor yoki mas’ul shaxs baholaydi (huquq va xodim doirasi kerak)');
+    const task = onbCard(onbProgram(s, emp)).tasks.find((t) => t.id === taskId);
+    if (!task) fail('Topshiriq topilmadi');
+    const g = Number(grade);
+    if (!(Number.isInteger(g) && g >= 1 && g <= 5)) fail('Baho 1–5');
+    ob.taskGrades = { ...(ob.taskGrades || {}), [taskId]: { grade: g, note, by: user.name, at: s.today } };
+    onbNotify(s, `onb-task:${ob.id}:${taskId}:${g}`, emp.name, `«${task.name}» topshirig‘ingiz baholandi: ${g} / 5${note ? ` — ${note}` : ''}.`);
+    log(s, user.name, 'Onboarding topshirig‘i baholandi', `${emp.id} · ${task.name}`, { after: String(g) });
+  });
+}
+
+/** Menejer (ustoz bo'lmagan) uchun ish amaliyotidagi kuzatuv: lavozim kartasidagi ko'rsatkichlar, 1–5. */
+export function addWorkCheck(state, { employeeId, ratings, note = '', userId, date }) {
+  return mutate(state, (s) => {
+    const emp = getEmployee(s, employeeId);
+    if (!emp || emp.status === 'archived') fail('Xodim topilmadi');
+    const user = getStaff(s, userId);
+    if (!user || !canAny(user, ['onb.observe', 'onb.approve']) || !inScope(s, user, emp)) fail('Ish kuzatuvini filial rahbari yoki kuzatuv huquqi bor shaxs kiritadi');
+    const card = onbCard(onbProgram(s, emp));
+    const r = Object.fromEntries(card.indicators.map((k) => [k, ratings?.[k]]).filter(([, v]) => v !== '' && v !== null && v !== undefined).map(([k, v]) => [k, Number(v)]));
+    if (Object.keys(r).length < card.indicators.length) fail('Barcha ko‘rsatkichlarni 1–5 baholang');
+    if (Object.values(r).some((v) => !(v >= 1 && v <= 5))) fail('Baho 1–5');
+    s.workChecks ||= [];
+    const id = nextId(s, 'wc');
+    s.workChecks.push({ id, employeeId, by: user.name, date: date || s.today, ratings: r, note });
+    onbNotify(s, `wc:${id}`, emp.name, `Ish amaliyotingiz kuzatildi (${user.name}): o‘rtacha ${String(r1(avg(Object.values(r)))).replace('.', ',')} / 5.${note ? ` ${note}` : ''}`);
+    log(s, user.name, 'Ish amaliyoti kuzatuvi', emp.id, { after: String(r1(avg(Object.values(r)))) });
   });
 }
 
@@ -1829,9 +1911,9 @@ export function remindLowResponse(state, { actor = 'Tizim (eslatmalar)' } = {}) 
 export const RIGHTS = [
   ['Moslashuv (onboarding)', [
     ['onb.view', 'Moslashuvni kuzatish', 'Yangi xodimlarning moslashuv jarayoni va onboarding dashboard'],
-    ['onb.approve', 'Onboarding bahosini tasdiqlash', 'Dastur yakunida yakuniy bahoni tasdiqlaydi'],
+    ['onb.approve', 'Onboarding natijasini tasdiqlash', 'Dastur yakunida onboarding natijasini tasdiqlaydi'],
     ['onb.assign', 'Mentor, buddy va kurs biriktirish', 'Doirasidagi xodimlarga mentor, buddy va qo‘shimcha kurs biriktiradi'],
-    ['onb.observe', 'Dars kuzatuvi', 'Ustozni checklist bo‘yicha kuzatadi, 1–5 ball qo‘yadi'],
+    ['onb.observe', 'Ish amaliyotini kuzatish', 'Ustozda dars kuzatuvi (checklist), menejerda ish ko‘rsatkichlari, 1–5'],
     ['onb.integration', 'Integratsiya navbati', 'Jobster va EduTizim hodisalarini qabul qiladi'],
     ['onb.meetings', 'Uchrashuvlarni boshqarish', 'CEO/HRD uchrashuvi: taklif, havola, qatnashuv'],
     ['onb.reminders', 'Eslatmalar', 'Kurs va so‘rovnoma eslatmalarini yuboradi'],
@@ -1851,7 +1933,10 @@ export const RIGHTS = [
   ]],
   ['Xodimlar va hisobotlar', [
     ['kpi.view', 'KPI ko‘rsatkichlari', 'Ustozlar KPI va yangi filial KPI'],
-    ['team.manage', 'Jamoa a’zolari huquqlari', 'Huquq va filial doirasini beradi'],
+    ['people.view', 'Umumiy jamoa a’zolari', 'Doirasidagi barcha xodimlar, profil va foydalanuvchi tarixi'],
+    ['org.manage', 'Tashkiliy tuzilma', 'Bo‘limlarni yuritadi, xodimni bo‘limga va jamoadoshlar doirasini belgilaydi'],
+    ['team.manage', 'Adminlar va huquqlar', 'Adminlarga huquq va doira beradi'],
+    ['gami.manage', 'Gamifikatsiyani boshqarish', 'Ball qoidalari va badge’lar katalogi: nom, belgi, berilish sharti'],
   ]],
   ['Tizim', [
     ['audit.view', 'O‘zgarishlar jurnali', 'Kim nimani o‘zgartirganini ko‘radi'],
@@ -1862,7 +1947,7 @@ export const ALL_RIGHTS = RIGHTS.flatMap(([, list]) => list.map(([k]) => k));
 export const RIGHT_LABEL = Object.fromEntries(RIGHTS.flatMap(([, list]) => list.map(([k, l]) => [k, l])));
 /** Lavozim shabloni — faqat yorliq va boshlang'ich huquqlar to'plami; amalda shaxsga berilgan huquqlar ishlaydi. */
 export const ROLE_LABEL = { super: 'Super Admin', hr: 'HR Admin', lda: 'L&D assistent', branch: 'Filial rahbari', mentor: 'Mentor', methodist: 'Metodist', curator: 'Kurator' };
-export const SCOPE_LABEL = { all: 'Barcha filiallar', branches: 'Tanlangan filiallar', assigned: 'Faqat o‘ziga biriktirilganlar' };
+export const SCOPE_LABEL = { all: 'Barcha filiallar', branches: 'Tanlangan filiallar', departments: 'Tanlangan bo‘limlar', positions: 'Tanlangan lavozimlar', assigned: 'Faqat o‘ziga biriktirilganlar' };
 export const can = (user, right) => !!user && user.active !== false && (user.role === 'super' || (user.rights || []).includes(right));
 export const canAny = (user, rights) => rights.some((r) => can(user, r));
 
@@ -1872,6 +1957,10 @@ export function scopeEmployees(s, user) {
   const sc = user.scope || { kind: 'all' };
   if (user.role === 'super' || sc.kind === 'all') return null;
   if (sc.kind === 'branches') return new Set(s.employees.filter((e) => (sc.branchIds || []).includes(e.branchId)).map((e) => e.id));
+  // Bo'lim yoki lavozim bo'yicha doira; filiallar tanlanmasa — barcha filiallarda (masalan, barcha GE ustozlari).
+  const inBr = (e) => !(sc.branchIds || []).length || sc.branchIds.includes(e.branchId);
+  if (sc.kind === 'departments') return new Set(s.employees.filter((e) => inBr(e) && (sc.departmentIds || []).includes(e.departmentId)).map((e) => e.id));
+  if (sc.kind === 'positions') return new Set(s.employees.filter((e) => inBr(e) && (sc.positions || []).includes(e.position)).map((e) => e.id));
   const ids = new Set();
   if (user.employeeId) for (const e of s.employees) if (e.supervisorId === user.employeeId || e.buddyId === user.employeeId) ids.add(e.id);
   for (const e of s.employees) if ((user.positions || []).includes(e.position)) ids.add(e.id);
@@ -1883,6 +1972,7 @@ export function scopeBranches(s, user) {
   const ids = scopeEmployees(s, user);
   if (ids === null) return null;
   if ((user.scope || {}).kind === 'branches') return new Set(user.scope.branchIds || []);
+  if (['departments', 'positions'].includes((user.scope || {}).kind) && (user.scope.branchIds || []).length) return new Set(user.scope.branchIds);
   return new Set(s.employees.filter((e) => ids.has(e.id)).map((e) => e.branchId));
 }
 export const inScope = (s, user, emp) => { const sc = scopeEmployees(s, user); return sc === null || sc.has(emp.id); };
@@ -1908,7 +1998,7 @@ export function assignMentorBuddy(state, { employeeId, mentorId, buddyId, userId
 export function setStaffRight(state, { userId, right, on, actor = 'Super Admin' }) {
   return mutate(state, (s) => {
     const u = getStaff(s, userId);
-    if (!u) fail('Jamoa a’zosi topilmadi');
+    if (!u) fail('Admin topilmadi');
     if (u.role === 'super') fail('Super Admin barcha huquqlarga ega');
     if (!ALL_RIGHTS.includes(right)) fail('Noma’lum huquq');
     const set = new Set(u.rights || []);
@@ -1918,24 +2008,34 @@ export function setStaffRight(state, { userId, right, on, actor = 'Super Admin' 
     log(s, actor, on ? 'Huquq berildi' : 'Huquq olib tashlandi', `${u.name} · ${RIGHT_LABEL[right]}`);
   });
 }
-export function setStaffScope(state, { userId, kind, branchIds = [], actor = 'Super Admin' }) {
+export function setStaffScope(state, { userId, kind, branchIds = [], departmentIds = [], positions = [], actor = 'Super Admin' }) {
   return mutate(state, (s) => {
     const u = getStaff(s, userId);
-    if (!u) fail('Jamoa a’zosi topilmadi');
+    if (!u) fail('Admin topilmadi');
     if (!SCOPE_LABEL[kind]) fail('Noma’lum doira');
     if (kind === 'branches' && !branchIds.length) fail('Kamida bitta filialni tanlang');
-    u.scope = kind === 'branches' ? { kind, branchIds } : { kind };
+    if (kind === 'departments' && !departmentIds.length) fail('Kamida bitta bo‘limni tanlang');
+    if (kind === 'positions' && !positions.length) fail('Kamida bitta lavozimni tanlang');
+    u.scope = kind === 'branches' ? { kind, branchIds } : kind === 'departments' ? { kind, departmentIds, branchIds } : kind === 'positions' ? { kind, positions, branchIds } : { kind };
     if (kind === 'branches') u.branchIds = branchIds;
     u.changedAt = s.today;
-    log(s, actor, 'Huquq doirasi o‘zgardi', u.name, { after: kind === 'branches' ? branchIds.map((b) => getBranch(s, b)?.name).join(', ') : SCOPE_LABEL[kind] });
+    log(s, actor, 'Huquq doirasi o‘zgardi', u.name, { after: scopeText(s, u.scope) });
   });
+}
+/** Doira matni: «Akademik bo'lim — Chilonzor», «GE — barcha filiallarda». */
+export function scopeText(s, sc = { kind: 'all' }) {
+  const br = (sc.branchIds || []).map((b) => getBranch(s, b)?.name).join(', ');
+  if (sc.kind === 'branches') return br;
+  if (sc.kind === 'departments') return `${(sc.departmentIds || []).map((d) => getDepartment(s, d)?.name).join(', ')} — ${br || 'barcha filiallarda'}`;
+  if (sc.kind === 'positions') return `${(sc.positions || []).join(', ')} — ${br || 'barcha filiallarda'}`;
+  return SCOPE_LABEL[sc.kind];
 }
 export function setStaffActive(state, { userId, active, actor = 'Super Admin' }) {
   return mutate(state, (s) => {
     const u = getStaff(s, userId);
     if (!u || u.role === 'super') fail('Bu akkauntni o‘chirib bo‘lmaydi');
     u.active = !!active;
-    log(s, actor, active ? 'Jamoa a’zosi faollashtirildi' : 'Jamoa a’zosi nofaol qilindi', u.name);
+    log(s, actor, active ? 'Admin faollashtirildi' : 'Admin nofaol qilindi', u.name);
   });
 }
 
@@ -2084,4 +2184,194 @@ function onbNotifyFlag(s, key, to, text) {
   if (!notify(s, key, to, text)) return false;
   s.notifications[0].tg = true;
   return true;
+}
+
+// ---------------------------------------------------------------------------
+// Gamifikatsiya: ballar (TZ «yulduzlar») va badge'lar katalogi. Badge — faqat noodatiy natija uchun;
+// onboardingni minimumdan o'tish badge emas. Kompetensiya darajalari ball va reytingga kirmaydi.
+// ---------------------------------------------------------------------------
+export const POINT_ACTIONS = {
+  lesson: ['Dars o‘qildi', 5],
+  test: ['Test topshirildi', 10],
+  task: ['Amaliy topshiriq qabul qilindi', 15],
+  course: ['Kurs yakunlandi', 30],
+  grade5: ['Kurs 5 bahoga yakunlandi (qo‘shimcha)', 20],
+};
+export const BADGE_KINDS = {
+  grade5: ['Kursni 5 kurs bahosi bilan yakunlash', 'kurs'],
+  streak: ['Uzluksiz o‘qish: har hafta faol', 'hafta'],
+  points: ['Ball chegarasi', 'ball'],
+  courses: ['Yakunlangan kurslar soni', 'kurs'],
+};
+const weekKey = (iso) => { const d = new Date(`${iso}T00:00:00Z`); const day = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - day); return d.toISOString().slice(0, 10); };
+/** Xodim harakatlari va to'plangan ballar (kurs yozuvlaridan hisoblanadi). */
+export function employeePoints(s, employeeId) {
+  const rules = s.gamification?.points || {};
+  const pts = (k) => Number(rules[k] ?? POINT_ACTIONS[k][1]);
+  const items = [];
+  for (const enr of (s.enrollments || []).filter((e) => e.employeeId === employeeId)) {
+    const course = getCourse(s, enr.courseId);
+    if (!course) continue;
+    for (const c of course.components) {
+      const p = enr.progress[c.id];
+      if (!p) continue;
+      if (c.kind === 'lesson' && p.done) items.push({ kind: 'lesson', at: p.at, course: course.title });
+      if (c.kind === 'test' && isNum(p.best) && p.best >= c.passScore) items.push({ kind: 'test', at: p.at, course: course.title });
+      if (c.kind === 'task' && p.status === 'accepted') items.push({ kind: 'task', at: p.mentor?.at || p.submittedAt, course: course.title });
+    }
+    if (enr.status === 'completed') {
+      items.push({ kind: 'course', at: enr.completedAt, course: course.title });
+      if (courseGrade(course, enr) === 5) items.push({ kind: 'grade5', at: enr.completedAt, course: course.title });
+    }
+  }
+  items.forEach((x) => { x.points = pts(x.kind); });
+  return { total: items.reduce((a, x) => a + x.points, 0), items: items.sort((a, b) => ((b.at || '') > (a.at || '') ? 1 : -1)) };
+}
+/** Ketma-ket faol haftalar (eng uzun seriya). */
+export function learningStreak(s, employeeId) {
+  const weeks = [...new Set(employeePoints(s, employeeId).items.filter((x) => x.at).map((x) => weekKey(x.at)))].sort();
+  let best = 0; let cur = 0; let prev = null;
+  for (const w of weeks) {
+    cur = prev && daysBetween(prev, w) === 7 ? cur + 1 : 1;
+    best = Math.max(best, cur);
+    prev = w;
+  }
+  return best;
+}
+/** Xodimga berilgan badge'lar: katalogdagi shart bajarilganmi (holat kurs yozuvlaridan hisoblanadi). */
+export function employeeBadges(s, employeeId) {
+  const enrs = (s.enrollments || []).filter((e) => e.employeeId === employeeId && e.status === 'completed');
+  const five = enrs.filter((e) => courseGrade(getCourse(s, e.courseId), e) === 5).length;
+  const pts = employeePoints(s, employeeId).total;
+  const streak = learningStreak(s, employeeId);
+  const val = { grade5: five, streak, points: pts, courses: enrs.length };
+  return (s.gamification?.badges || []).filter((b) => b.active !== false).map((b) => ({ ...b, value: val[b.kind], earned: val[b.kind] >= b.n })).filter((b) => b.earned);
+}
+/** Reyting: ballar bo'yicha, lavozim / filial / umumiy kesimda. Kompetensiya darajasi kirmaydi. */
+export function ratingList(s, { position = '', branchId = '' } = {}) {
+  return activeEmployees(s).filter((e) => (!position || e.position === position) && (!branchId || e.branchId === branchId))
+    .map((e) => ({ emp: e, points: employeePoints(s, e.id).total, badges: employeeBadges(s, e.id) }))
+    .sort((a, b) => b.points - a.points || a.emp.name.localeCompare(b.emp.name))
+    .map((r, i) => ({ ...r, rank: i + 1 }));
+}
+export function saveBadge(state, { badge, actor = 'L&D' }) {
+  return mutate(state, (s) => {
+    const name = String(badge.name || '').trim();
+    if (!name) fail('Badge nomini kiriting');
+    if (!BADGE_KINDS[badge.kind]) fail('Shart turini tanlang');
+    const n = Number(badge.n);
+    if (!(Number.isInteger(n) && n >= 1)) fail('Shart qiymati butun son, kamida 1');
+    s.gamification ||= { points: {}, badges: [] };
+    const list = s.gamification.badges;
+    const b = { id: badge.id || nextId(s, 'bdg'), name, icon: badge.icon || '🏅', kind: badge.kind, n, desc: String(badge.desc || '').trim(), active: badge.active !== false };
+    const i = list.findIndex((x) => x.id === b.id);
+    if (i >= 0) list[i] = b; else list.push(b);
+    log(s, actor, i >= 0 ? 'Badge o‘zgartirildi' : 'Badge qo‘shildi', name, { after: `${BADGE_KINDS[b.kind][0]} ≥ ${n}` });
+  });
+}
+export function removeBadge(state, { id, actor = 'L&D' }) {
+  return mutate(state, (s) => {
+    const b = (s.gamification?.badges || []).find((x) => x.id === id);
+    if (!b) fail('Badge topilmadi');
+    s.gamification.badges = s.gamification.badges.filter((x) => x.id !== id);
+    log(s, actor, 'Badge o‘chirildi', b.name);
+  });
+}
+export function setPointRule(state, { kind, points, actor = 'L&D' }) {
+  return mutate(state, (s) => {
+    if (!POINT_ACTIONS[kind]) fail('Noma’lum harakat');
+    const v = Number(points);
+    if (!(Number.isInteger(v) && v >= 0 && v <= 1000)) fail('Ball 0–1000, butun son');
+    s.gamification ||= { points: {}, badges: [] };
+    const before = s.gamification.points[kind] ?? POINT_ACTIONS[kind][1];
+    s.gamification.points[kind] = v;
+    log(s, actor, 'Ball qoidasi', POINT_ACTIONS[kind][0], { before: String(before), after: String(v) });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Tashkiliy tuzilma (LMS'da qo'lda): filial → bo'lim. Xodim ma'lumotlari EduTizim'dan keladi.
+// Jamoadoshlar: xodim sukut bo'yicha o'z filialini ko'radi; doira sozlanadi (bo'lim yoki bir necha filial).
+// ---------------------------------------------------------------------------
+export const getDepartment = (s, id) => (s.departments || []).find((d) => d.id === id);
+export const branchDepartments = (s, branchId) => (s.departments || []).filter((d) => !d.branchIds?.length || d.branchIds.includes(branchId));
+export const COLLEAGUE_SCOPE = { branch: 'O‘z filiali (standart)', department: 'O‘z filialidagi bo‘limi', branches: 'Tanlangan filiallar' };
+export function colleaguesOf(s, emp) {
+  const sc = emp.colleagues || { kind: 'branch' };
+  return activeEmployees(s).filter((e) => e.id !== emp.id && (
+    sc.kind === 'department' ? e.branchId === emp.branchId && e.departmentId === emp.departmentId
+      : sc.kind === 'branches' ? [emp.branchId, ...(sc.branchIds || [])].includes(e.branchId)
+        : e.branchId === emp.branchId));
+}
+/** Sertifikat: yakunlangan kurs, kurs bahosi chegaradan past emas. */
+export function certificates(s, employeeId) {
+  return (s.enrollments || []).filter((e) => e.employeeId === employeeId && e.status === 'completed').map((e) => ({ enr: e, course: getCourse(s, e.courseId), grade: courseGrade(getCourse(s, e.courseId), e) }))
+    .filter((x) => x.course && x.course.certificate !== false && (x.grade === null || x.grade >= courseMinGrade(x.course)))
+    .map((x) => ({ ...x, no: `RU-${x.enr.id.replace(/\D/g, '').padStart(4, '0')}`, at: x.enr.completedAt }));
+}
+/** Foydalanuvchi tarixi (admin ko'radi): kurslar, boshlangan va tugagan sanalar, kurs bahosi, sertifikat. */
+export function userHistory(s, employeeId) {
+  const certs = new Set(certificates(s, employeeId).map((c) => c.enr.id));
+  return (s.enrollments || []).filter((e) => e.employeeId === employeeId).map((e) => {
+    const course = getCourse(s, e.courseId);
+    return { enr: e, course, startedAt: e.startedAt, completedAt: e.status === 'completed' ? e.completedAt : null, grade: courseGrade(course, e), ...courseProgress(course, e), cert: certs.has(e.id) };
+  }).sort((a, b) => (b.startedAt > a.startedAt ? 1 : -1));
+}
+export function saveDepartment(state, { id, name, branchIds = [], userId }) {
+  return mutate(state, (s) => {
+    const user = getStaff(s, userId);
+    if (!can(user, 'org.manage')) fail('Tashkiliy tuzilmani «Tashkiliy tuzilma» huquqi bor admin yuritadi');
+    const nm = String(name || '').trim();
+    if (!nm) fail('Bo‘lim nomini kiriting');
+    s.departments ||= [];
+    if (s.departments.some((d) => d.id !== id && d.name.toLowerCase() === nm.toLowerCase())) fail('Bunday bo‘lim bor');
+    const d = id ? getDepartment(s, id) : null;
+    if (d) Object.assign(d, { name: nm, branchIds });
+    else s.departments.push({ id: nextId(s, 'd'), name: nm, branchIds });
+    log(s, user.name, d ? 'Bo‘lim o‘zgartirildi' : 'Bo‘lim qo‘shildi', nm, { after: branchIds.length ? branchIds.map((b) => getBranch(s, b)?.name).join(', ') : 'barcha filiallar' });
+  });
+}
+export function removeDepartment(state, { id, userId }) {
+  return mutate(state, (s) => {
+    const user = getStaff(s, userId);
+    if (!can(user, 'org.manage')) fail('Huquq yo‘q');
+    const d = getDepartment(s, id);
+    if (!d) fail('Bo‘lim topilmadi');
+    const n = activeEmployees(s).filter((e) => e.departmentId === id).length;
+    if (n) fail(`Bo‘limda ${n} ta xodim bor — avval ularni boshqa bo‘limga o‘tkazing`);
+    s.departments = s.departments.filter((x) => x.id !== id);
+    log(s, user.name, 'Bo‘lim o‘chirildi', d.name);
+  });
+}
+export function setEmployeeDepartment(state, { employeeId, departmentId, userId }) {
+  return mutate(state, (s) => {
+    const user = getStaff(s, userId);
+    const emp = getEmployee(s, employeeId);
+    if (!emp) fail('Xodim topilmadi');
+    if (!can(user, 'org.manage') || !inScope(s, user, emp)) fail('Huquq va xodim doirasi kerak');
+    const d = getDepartment(s, departmentId);
+    if (!d || (d.branchIds?.length && !d.branchIds.includes(emp.branchId))) fail('Bu bo‘lim xodim filialida yo‘q');
+    const before = getDepartment(s, emp.departmentId)?.name || '—';
+    emp.departmentId = departmentId;
+    log(s, user.name, 'Xodim bo‘limi', emp.name, { before, after: d.name });
+  });
+}
+export function setColleaguesScope(state, { employeeId, kind, branchIds = [], userId }) {
+  return mutate(state, (s) => {
+    const user = getStaff(s, userId);
+    const emp = getEmployee(s, employeeId);
+    if (!emp) fail('Xodim topilmadi');
+    if (!can(user, 'org.manage') || !inScope(s, user, emp)) fail('Huquq va xodim doirasi kerak');
+    if (!COLLEAGUE_SCOPE[kind]) fail('Noma’lum doira');
+    if (kind === 'branches' && !branchIds.filter((b) => b !== emp.branchId).length) fail('Qo‘shimcha filialni tanlang');
+    emp.colleagues = kind === 'branch' ? undefined : kind === 'branches' ? { kind, branchIds: branchIds.filter((b) => b !== emp.branchId) } : { kind };
+    log(s, user.name, 'Jamoadoshlar doirasi', emp.name, { after: COLLEAGUE_SCOPE[kind] });
+  });
+}
+
+export const DEPT_BY_POSITION = { GE: 'd-acad', FIN: 'd-fin', FR: 'd-mgmt', ADM: 'd-adm' };
+/** EduTizim'dagi bo'lim nomi yoki lavozim bo'yicha LMS bo'limi. */
+export function deptFor(s, position, name) {
+  const byName = name && (s.departments || []).find((d) => d.name.toLowerCase().startsWith(String(name).toLowerCase().split(' ')[0]));
+  return byName?.id || DEPT_BY_POSITION[position] || null;
 }

@@ -34,7 +34,7 @@ function Checklist({ s, emp, user, onDone }) {
       <label className="f" style={{ marginTop: 8 }}>Xulosa va keyingi qadam<textarea className="i" placeholder="Kuzatilgan dalil, kuchli tomon, 1–2 aniq keyingi qadam" value={o.note} onChange={set('note')} /></label>
       <div className="row" style={{ marginTop: 8 }}>
         <button className="btn primary" disabled={rated < 3 || !o.note.trim()} onClick={() => run(D.addOnbObservation, { employeeId: emp.id, methodist: user.role === 'methodist' ? user.name : 'Metodist', ...o, ratings: r, userId: user.id }, 'Kuzatuv saqlandi') && onDone()}>Saqlash ({rated}/{comps.length})</button>
-        <span className="small muted">Kamida 3 band. Ballar onboarding bahosiga kiradi; filial rahbari tasdiqlagach kompetensiya profiliga ish dalili sifatida yoziladi.</span>
+        <span className="small muted">Kamida 3 band. Ballar onboarding natijasining «Ish amaliyotidagi kuzatuv» qismiga kiradi; filial rahbari tasdiqlagach kompetensiya profiliga ish dalili sifatida yoziladi.</span>
       </div>
     </Panel>
   );
