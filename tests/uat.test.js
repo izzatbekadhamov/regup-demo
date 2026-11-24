@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { UAT } from '../src/core/uat.js';
 import { computeMatch, computeRScope, minIntegerForThreshold, computeNewBranchKpi, auditAverage, independentSources, DE } from '../src/core/calc.js';
 import { validateModel } from '../src/core/rules.js';
+import { resolveScores } from '../src/core/calc.js';
 import { validateImport } from '../src/core/importValidate.js';
 import { frModel, teacherModel } from '../src/data/models.js';
 import { createSeed } from '../src/data/seed.js';
@@ -960,5 +961,43 @@ describe('Ikki rolli xodim (qaror №50)', () => {
     expect(D.getCard(s, 'c-101').scores[fun]).toBeUndefined();
     // Ikkinchi roli yo'q xodimda bo'lim ochilmaydi.
     expect(() => D.openRoleSection(s, { cardId: 'c-103' })).toThrow(/ikkinchi rol/);
+  });
+});
+
+describe('Model konstruktori — kengaytma (qaror №49)', () => {
+  const draft = () => { const s = D.createDraft(createSeed(), { fromId: 'GE@1.0' }); return [s, s.models.find((m) => m.modelId === 'GE' && m.status === 'draft')]; };
+  it('Klaster: qayta nomlash va «umumiy» belgisi; faol model tahrirlanmaydi', () => {
+    let [s, m] = draft();
+    expect(() => D.renameCluster(s, { id: 'GE@1.0', from: 'Funksional', to: 'Kasbiy' })).toThrow(/qoralama/);
+    s = D.renameCluster(s, { id: m.id, from: 'Funksional', to: 'Funksional (GE)' });
+    expect(D.getModel(s, m.id).competencies.some((c) => c.layer === 'Funksional (GE)')).toBe(true);
+    expect(() => D.renameCluster(s, { id: m.id, from: 'Funksional (GE)', to: 'Korporativ' })).toThrow(/allaqachon/);
+    s = D.setSharedCluster(s, { id: m.id, layer: 'Pedagogik xulq-atvor', on: true });
+    expect(D.sharedLayers(D.getModel(s, m.id))).toEqual(['Korporativ', 'Pedagogik xulq-atvor']);
+  });
+  it('Sub-kompetensiyalar: o‘rtacha yaxlitlanadi, kodlar takrorlanmaydi; olib tashlash mumkin', () => {
+    let [s, m] = draft();
+    const code = D.getModel(s, m.id).competencies.find((c) => c.layer === 'Funksional').code;
+    expect(() => D.setSubCompetencies(s, { id: m.id, code, parts: [{ code: 'P-1', name: 'A' }] })).toThrow(/Kamida 2/);
+    expect(() => D.setSubCompetencies(s, { id: m.id, code, parts: [{ code: 'P-1', name: 'A' }, { code: 'P-1', name: 'B' }] })).toThrow(/takrorlanyapti/);
+    s = D.setSubCompetencies(s, { id: m.id, code, parts: [{ code: 'P-1', name: 'Rejalashtirish' }, { code: 'P-2', name: 'Maqsad' }, { code: 'P-3', name: 'Vaqt' }] });
+    const mm = D.getModel(s, m.id);
+    expect(mm.competencies.find((c) => c.code === code).composite).toBe(true);
+    expect(resolveScores(mm, {}, { 'P-1': 3, 'P-2': 4, 'P-3': 4 })[code]).toBe(4);
+    s = D.setSubCompetencies(s, { id: m.id, code, parts: [] });
+    expect(D.getModel(s, m.id).composites[code]).toBeUndefined();
+  });
+  it('Arxivlash: maqsadli darajalardan chiqadi, qaytarish mumkin; lavozim darajalari tartibi', () => {
+    let [s, m] = draft();
+    const code = 'KOR-04';
+    s = D.archiveCompetency(s, { id: m.id, code });
+    const mm = D.getModel(s, m.id);
+    expect(mm.competencies.find((c) => c.code === code).archived).toBe(true);
+    expect(mm.profiles.every((p) => p.targets[code] === undefined)).toBe(true);
+    s = D.archiveCompetency(s, { id: m.id, code, archived: false });
+    expect(D.getModel(s, m.id).competencies.find((c) => c.code === code).archived).toBe(false);
+    s = D.moveProfile(s, { id: m.id, code: 'LT-1', dir: 'up' });
+    expect(D.getModel(s, m.id).profiles.slice(0, 2).map((p) => p.code)).toEqual(['LT-1', 'LT-0']);
+    expect(() => D.moveProfile(s, { id: m.id, code: 'LT-1', dir: 'up' })).toThrow(/Siljitib/);
   });
 });

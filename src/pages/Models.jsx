@@ -73,7 +73,7 @@ export default function Models() {
     <>
       <div className="page-head">
         <div>
-          <h1>Lavozim modellari</h1>
+          <h1>Kompetensiya modellari</h1>
           <p>Har lavozim uchun: qaysi kompetensiyalar baholanadi, qaysi usullar bilan va keyingi darajaga o‘tish uchun nima kerak.</p>
         </div>
         <button className="btn primary" onClick={() => setCreating(true)}>+ Yangi lavozim modeli</button>

@@ -142,7 +142,7 @@ export default function Dashboard() {
           <li><span><a href="#/cards/c-101">Dilshod Karimov (FR-1 → FR-2)</a>: «Keyingi qadam» blokidagi tugma bilan LDR-05 ni oching, darajani rubrikadan tanlang, so‘ng panel protokoli, e’lon va rasmiy tayinlash.</span></li>
           <li><span><a href="#/stretch/s-201">Stretch vazifa</a>: dalilni qaytaring; xodim ko‘rinishida (Nodira Rahimova) qayta yuboring va tasdiqlang.</span></li>
           <li><span><a href="#/cards/c-103">Malika Yusupova (LT-1 → LT-2)</a>: bitta dars kuzatuvida bir nechta kompetensiyani baholang, majburiy talablarni belgilang.</span></li>
-          <li><span><a href="#/models">Lavozim modellari</a>: yangi lavozim modelini yarating yoki mavjudini solishtiring.</span></li>
+          <li><span><a href="#/models">Kompetensiya modellari</a>: yangi lavozim modelini yarating yoki mavjudini solishtiring.</span></li>
           <li><span>Xodim ko‘rinishi → Malika Yusupova → <b>Karyera yo‘lim</b>.</span></li>
         </ol>
         <p className="muted small" style={{ padding: '0 16px 16px' }}>Bugungi sana (demo): {fmtDate(s.today)}</p>

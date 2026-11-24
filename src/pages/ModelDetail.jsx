@@ -58,9 +58,8 @@ function CompetencyBlock({ m, c, editable }) {
               : methods.map((x) => <span key={x} className="tag" style={{ fontFamily: 'inherit' }}>{methodLabel(m, x)}</span>)}
           </div>
         </div>
-        {c.composite ? (
-          <div className="callout small">Tarkibli kompetensiya: {m.composites[c.code]?.label}. Qismlar: {parts.map((p) => p.code).join(', ')}.</div>
-        ) : (
+        {(c.composite || editable) && <SubCompetencies m={m} c={c} parts={parts} editable={editable} />}
+        {c.composite ? null : (
           <div className="f">Har daraja uchun kuzatiladigan xatti-harakat
             <div className="rubric">
               {levels.map((l) => (
@@ -78,9 +77,45 @@ function CompetencyBlock({ m, c, editable }) {
             </div>
           </div>
         )}
-        {editable && <div className="row" style={{ justifyContent: 'flex-end' }}><button className="btn sm danger" onClick={() => ask(`«${c.name}» modeldan olib tashlansinmi? U daraja maqsadlari va shartlardan ham o‘chadi.`, () => run(D.removeCompetency, { id: m.id, code: c.code }, `${c.code} olib tashlandi`))}>Kompetensiyani olib tashlash</button></div>}
+        {editable && <div className="row" style={{ justifyContent: 'flex-end' }}><button className="btn sm" onClick={() => run(D.archiveCompetency, { id: m.id, code: c.code, archived: true }, `${c.code} arxivlandi — hech bir darajada baholanmaydi`)}>Arxivlash</button><button className="btn sm danger" onClick={() => ask(`«${c.name}» modeldan olib tashlansinmi? U daraja maqsadlari va shartlardan ham o‘chadi.`, () => run(D.removeCompetency, { id: m.id, code: c.code }, `${c.code} olib tashlandi`))}>Kompetensiyani olib tashlash</button></div>}
       </div>
     </details>
+  );
+}
+
+/** Sub-kompetensiyalar: ichki bandlar, kompetensiya darajasi ularning o'rtachasi (masalan, FR'dagi HR-01…HR-11). */
+function SubCompetencies({ m, c, parts, editable }) {
+  const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState(() => (parts.length ? parts.map((p) => ({ code: p.code, name: p.name || '', definition: p.definition || '' })) : [{ code: '', name: '', definition: '' }, { code: '', name: '', definition: '' }]));
+  const setRow = (i, k, v) => setRows(rows.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
+  if (!editable) return <div className="callout small">Tarkibli kompetensiya: {m.composites[c.code]?.label}. Sub-kompetensiyalar: {parts.map((p) => `${p.code}${p.name && p.name !== p.code ? ` ${p.name}` : ''}`).join('; ')}.</div>;
+  if (!open) return (
+    <div className="row small" style={{ gap: 8 }}>
+      {c.composite ? <span className="callout small" style={{ margin: 0 }}>Sub-kompetensiyalar: {parts.length} ta ({parts.map((p) => p.code).join(', ')}) — daraja ularning o‘rtachasi.</span> : <span className="muted">Murakkab kompetensiyani ichki bandlarga bo‘lish mumkin.</span>}
+      <button className="link-btn" onClick={() => setOpen(true)}>{c.composite ? 'Sub-kompetensiyalarni tahrirlash' : 'Sub-kompetensiyalarga bo‘lish'}</button>
+    </div>
+  );
+  return (
+    <div className="panel add-box">
+      <b className="small">Sub-kompetensiyalar — {c.code}</b>
+      <div className="small muted">Har biri 1–{scaleMax(m)} baholanadi; {c.code} darajasi = o‘rtacha, butun songa yaxlitlanadi. Sub-kompetensiya bo‘lgan kompetensiyaning o‘z indikatorlari yozilmaydi.</div>
+      <div className="stack" style={{ gap: 6, marginTop: 8 }}>
+        {rows.map((r, i) => (
+          <div key={i} className="row" style={{ gap: 6 }}>
+            <input className="i compact" style={{ width: 100 }} placeholder="HR-01" value={r.code} onChange={(e) => setRow(i, 'code', e.target.value.toUpperCase())} />
+            <input className="i compact" style={{ flex: 1 }} placeholder="Nomi" value={r.name} onChange={(e) => setRow(i, 'name', e.target.value)} />
+            <input className="i compact" style={{ flex: 2 }} placeholder="Ta’rif (ixtiyoriy)" value={r.definition} onChange={(e) => setRow(i, 'definition', e.target.value)} />
+            <button className="link-btn small" onClick={() => setRows(rows.filter((_, j) => j !== i))}>o‘chirish</button>
+          </div>
+        ))}
+      </div>
+      <div className="row" style={{ marginTop: 8, gap: 6 }}>
+        <button className="btn sm" onClick={() => setRows([...rows, { code: '', name: '', definition: '' }])}>+ Band</button>
+        <button className="btn sm primary" onClick={() => run(D.setSubCompetencies, { id: m.id, code: c.code, parts: rows }, 'Sub-kompetensiyalar saqlandi') && setOpen(false)}>Saqlash</button>
+        {c.composite && <button className="btn sm danger" onClick={() => ask('Sub-kompetensiyalar olib tashlansinmi? Kompetensiya oddiy (indikatorli) bo‘lib qoladi.', () => run(D.setSubCompetencies, { id: m.id, code: c.code, parts: [] }, 'Sub-kompetensiyalar olib tashlandi') && setOpen(false))}>Olib tashlash</button>}
+        <button className="btn sm" onClick={() => setOpen(false)}>Bekor qilish</button>
+      </div>
+    </div>
   );
 }
 
@@ -122,7 +157,10 @@ function AddCompetency({ m, s }) {
 }
 
 function Structure({ m, s, editable, cardsUsing }) {
-  const layers = [...new Set(m.competencies.map((c) => c.layer))];
+  const live = m.competencies.filter((c) => !c.archived);
+  const archived = m.competencies.filter((c) => c.archived);
+  const layers = [...new Set(live.map((c) => c.layer))];
+  const shared = D.sharedLayers(m);
   const allLayers = [...new Set(s.models.flatMap((x) => x.competencies.map((c) => c.layer)))];
   return (
     <div className="stack" style={{ gap: 14 }}>
@@ -138,14 +176,29 @@ function Structure({ m, s, editable, cardsUsing }) {
           <span className="muted">— har kompetensiya uchun shuncha daraja indikatori yoziladi.</span>
         </div>
       )}
+      {editable && (
+        <div className="row small ink2" style={{ gap: 8, flexWrap: 'wrap' }}>
+          Daraja nomlari:
+          {scaleLevels(m).map((l) => <label key={l} className="row" style={{ gap: 4 }}><b>{l}</b><input className="i compact" style={{ width: 120 }} defaultValue={levelName(m, l)} onBlur={(e) => { const v = e.target.value.trim(); if (v && v !== levelName(m, l)) upd(m, (mm) => { mm.scale = { ...(mm.scale || {}), labels: { ...(mm.scale?.labels || {}), [l]: v } }; }, 'Daraja nomi saqlandi'); }} /></label>)}
+        </div>
+      )}
       {!m.competencies.length && <Panel><Empty icon="layers">Kompetensiya hali yo‘q. Pastda birinchisini qo‘shing.</Empty></Panel>}
       {layers.map((layer) => (
-        <Panel key={layer} title={<div className="row"><h2>{layer}</h2><span className="muted small">{m.competencies.filter((c) => c.layer === layer).length} ta</span></div>} tight>
+        <Panel key={layer} title={<div className="row"><h2>{layer}</h2><span className="muted small">{live.filter((c) => c.layer === layer).length} ta</span>{shared.includes(layer) && <Pill tone="teal">umumiy — ikki rolda bir marta baholanadi</Pill>}</div>} tight
+          actions={editable && <div className="row" style={{ gap: 8 }}>
+            <label className="chk small" title="Ikki rolli xodim kartasida bu klaster kompetensiyalari bir marta baholanadi va ikkala bo‘limga yoziladi"><input type="checkbox" checked={shared.includes(layer)} onChange={(e) => run(D.setSharedCluster, { id: m.id, layer, on: e.target.checked }, 'Saqlandi')} /> umumiy klaster</label>
+            <button className="link-btn small" onClick={() => ask('Klasterning yangi nomi:', (v) => run(D.renameCluster, { id: m.id, from: layer, to: v }, 'Klaster qayta nomlandi'), { input: true, ok: 'Saqlash' })}>qayta nomlash</button>
+          </div>}>
           <div className="comp-list">
-            {m.competencies.filter((c) => c.layer === layer).map((c) => <CompetencyBlock key={`${c.code}-${m.competencies.length}`} m={m} c={c} editable={editable} />)}
+            {live.filter((c) => c.layer === layer).map((c) => <CompetencyBlock key={`${c.code}-${m.competencies.length}`} m={m} c={c} editable={editable} />)}
           </div>
         </Panel>
       ))}
+      {archived.length > 0 && (
+        <Panel title={<div className="row"><h2>Arxiv</h2><span className="muted small">{archived.length} ta — modelda saqlanadi, hech bir darajada baholanmaydi</span></div>} tight>
+          <table className="small"><tbody>{archived.map((c) => <tr key={c.code}><td className="code">{c.code}</td><td>{c.name}</td><td className="muted">{c.layer}</td><td className="num">{editable && <button className="btn sm" onClick={() => run(D.archiveCompetency, { id: m.id, code: c.code, archived: false }, `${c.code} arxivdan qaytarildi — maqsadli darajalarni qayta qo‘ying`)}>Qaytarish</button>}</td></tr>)}</tbody></table>
+        </Panel>
+      )}
       {editable && <AddCompetency m={m} s={s} />}
     </div>
   );
@@ -166,14 +219,15 @@ function Profiles({ m, editable }) {
                 {m.profiles.map((p) => (
                   <th key={p.code} className="num">
                     {p.code}
-                    <div className="muted" style={{ fontWeight: 500, textTransform: 'none' }}>{p.name}</div>
+                    {editable ? <input className="i compact" style={{ width: 130, display: 'block', margin: '4px auto', textTransform: 'none', fontWeight: 500 }} defaultValue={p.name} title="Lavozim darajasi nomi (model jadvalidagidek)" onBlur={(e) => { const v = e.target.value.trim(); if (v && v !== p.name) upd(m, (mm) => { mm.profiles.find((x) => x.code === p.code).name = v; }, 'Daraja nomi saqlandi'); }} /> : <div className="muted" style={{ fontWeight: 500, textTransform: 'none' }}>{p.name}</div>}
+                    {editable && <span className="row" style={{ gap: 2, justifyContent: 'center' }}><button className="link-btn" disabled={m.profiles[0].code === p.code} title="Chapga" onClick={() => run(D.moveProfile, { id: m.id, code: p.code, dir: 'up' })}>←</button><button className="link-btn" disabled={m.profiles.at(-1).code === p.code} title="O‘ngga" onClick={() => run(D.moveProfile, { id: m.id, code: p.code, dir: 'down' })}>→</button></span>}
                     {editable && <button className="link-btn" onClick={() => ask(`${p.code} profili o‘chirilsinmi?`, () => run(D.removeProfile, { id: m.id, code: p.code }, 'Profil olib tashlandi'))}>o‘chirish</button>}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {m.competencies.map((c) => (
+              {m.competencies.filter((c) => !c.archived).map((c) => (
                 <tr key={c.code}>
                   <td className="code">{c.code}</td><td>{c.name}</td><td className="small muted">{c.layer}</td>
                   {m.profiles.map((p, pi) => (
@@ -559,7 +613,7 @@ export default function ModelDetail({ id }) {
       <section className="panel hero compact-hero">
         <div className="hero-top">
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div className="crumbs"><a href="#/models"><Icon name="back" size={13} /> Lavozim modellari</a></div>
+            <div className="crumbs"><a href="#/models"><Icon name="back" size={13} /> Kompetensiya modellari</a></div>
             <div className="row" style={{ marginTop: 4, flexWrap: 'nowrap' }}>
               {editable
                 ? <input className="i title-input" title="Nomni o‘zgartirish uchun bosing" defaultValue={m.name} onBlur={(e) => { const v = e.target.value.trim(); if (v && v !== m.name) upd(m, (mm) => { mm.name = v; }, 'Nom saqlandi'); }} />

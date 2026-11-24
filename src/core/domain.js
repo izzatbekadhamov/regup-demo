@@ -3051,9 +3051,11 @@ export function cardSections(s, card) {
   if (!root) return [card];
   return [root, ...s.cards.filter((c) => c.sectionOf === root.id && c.stage !== 'closed')];
 }
+/** Modelda «umumiy» deb belgilangan klasterlar (standart — Korporativ): ikki rolda bir marta baholanadi. */
+export const sharedLayers = (model) => model?.sharedLayers || [SHARED_LAYER];
 export function isSharedComp(s, card, code) {
   const model = getModel(s, card.modelVersionId);
-  return model?.competencies.find((c) => c.code === code)?.layer === SHARED_LAYER;
+  return sharedLayers(model).includes(model?.competencies.find((c) => c.code === code)?.layer);
 }
 /** Korporativ baho bir bo'limda o'zgarsa — boshqa bo'limlarga ham yoziladi (ikki marta baholanmaydi). */
 function syncShared(s, card, code) {
@@ -3090,5 +3092,83 @@ export function openRoleSection(state, { cardId, actor = 'HR/L&D', userId }) {
       scores, hrScores: {}, observations: [], gates: {}, kpi: null, panel: null, appointment: null, published: null, createdAt: s.today,
     });
     log(s, user?.name || actor, 'Ikkinchi rol bo‘limi ochildi', `${root.id} → ${id}`, { after: `${model.id} · ${r2.level} · umumiy korporativ: ${Object.keys(scores).length}` });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Model konstruktori — kengaytma (TZ 8-bo'lim, qaror №49): klasterlar, sub-kompetensiyalar, daraja nomlari,
+// lavozim darajalarini tartiblash va kompetensiyani arxivlash. Hammasi faqat qoralama versiyada; faollashtirilgach
+// yangi versiya keyingi baholashlarga qo'llanadi, e'lon qilingan darajalar qayta hisoblanmaydi.
+// ---------------------------------------------------------------------------
+export function renameCluster(state, { id, from, to, actor = 'HR/L&D' }) {
+  return mutate(state, (s) => {
+    const m = draftModel(s, id);
+    const name = String(to || '').trim();
+    if (!name) fail('Klaster nomi bo‘sh bo‘lmasin');
+    if (!m.competencies.some((c) => c.layer === from)) fail('Klaster topilmadi');
+    if (name !== from && m.competencies.some((c) => c.layer === name)) fail(`«${name}» klasteri allaqachon bor — kompetensiyani unga alohida o‘tkazing`);
+    for (const c of m.competencies) if (c.layer === from) c.layer = name;
+    if (m.sharedLayers) m.sharedLayers = m.sharedLayers.map((l) => (l === from ? name : l));
+    log(s, actor, 'Klaster qayta nomlandi', id, { before: from, after: name });
+  });
+}
+export function setSharedCluster(state, { id, layer, on, actor = 'HR/L&D' }) {
+  return mutate(state, (s) => {
+    const m = draftModel(s, id);
+    const cur = new Set(sharedLayers(m));
+    if (on) cur.add(layer); else cur.delete(layer);
+    m.sharedLayers = [...cur];
+    log(s, actor, on ? 'Klaster umumiy deb belgilandi' : 'Klaster umumiy emas', `${id} · ${layer}`);
+  });
+}
+/** Sub-kompetensiyalar: kompetensiya ichki bandlarga bo'linadi, daraja ularning o'rtachasi (butun songa yaxlitlanadi). */
+export function setSubCompetencies(state, { id, code, parts, actor = 'HR/L&D' }) {
+  return mutate(state, (s) => {
+    const m = draftModel(s, id);
+    const c = m.competencies.find((x) => x.code === code);
+    if (!c) fail('Kompetensiya topilmadi');
+    const list = (parts || []).map((p) => ({ code: String(p.code || '').trim().toUpperCase(), name: String(p.name || '').trim(), definition: String(p.definition || '').trim() })).filter((p) => p.code || p.name);
+    if (!list.length) {
+      c.composite = false;
+      delete m.composites?.[code];
+      log(s, actor, 'Sub-kompetensiyalar olib tashlandi', `${id} · ${code}`);
+      return;
+    }
+    if (list.length < 2) fail('Kamida 2 ta sub-kompetensiya kerak');
+    const others = Object.entries(m.composites || {}).filter(([k]) => k !== code).flatMap(([, d]) => d.parts);
+    const seen = new Set();
+    for (const p of list) {
+      if (!CODE_RE.test(p.code)) fail(`Sub-kompetensiya kodi noto‘g‘ri: «${p.code}» (masalan HR-01)`);
+      if (!p.name) fail(`${p.code}: nomi majburiy`);
+      if (seen.has(p.code) || others.includes(p.code) || m.competencies.some((x) => x.code === p.code)) fail(`${p.code} kodi takrorlanyapti`);
+      seen.add(p.code);
+    }
+    c.composite = true;
+    m.composites = { ...(m.composites || {}), [code]: { parts: list.map((p) => p.code), method: 'mean-round', label: `${list[0].code}–${list.at(-1).code} o‘rtachasi, butun songa yaxlitlanadi`, partDefs: list } };
+    log(s, actor, 'Sub-kompetensiyalar belgilandi', `${id} · ${code}`, { after: list.map((p) => p.code).join(', ') });
+  });
+}
+/** Arxivlash: kompetensiya modelda qoladi (tarix uchun), lekin hech bir darajada baholanmaydi. */
+export function archiveCompetency(state, { id, code, archived = true, actor = 'HR/L&D' }) {
+  return mutate(state, (s) => {
+    const m = draftModel(s, id);
+    const c = m.competencies.find((x) => x.code === code);
+    if (!c) fail('Kompetensiya topilmadi');
+    c.archived = !!archived;
+    if (archived) {
+      for (const p of m.profiles) delete p.targets[code];
+      for (const cond of m.rules?.conditions || []) if (cond.type === 'min_level_items') delete cond.params.items[code];
+    }
+    log(s, actor, archived ? 'Kompetensiya arxivlandi' : 'Kompetensiya arxivdan qaytarildi', `${id} · ${code}`);
+  });
+}
+export function moveProfile(state, { id, code, dir, actor = 'HR/L&D' }) {
+  return mutate(state, (s) => {
+    const m = draftModel(s, id);
+    const i = m.profiles.findIndex((p) => p.code === code);
+    const j = i + (dir === 'up' ? -1 : 1);
+    if (i < 0 || j < 0 || j >= m.profiles.length) fail('Siljitib bo‘lmaydi');
+    [m.profiles[i], m.profiles[j]] = [m.profiles[j], m.profiles[i]];
+    log(s, actor, 'Lavozim darajalari tartibi', id, { after: m.profiles.map((p) => p.code).join(' → ') });
   });
 }
