@@ -943,3 +943,22 @@ describe('Eski TZ va Jobster qarorlari (2026-11-24)', () => {
     expect(() => D.setSelfScore(s, { cardId: 'c-110', employeeId: 'e-malika', code: 'GEN-01', level: 3 })).toThrow(/topilmadi/);
   });
 });
+
+describe('Ikki rolli xodim (qaror №50)', () => {
+  it('Bitta karta, ikki bo‘lim: korporativ baho bir marta qo‘yiladi va ikkala bo‘limga yoziladi', () => {
+    let s = createSeed();
+    const secs = D.cardSections(s, D.getCard(s, 'c-101'));
+    expect(secs.map((c) => c.modelVersionId)).toEqual(['FR@0.3', 'GE@1.0']);
+    const ge = secs[1];
+    expect(ge).toMatchObject({ sectionOf: 'c-101', profileTo: 'LT-3' });
+    expect(() => D.openRoleSection(s, { cardId: 'c-101' })).toThrow(/allaqachon/);
+    s = D.setScore(s, { cardId: ge.id, code: 'KOR-01', final: 4, basis: 'Ikkala rolda ham mas’uliyatli' });
+    expect(D.getCard(s, 'c-101').scores['KOR-01']).toMatchObject({ final: 4, sharedFrom: ge.id });
+    // Funksional kompetensiya bo'limlararo ko'chirilmaydi.
+    const fun = D.getModel(s, 'GE@1.0').competencies.find((c) => c.layer === 'Funksional').code;
+    s = D.setScore(s, { cardId: ge.id, code: fun, final: 3, basis: 'Dars kuzatuvi' });
+    expect(D.getCard(s, 'c-101').scores[fun]).toBeUndefined();
+    // Ikkinchi roli yo'q xodimda bo'lim ochilmaydi.
+    expect(() => D.openRoleSection(s, { cardId: 'c-103' })).toThrow(/ikkinchi rol/);
+  });
+});

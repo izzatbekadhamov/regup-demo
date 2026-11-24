@@ -113,7 +113,7 @@ export default function Cards() {
                 return (
                   <tr key={c.id} className="clickable" onClick={() => go(`/cards/${c.id}`)}>
                     <td><Person name={e.name} sub={getBranch(s, c.branchId)?.name} /></td>
-                    <td style={{ whiteSpace: 'nowrap' }}>{c.profileFrom ? `${c.profileFrom} → ${c.profileTo}` : c.profileTo}<div className="muted small">{model?.name}</div></td>
+                    <td style={{ whiteSpace: 'nowrap' }}>{c.profileFrom ? `${c.profileFrom} → ${c.profileTo}` : c.profileTo}<div className="muted small">{model?.name}{c.sectionOf ? ` · ${c.sectionOf} kartasining 2-rol bo‘limi` : ''}</div></td>
                     <td>{STAGE_LABELS[c.stage]}{c.prevCardId && <div className="muted small">qayta baholash</div>}{c.origin === 'onboarding' && <div><Pill tone="brand">onboarding</Pill></div>}{c.stage !== 'published' && <div className="muted small">shartli</div>}</td>
                     <td style={{ whiteSpace: 'nowrap' }}>{fmtDate(c.deadline)} {late && <Pill tone="bad">kechikkan</Pill>}</td>
                     <td className="num">{isNum(d.match.match) ? <b>{fmtPct(d.match.match)}</b> : <span className="muted small">{d.match.counts.scored}/{d.match.counts.total}</span>}</td>

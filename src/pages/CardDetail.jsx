@@ -387,6 +387,24 @@ function Appointment({ card, emp }) {
   );
 }
 
+/** Ikki rolli xodim: bitta karta, har rol — alohida bo'lim va o'z lavozim darajasi (qaror №50). */
+function RoleSections({ s, card, emp, user }) {
+  const secs = D.cardSections(s, card);
+  const root = secs[0];
+  const canOpen = emp.secondRole && secs.length === 1 && !card.sectionOf && card.stage !== 'published' && (!user || D.can(user, 'cards.assign'));
+  if (secs.length === 1 && !canOpen) return null;
+  return (
+    <div className="panel panel-body row between" style={{ gap: 10 }}>
+      <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+        <b className="small">Rol bo‘limlari:</b>
+        {secs.map((c) => { const m = D.getModel(s, c.modelVersionId); return <a key={c.id} href={`#/cards/${c.id}`} className={`btn sm ${c.id === card.id ? 'primary' : ''}`}>{m.name} · {c.profileTo}{c.stage === 'published' ? ' ✓' : ''}</a>; })}
+        {secs.length > 1 && <span className="small muted">Korporativ kompetensiyalar bir marta baholanadi va ikkala bo‘limga yoziladi; lavozim darajasi har bo‘limda alohida e’lon qilinadi.</span>}
+      </div>
+      {canOpen && <button className="btn sm" onClick={() => run(D.openRoleSection, { cardId: root.id, userId: user?.id }, 'Ikkinchi rol bo‘limi ochildi')}>+ {emp.secondRole.title || emp.secondRole.position} bo‘limi</button>}
+    </div>
+  );
+}
+
 export default function CardDetail({ id, user }) {
   const s = useAppState();
   const [open, setOpen] = useState(null);
@@ -440,6 +458,7 @@ export default function CardDetail({ id, user }) {
         </div>
         <Stepper stages={model.stages} current={card.stage} />
       </section>
+      <RoleSections s={s} card={card} emp={emp} user={user} />
       <NextStep card={card} model={model} d={d} onOpen={(code) => { setOpen(code); setTimeout(() => document.getElementById(`row-${code}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50); }} />
 
       <div className="split">
@@ -461,7 +480,7 @@ export default function CardDetail({ id, user }) {
                     const evM = context.evidenceMethods?.[c.code]?.length || 0;
                     return [
                       <tr key={c.code} id={`row-${c.code}`} className={`clickable ${isOpen ? 'open' : ''} ${it.state === 'unrated' ? 'todo' : ''}`} onClick={() => setOpen(isOpen ? null : c.code)}>
-                        <td><span className="chev">{isOpen ? '−' : '+'}</span> <span className="code">{c.code}</span> {c.name}{c.composite && <div className="muted small" style={{ marginLeft: 18 }}>{compositeParts(model, c.code).length} qism · {Object.keys(card.hrScores).length} baho</div>}</td>
+                        <td><span className="chev">{isOpen ? '−' : '+'}</span> <span className="code">{c.code}</span> {c.name}{c.layer === D.SHARED_LAYER && D.cardSections(s, card).length > 1 && <span className="pill teal" style={{ marginLeft: 6 }} title="Korporativ kompetensiya ikkala rol bo‘limida bir marta baholanadi">umumiy</span>}{c.composite && <div className="muted small" style={{ marginLeft: 18 }}>{compositeParts(model, c.code).length} qism · {Object.keys(card.hrScores).length} baho</div>}</td>
                         <td className="num">{it.target}</td>
                         <td className="num">{it.state === 'unrated' ? <span className="pill muted">baholanmagan</span> : <ScoreChip v={it.score} target={it.target} />}</td>
                         <td className="num">{it.gap === null ? <span className="muted">—</span> : it.gap > 0 ? <span style={{ color: it.gap > 1 ? 'var(--bad)' : 'var(--warn)', fontWeight: 700 }}>−{it.gap}</span> : <span className="muted">0</span>}</td>

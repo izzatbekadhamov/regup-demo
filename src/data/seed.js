@@ -2,7 +2,7 @@
 import { frModel, geModel, abModel, HR_CODES } from './models.js';
 import { compMethods } from '../core/modelKit.js';
 import { resolveScores, computeMatch } from '../core/calc.js';
-import { idpProposal, ROLE_PRESETS } from '../core/domain.js';
+import { idpProposal, ROLE_PRESETS, openRoleSection } from '../core/domain.js';
 import { COURSES, PATHS } from './courses.js';
 
 import { createOnbHistory } from './onbHistory.js';
@@ -72,6 +72,7 @@ export function createSeed() {
   const employees = [
     {
       id: 'e-dilshod', name: 'Dilshod Karimov', position: 'FR', currentLevel: 'FR-1', branchId: 'b-chil',
+      secondRole: { position: 'GE', level: 'LT-3', title: 'Ustoz (Head teacher) — Chilonzor' },
       levelSince: '2025-08-01', kpi10m: 82, history: [{ level: 'FR-1', from: '2025-08-01', doc: 'Buyruq №118-K' }], records: {},
     },
     {
@@ -655,8 +656,8 @@ export function createSeed() {
   const malika = employees.find((e) => e.id === 'e-malika');
   if (malika) malika.colleagues = { kind: 'branches', branchIds: ['b-yunus'] };
 
-  return {
-    schema: 19,
+  const seedState = {
+    schema: 20,
     today: TODAY,
     models,
     branches,
@@ -721,4 +722,6 @@ export function createSeed() {
     audit: [{ id: 'a-0', at: '2026-10-01T09:00', actor: 'HRD', action: 'Model faollashtirildi', object: 'FR@0.3', reason: 'Pilot bazasi' }],
     seq: 1000,
   };
+  // Ikki rolli xodim (qaror №50): Dilshod — filial rahbari va Head teacher; kartada GE bo'limi ochilgan, korporativ baholar umumiy.
+  return openRoleSection(seedState, { cardId: 'c-101', actor: 'HR/L&D' });
 }

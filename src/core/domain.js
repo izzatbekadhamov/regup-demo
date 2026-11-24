@@ -160,6 +160,7 @@ export function setScore(state, { cardId, code, final, basis, expectedRevision, 
     const before = card.scores[code]?.final ?? '—';
     card.scores[code] = { ...(card.scores[code] || { evidences: [] }), final, basis, by: actor, at: s.today };
     card.revision += 1;
+    syncShared(s, card, code);
     log(s, actor, 'Yakuniy daraja kiritildi', `${cardId} · ${code}`, { before: String(before), after: String(final), reason: basis });
   });
 }
@@ -176,6 +177,7 @@ export function addEvidence(state, { cardId, code, method, value, note, sourceId
     entry.evidences = [...(entry.evidences || []), { method, value, note, sourceId: sourceId || nextId(s, 'SRC') }];
     card.scores[code] = entry;
     card.revision += 1;
+    syncShared(s, card, code);
     log(s, actor, 'Dalil qo‘shildi', `${cardId} · ${code}`, { after: `${method}: ${value ?? '—'}` });
   });
 }
@@ -3034,5 +3036,59 @@ export function setSelfScore(state, { cardId, employeeId, code, level, note = ''
     if (!(Number.isInteger(lv) && lv >= 1 && lv <= scaleMax(model))) fail(`Daraja 1–${scaleMax(model)}`);
     card.selfScores = { ...(card.selfScores || {}), [code]: { level: lv, note: String(note).trim(), at: s.today } };
     log(s, getEmployee(s, employeeId).name, 'O‘zini baholadi', `${cardId} · ${code}`, { after: String(lv) });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Ikki rolli xodim (qaror №50): karta bitta — ichida har rol modeli alohida bo'lim, har bo'limda o'z lavozim
+// darajasi. Korporativ klaster kompetensiyalari bir marta baholanadi va ikkala bo'limga tatbiq etiladi.
+// Prototipda bo'lim — asosiy kartaga bog'langan yozuv (sectionOf); e'lon har bo'limda alohida.
+// ---------------------------------------------------------------------------
+export const SHARED_LAYER = 'Korporativ';
+/** Kartaning barcha bo'limlari (asosiy birinchi). */
+export function cardSections(s, card) {
+  const root = card.sectionOf ? getCard(s, card.sectionOf) : card;
+  if (!root) return [card];
+  return [root, ...s.cards.filter((c) => c.sectionOf === root.id && c.stage !== 'closed')];
+}
+export function isSharedComp(s, card, code) {
+  const model = getModel(s, card.modelVersionId);
+  return model?.competencies.find((c) => c.code === code)?.layer === SHARED_LAYER;
+}
+/** Korporativ baho bir bo'limda o'zgarsa — boshqa bo'limlarga ham yoziladi (ikki marta baholanmaydi). */
+function syncShared(s, card, code) {
+  if (!isSharedComp(s, card, code)) return;
+  for (const other of cardSections(s, card)) {
+    if (other.id === card.id || other.stage === 'published') continue;
+    const m = getModel(s, other.modelVersionId);
+    if (!m.competencies.some((c) => c.code === code)) continue;
+    other.scores[code] = { ...structuredClone(card.scores[code]), sharedFrom: card.id };
+  }
+}
+/** Ikkinchi rol bo'limini ochish: xodimning ikkinchi lavozimi modeli bo'yicha, korporativ baholar ko'chiriladi. */
+export function openRoleSection(state, { cardId, actor = 'HR/L&D', userId }) {
+  return mutate(state, (s) => {
+    const root = getCard(s, cardId);
+    if (!root || root.sectionOf) fail('Asosiy karta topilmadi');
+    if (root.stage === 'published' || root.stage === 'closed') fail('E’lon qilingan kartaga bo‘lim qo‘shilmaydi');
+    const user = userId ? getStaff(s, userId) : null;
+    if (user && !can(user, 'cards.assign')) fail('Bo‘lim ochish uchun «Baholash kartasini biriktirish» huquqi kerak');
+    const emp = getEmployee(s, root.employeeId);
+    const r2 = emp.secondRole;
+    if (!r2) fail('Xodimda ikkinchi rol belgilanmagan');
+    if (cardSections(s, root).length > 1) fail('Ikkinchi rol bo‘limi allaqachon ochilgan');
+    const model = activeModel(s, r2.position);
+    if (!model) fail(`${r2.position} lavozimi uchun kompetensiya modeli yo‘q — bo‘lim ochilmaydi`);
+    if (!model.profiles.some((p) => p.code === r2.level)) fail(`${r2.level} darajasi ${model.name} modelida yo‘q`);
+    const id = nextId(s, 'c');
+    const scores = {};
+    for (const [code, v] of Object.entries(root.scores)) if (isSharedComp(s, root, code) && model.competencies.some((c) => c.code === code)) scores[code] = { ...structuredClone(v), sharedFrom: root.id };
+    s.cards.unshift({
+      id, sectionOf: root.id, cycleId: root.cycleId, origin: root.origin, provisional: root.provisional, employeeId: emp.id, modelVersionId: model.id,
+      profileFrom: model.transition ? (r2.from || null) : null, profileTo: r2.level, branchId: root.branchId, stage: root.stage === 'draft' ? 'draft' : 'evidence', revision: 1, deadline: root.deadline,
+      targetRoleId: null, stretchId: null, assessors: { evaluator: model.evaluatorRole || 'Assessor', calibrator: 'L&D' },
+      scores, hrScores: {}, observations: [], gates: {}, kpi: null, panel: null, appointment: null, published: null, createdAt: s.today,
+    });
+    log(s, user?.name || actor, 'Ikkinchi rol bo‘limi ochildi', `${root.id} → ${id}`, { after: `${model.id} · ${r2.level} · umumiy korporativ: ${Object.keys(scores).length}` });
   });
 }
