@@ -51,6 +51,9 @@ function Scatter({ pts, metric }) {
   );
 }
 
+/** Anonimlik: filialda 5 tadan kam javob bo'lsa mazmun ko'rsatilmaydi. */
+const Few = ({ n }) => <span className="muted" title={`Javoblar kam: ${n} / ${D.ANON_MIN}`}>kam ({n})</span>;
+
 export default function OnbDashboard({ user }) {
   const s = useAppState();
   const scope = D.scopeBranches(s, user);
@@ -113,7 +116,7 @@ export default function OnbDashboard({ user }) {
         <Stat k="O‘rtacha onboarding natijasi" v={N1(completed.length ? completed.reduce((a, r) => a + r.score, 0) / completed.length : null)} s={`${completed.length} ta yakunlangan · muvaffaqiyatli ${P(100 * completed.filter((r) => r.passed).length / (completed.length || 1))}`} icon="check" />
         <Stat k="30 kun ichida ketganlar" v={P(leave.early.pct)} s={`${leave.early.n} / ${leave.early.of} xodim · 30 kuni to‘lganlardan`} icon="trend" tone={leave.early.pct !== null && leave.early.pct > 20 ? 'bad' : ''} />
         <Stat k="Standartlar bajarilishi" v={P(tot.checklist)} s={`8 bandli nazorat ro‘yxati · javob ulushi ${P(tot.rate)}`} icon="check" tone={tot.checklist !== null && tot.checklist < 80 ? 'warn' : ''} />
-        <Stat k="eNPS (D30, D60)" v={tot.enps === null ? '—' : Math.round(tot.enps)} s="tavsiya qilish, −100…+100 · anonim" icon="users" />
+        <Stat k="eNPS (D30, D60)" v={tot.enps === null ? '—' : Math.round(tot.enps)} s={tot.enpsN < D.ANON_MIN ? `javoblar kam (${tot.enpsN} / ${D.ANON_MIN}) — anonimlik uchun ko‘rsatilmaydi` : 'tavsiya qilish, −100…+100 · anonim'} icon="users" />
       </div>
 
       <div className="grid g2">
@@ -188,11 +191,11 @@ export default function OnbDashboard({ user }) {
         </div>
         <table className="small" style={{ marginTop: 12 }}>
           <thead><tr><th>Filial</th><th className="num">Yangi xodim</th><th className="num">Javob ulushi</th><th className="num">D8</th><th className="num">D30</th><th className="num">D60</th><th className="num">eNPS</th><th style={{ width: '22%' }}>Standartlar</th></tr></thead>
-          <tbody>{proc.map((r) => <tr key={r.branchId}><td>{D.getBranch(s, r.branchId)?.name}</td><td className="num">{r.hires}</td><td className="num">{r.rate !== null && r.rate < D.SURVEY_MIN_RATE ? <Pill tone="warn">{P(r.rate)}</Pill> : P(r.rate)}</td><td className="num">{N1(r.d8[1])}</td><td className="num">{N1(r.d30[1])}</td><td className="num">{N1(r.d60[1])}</td><td className="num">{r.enps}</td><td><HBar v={r.checklistPct} color={r.checklistPct < 80 ? 'var(--warn)' : 'var(--good)'} /></td></tr>)}</tbody>
+          <tbody>{proc.map((r) => <tr key={r.branchId}><td>{D.getBranch(s, r.branchId)?.name}</td><td className="num">{r.hires}</td><td className="num">{r.rate !== null && r.rate < D.SURVEY_MIN_RATE ? <Pill tone="warn">{P(r.rate)}</Pill> : P(r.rate)}</td><td className="num">{r.few.d8 ? <Few n={r.d8[0]} /> : N1(r.d8[1])}</td><td className="num">{r.few.d30 ? <Few n={r.d30[0]} /> : N1(r.d30[1])}</td><td className="num">{r.few.d60 ? <Few n={r.d60[0]} /> : N1(r.d60[1])}</td><td className="num">{r.few.enps ? <Few n={r.d30[0] + r.d60[0]} /> : r.enps}</td><td>{r.few.d8 ? <Few n={r.d8[0]} /> : <HBar v={r.checklistPct} color={r.checklistPct < 80 ? 'var(--warn)' : 'var(--good)'} />}</td></tr>)}</tbody>
         </table>
         <h3 className="small" style={{ margin: '14px 0 6px' }}>Nazorat ro‘yxati: har band bo‘yicha «Ha» ulushi</h3>
         <table className="small"><tbody>{D.CHECKLIST_ITEMS.map(([src, label], i) => <tr key={label}><td><span className="muted">{src}</span> {label}</td><td style={{ width: '34%' }}><HBar v={tot.items[i]} color={tot.items[i] < 80 ? 'var(--warn)' : 'var(--good)'} /></td></tr>)}</tbody></table>
-        <div className="small muted" style={{ marginTop: 6 }}>So‘rovnomalarda xodim ID’si yo‘q: natijalar faqat filial va lavozim bo‘yicha ko‘rsatiladi, alohida xodimga bog‘lanmaydi.</div>
+        <div className="small muted" style={{ marginTop: 6 }}>So‘rovnomalarda xodim ID’si yo‘q: natijalar faqat filial va lavozim bo‘yicha ko‘rsatiladi, alohida xodimga bog‘lanmaydi. Filialda {D.ANON_MIN} tadan kam javob bo‘lsa, javoblar mazmuni ko‘rsatilmaydi («kam»), faqat umumiy jamlanmaga kiradi; javob ulushi (qatnashuv) har doim ko‘rinadi.</div>
       </Panel>
 
       <div className="grid g2">

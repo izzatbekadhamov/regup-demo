@@ -32,12 +32,13 @@ export default function MyOnboarding({ emp }) {
       <section className="panel hero compact-hero">
         <div className="row between">
           <div>
-            <div className="row"><h1>Moslashuv dasturim</h1>{ob.reboarding && <Pill tone="brand">Reboarding</Pill>}{ob.status === 'completed' && <Pill tone="good">yakunlangan</Pill>}</div>
+            <div className="row"><h1>Moslashuv dasturim</h1>{ob.reboarding && <Pill tone="brand">Reboarding</Pill>}{ob.status === 'completed' && <Pill tone="good">yakunlangan</Pill>}{ob.status === 'active' && ob.extension && <Pill tone="warn">uzaytirilgan</Pill>}</div>
             <p className="ink2">Adaptatsiya 60 kun davom etadi. Moslashuv dasturi {days} kun: lavozimingizga mos kurslar, test va amaliy topshiriqlar{r.needObs ? ', metodistning dars kuzatuvi' : ''} va CEO/HRD bilan uchrashuv. Oxirida onboarding natijasi (1–5) chiqadi va uni filial rahbari tasdiqlaydi. Mentoringiz: <b>{mentor?.name || '—'}</b>{buddy && <> · buddy: <b>{buddy.name}</b></>}. 60-kunda kompetensiya kartasi bo‘yicha birinchi lavozim darajangiz e’lon qilinadi.</p>
           </div>
           <div style={{ minWidth: 170 }}>{ob.status === 'active' ? <OnbStages day={day} days={days} /> : <div className="small">Yakunlangan: {fmtDate(ob.final?.at)}</div>}</div>
         </div>
         {ob.final?.passed && <div className="callout good"><b>Onboarding muvaffaqiyatli yakunlandi</b><div className="small">Natija {num(ob.final.score)} / 5 — {ob.final.label}. Barcha qismlar minimumdan o‘tdi. Tasdiqladi: {ob.final.by}.</div></div>}
+        {ob.status === 'active' && ob.extension && <div className="callout warn small"><b>Onboarding {fmtDate(ob.extension.until)} gacha uzaytirildi.</b> Qayta baholanadigan qism: {ob.extension.parts.map((k) => D.ONB_PARTS[k][0]).join(', ')}. Mentor rejasi: {ob.extension.plan}{Object.keys(ob.extension.regrades || {}).length > 0 && <> · Qayta baholangan: {Object.entries(ob.extension.regrades).map(([k, v]) => `${D.ONB_PARTS[k][0]} — ${v.grade} / 5`).join(', ')}</>}</div>}
         {ob.restored?.length > 0 && <div className="callout small"><b>Qaytganingiz bilan!</b> {ob.restored.map((x) => x.text).join('; ')}.</div>}
       </section>
       <div className="split">
@@ -49,7 +50,7 @@ export default function MyOnboarding({ emp }) {
                 const doneN = c.components.filter((x) => D.componentDone(c, enr, x.id)).length;
                 return (
                   <Step key={enr.id} ok={enr.status === 'completed'} title={<a href={`#/learn/${enr.id}`}>{c.title}</a>}>
-                    {enr.status === 'completed' ? `Yakunlangan ${fmtDate(enr.completedAt)} · kurs bahosi ${num(D.courseGrade(c, enr))}` : `Kurslar bajarilishi ${Math.round((100 * doneN) / c.components.length)}% (${doneN}/${c.components.length})${D.courseGrade(c, enr) !== null ? ` · kurs bahosi ${num(D.courseGrade(c, enr))}` : ''} · muddat ${fmtDate(enr.deadline)}${enr.deadline < s.today ? ' — muddat o‘tdi' : ''}`}
+                    {enr.status === 'completed' ? `Yakunlangan ${fmtDate(enr.completedAt)} · kurs bahosi ${num(D.courseGrade(c, enr))}` : enr.awaitingFeedback ? 'Kontent bajarildi — kursni yakunlash uchun 2 ta savolga javob bering (qoniqish bahosi va NPS)' : `Kurslar bajarilishi ${Math.round((100 * doneN) / c.components.length)}% (${doneN}/${c.components.length})${D.courseGrade(c, enr) !== null ? ` · kurs bahosi ${num(D.courseGrade(c, enr))}` : ''} · muddat ${fmtDate(enr.deadline)}${enr.deadline < s.today ? ' — muddat o‘tdi' : ''}`}
                   </Step>
                 );
               })}

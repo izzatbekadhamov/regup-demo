@@ -59,6 +59,15 @@ Tizim hujjati — «RegUP onboarding tizimi» (Claude Doc). Prototipda:
 - **Tashkiliy tuzilma** (filial → bo'lim) LMS'da qo'lda; «Umumiy jamoa a'zolari» — admin doirasidagi xodimlar, profil (EduTizim ma'lumotlari) va to'liq foydalanuvchi tarixi. Xodim kabinetida «Jamoadoshlar»: sukut bo'yicha o'z filiali, doira sozlanadi; hamkasbga yakunlangan kurslar, yutuqlar va badge'lar ko'rinadi.
 - Dashboard'dagi ko'rsatkichlar kelishilgan ro'yxat bo'yicha (kohorta retention 30/60/90, 30 kun ichida ketganlar, mentor yuklamasi, eNPS, ma'lumot sifati, reboarding, ishga tayyor bo'lish vaqti; baho ↔ KPI bog'liqligi faqat 100+ xodimdan keyin xulosa).
 
+## 1-reliz TZ qarorlari (2026-11-24)
+
+- **Test:** standart 3 urinish (testda sozlanadi), kurs bahosiga oxirgi urinish kiradi.
+- **Onboarding minimumdan o'tmasa:** avval mentor rejasi bilan 14 kungacha uzaytiriladi, faqat past qismlar qayta baholanadi, keyin yakuniy tasdiq.
+- **Kurs fikri:** kursdan qoniqish bahosi va NPS majburiy — kurs shulardan keyin yakunlangan hisoblanadi (yakunlanish sanasi — kontent bajarilgan kun).
+- **Anonimlik:** so'rovnoma, kurs bahosi va NPS kamida 5 ta javob bo'lsa ko'rsatiladi.
+- **Shikoyat:** xodim e'lon qilingan natija bo'yicha 10 kun ichida shikoyat yuboradi; kartani baholamagan, «E'lon va tayinlash» huquqi bor shaxs ko'rib chiqadi (o'zgarmaydi yoki qayta baholash).
+- **Kirish:** «Chiqish» → kirish ekrani: Telegram, SMS kod yoki login va parol (demo: kod 1234, parol «demo», admin logini «hr», «lda», «super»).
+
 ## Moslashuvchan model
 Mohiyat hamma lavozimda bir xil: kompetensiya → daraja indikatorlari → dalil → yakuniy daraja → moslik (`100 × Σmin(baho, maqsad) ÷ Σmaqsad`) va shartlar → qaror. Lavozimga qarab quyidagilar model konfiguratsiyasida sozlanadi:
 - **Kompetensiyalar** soni va turi (qatlam), har birining ta'rifi, salbiy indikatorlari va savollari; umumiy kompetensiyalar (masalan KOR-01…04) kutubxonadan olinadi.

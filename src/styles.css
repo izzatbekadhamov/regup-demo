@@ -606,3 +606,7 @@ ol.crit { margin: 6px 0 2px 18px; padding: 0; color: var(--ink-2); display: grid
 .mate:hover { border-color: var(--brand); }
 .mate.on { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand-soft, #dbe7ff); }
 .mate-badges { min-height: 20px; font-size: 16px; }
+
+/* Kirish ekrani */
+.login-wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--bg, #f6f7f9); }
+.login-card { width: min(420px, 100%); }

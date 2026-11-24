@@ -38,6 +38,7 @@ import OnbDashboard from './pages/OnbDashboard.jsx';
 import Team from './pages/Team.jsx';
 import People from './pages/People.jsx';
 import Gamification from './pages/Gamification.jsx';
+import Login from './pages/Login.jsx';
 import Colleagues from './pages/Colleagues.jsx';
 import MyRating from './pages/MyRating.jsx';
 import { kpiValue, kpiResult, kpiMonths } from './core/domain.js';
@@ -141,6 +142,7 @@ export default function App() {
   const user = D.getStaff(state, session.userId) || D.getStaff(state, 'u-super');
   const actives = D.activeEmployees(state);
   const emp = actives.find((e) => e.id === session.employeeId) || actives[0];
+  if (session.loggedOut) return <><Login /><Toasts /></>;
 
   let page;
   if (admin && !allowed(user, p0 || '')) {
@@ -157,7 +159,7 @@ export default function App() {
     else if (p0 === 'reminders') page = <Reminders user={user} />;
     else if (p0 === 'tasks') page = <TaskQueue key={user.id} user={user} />;
     else if (p0 === 'observations') page = <ObservationPage key={user.id} user={user} focus={p1} />;
-    else if (p0 === 'cards' && p1) page = <CardDetail id={p1} />;
+    else if (p0 === 'cards' && p1) page = <CardDetail id={p1} user={user} />;
     else if (p0 === 'cards') page = <Cards />;
     else if (p0 === 'stretch') page = <Stretch id={p1} />;
     else if (p0 === 'models' && p1) page = <ModelDetail id={decodeURIComponent(p1)} />;
@@ -213,6 +215,7 @@ export default function App() {
             <button className={admin ? 'on' : ''} title="HR, baholovchi va rahbar uchun" onClick={() => { setSession({ mode: 'admin' }); go(`/${firstRoute(user)}`); }}>Admin</button>
             <button className={!admin ? 'on' : ''} title="Xodim o‘z kabinetini qanday ko‘radi" onClick={() => { setSession({ mode: 'employee' }); go('/'); }}>Xodim</button>
           </div>
+          <button className="btn sm" style={{ marginLeft: 'auto', order: 9 }} title="Kirish ekrani: Telegram, SMS kod yoki login va parol" onClick={() => setSession({ loggedOut: true })}>Chiqish</button>
           {admin ? (
             <label className="who" title="Har bir admin o‘ziga berilgan huquqlar va doira bo‘yicha ishlaydi">
               <Avatar name={user.role === 'super' ? 'HR LD' : user.name} />

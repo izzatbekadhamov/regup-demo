@@ -274,7 +274,11 @@ describe('LMS: kurslar va Learning Path', () => {
     const emp = D.getEmployee(s, 'e-jasur');
     // Jasurda FUN-03 ish dalili 3 edi (karta) — pasaytirilmaydi, qayta yozilmaydi; kurs yakunlandi
     expect(emp.records['FUN-03'].filter((r) => r.context === 'work').at(-1).level).toBe(3);
+    // Kontent bajarildi, lekin kurs 2 ta majburiy savoldan (qoniqish + NPS) keyin yakunlanadi
+    expect(D.getEnrollment(s, enr.id)).toMatchObject({ status: 'in_progress', awaitingFeedback: true });
+    s = D.submitCourseFeedback(s, { enrollmentId: enr.id, satisfaction: 5, nps: 9 });
     expect(D.getEnrollment(s, enr.id).status).toBe('completed');
+    expect(D.getEnrollment(s, enr.id).completedAt).toBe(s.today);
   });
 
   it('Learning Path: ketma-ketlik, kurs natijasi lavozimga tayyorlikni oshiradi, yo‘l yakunlanadi', () => {
@@ -290,6 +294,8 @@ describe('LMS: kurslar va Learning Path', () => {
     expect(emp.records['FUN-01'].at(-1)).toMatchObject({ level: 3, context: 'work' });
     expect(emp.records['LDR-01'].at(-1)).toMatchObject({ level: 3, context: 'work' });
     expect(D.positionReadiness(s, emp, fr, fr1).near).toBeGreaterThan(before);
+    expect(D.courseLocked(s, D.getEnrollment(s, next.id))).toBe(true); // fikr qoldirilmaguncha kurs yakunlanmagan
+    s = D.submitCourseFeedback(s, { enrollmentId: 'enr-7', satisfaction: 4, nps: 8 });
     expect(D.courseLocked(s, D.getEnrollment(s, next.id))).toBe(false);
     expect(D.positionReadiness(s, emp, fr, fr1).eligible).toBe(true); // FR-1 — kirish darajasi
   });
@@ -484,6 +490,7 @@ describe('Onboarding (TZ): integratsiya, 30 kunlik moslashuv, rollar, eslatmalar
     expect(() => D.reviewTask(s, { enrollmentId: 'enr-o2', componentId: 'a1', decision: 'accepted', grade: 4, note: 'ok', reviewerId: 'u-cur' })).toThrow(/mentori/);
     expect(() => D.reviewTask(s, { enrollmentId: 'enr-o2', componentId: 'a1', decision: 'accepted', note: 'ok', reviewerId: 'u-men-sher' })).toThrow(/1–5/);
     s = D.reviewTask(s, { enrollmentId: 'enr-o2', componentId: 'a1', decision: 'accepted', grade: 4, note: 'Maqsad aniq', mentor: 'Sherzod Ismoilov', reviewerId: 'u-men-sher' });
+    s = D.submitCourseFeedback(s, { enrollmentId: 'enr-o2', satisfaction: 4, nps: 9 });
     expect(D.getEnrollment(s, 'enr-o2').status).toBe('completed');
     expect(D.onboardingScore(s, D.onboardingOf(s, 'e-nilufar')).ready).toBe(false); // kursdan tashqari topshiriq hali baholanmagan
     s = D.gradeOnbTask(s, { onboardingId: 'onb-1', taskId: 'gt1', grade: 4, userId: 'u-men-sher' });
@@ -744,5 +751,75 @@ describe('Kurslar bajarilishi, gamifikatsiya, tashkiliy tuzilma va jamoadoshlar'
     s = D.setColleaguesScope(s, { employeeId: 'e-sanjar', kind: 'branches', branchIds: ['b-yunus'], userId: 'u-hr' });
     expect(new Set(D.colleaguesOf(s, D.getEmployee(s, 'e-sanjar')).map((e) => e.branchId))).toEqual(new Set(['b-chil', 'b-yunus']));
     expect(() => D.setColleaguesScope(s, { employeeId: 'e-sanjar', kind: 'branch', userId: 'u-men-gul' })).toThrow(/Huquq/);
+  });
+});
+
+describe('TZ 2026-11-24 qarorlari', () => {
+  it('Test: standart 3 urinish, kurs bahosiga oxirgi urinish kiradi', () => {
+    let s = createSeed();
+    s = D.enrollCourse(s, { employeeId: 'e-jasur', courseId: 'CRS-CX-01' });
+    const id = s.enrollments.at(-1).id;
+    s = D.submitTest(s, { enrollmentId: id, componentId: 't1', answers: [0, 0] }); // 100%
+    s = D.submitTest(s, { enrollmentId: id, componentId: 't1', answers: [1, 1] }); // 0% — oxirgisi hisoblanadi
+    const p = D.getEnrollment(s, id).progress.t1;
+    expect(D.testScore(p)).toBe(0);
+    expect(D.componentDone(D.getCourse(s, 'CRS-CX-01'), D.getEnrollment(s, id), 't1')).toBe(false);
+    s = D.submitTest(s, { enrollmentId: id, componentId: 't1', answers: [0, 0] });
+    expect(D.testScore(D.getEnrollment(s, id).progress.t1)).toBe(100);
+    expect(() => D.submitTest(s, { enrollmentId: id, componentId: 't1', answers: [0, 0] })).toThrow(/Urinishlar tugadi/);
+  });
+
+  it('Onboarding minimumdan o‘tmasa: avval uzaytirish (≤14 kun), faqat past qism qayta baholanadi', () => {
+    let s = createSeed();
+    s = D.gradeOnbTask(s, { onboardingId: 'onb-2', taskId: 'ft1', grade: 4, userId: 'u-br-chil' });
+    s = D.addWorkCheck(s, { employeeId: 'e-jahongir', ratings: { 'Mijoz va ota-onani kutib olish': 4, 'To‘lov va hujjatlarni to‘g‘ri rasmiylashtirish': 4, 'Topshiriqni bajarish sifati va muddati': 3 }, userId: 'u-br-chil' });
+    s = D.setOnbCard(s, { position: 'FIN', patch: { min: 4 } }); // ish kuzatuvi 3,7 — o'tmaydi
+    expect(() => D.approveOnboarding(s, { id: 'onb-2', userId: 'u-br-chil' })).toThrow(/uzaytiring/);
+    expect(() => D.extendOnboarding(s, { id: 'onb-2', days: 20, plan: 'x', userId: 'u-br-chil' })).toThrow(/1–14/);
+    expect(() => D.extendOnboarding(s, { id: 'onb-2', days: 14, plan: '', userId: 'u-br-chil' })).toThrow(/reja/);
+    s = D.extendOnboarding(s, { id: 'onb-2', days: 14, plan: 'Har kuni 2 ta mijoz bilan ishlash, filial rahbari kuzatadi', userId: 'u-br-chil' });
+    const ob = D.getOnboarding(s, 'onb-2');
+    expect(ob.extension).toMatchObject({ days: 14, until: D.addDays(s.today, 14), parts: ['practice'] });
+    expect(D.onbStatusLabel(ob)).toBe('uzaytirilgan');
+    expect(() => D.reassessOnbPart(s, { id: 'onb-2', part: 'courses', grade: 5, note: 'x', userId: 'u-br-chil' })).toThrow(/past qism|o‘tmagan/);
+    s = D.reassessOnbPart(s, { id: 'onb-2', part: 'practice', grade: 4, note: 'Mijozni kutib olish standarti bajarilmoqda', userId: 'u-br-chil' });
+    expect(D.onboardingScore(s, D.getOnboarding(s, 'onb-2'))).toMatchObject({ passed: true });
+    s = D.approveOnboarding(s, { id: 'onb-2', userId: 'u-br-chil' });
+    expect(D.getOnboarding(s, 'onb-2').final).toMatchObject({ passed: true, extended: true });
+  });
+
+  it('Anonim natija kamida 5 ta javob bo‘lsa ko‘rsatiladi', () => {
+    const s = createSeed();
+    expect(D.ANON_MIN).toBe(5);
+    expect(D.courseFeedbackStats(s, 'CRS-ON-CORP').few).toBe(true); // 3 ta javob
+    const chil = D.surveyBranch(s, 'b-chil');
+    expect(chil.few).toMatchObject({ d8: false, d30: false, d60: true, enps: false });
+  });
+
+  it('Shikoyat: e’londan keyin 10 kun ichida, kartani baholamagan shaxs ko‘rib chiqadi', () => {
+    let s = createSeed();
+    expect(() => D.fileAppeal(s, { cardId: 'c-105', employeeId: 'e-malika', text: 'Mening natijam emas' })).toThrow(/o‘zi/);
+    s = D.fileAppeal(s, { cardId: 'c-105', employeeId: 'e-aziza', text: 'GEN-05 bo‘yicha oktabrdagi kuzatuv hisobga olinmagan' });
+    expect(() => D.fileAppeal(s, { cardId: 'c-105', employeeId: 'e-aziza', text: 'Yana bir shikoyat matni' })).toThrow(/allaqachon/);
+    const code = Object.keys(D.getCard(s, 'c-105').scores)[0];
+    D.getCard(s, 'c-105').scores[code].by = 'Madina Xasanova';
+    expect(() => D.reviewAppeal(s, { cardId: 'c-105', decision: 'upheld', note: 'ok', userId: 'u-hr' })).toThrow(/baholamagan/);
+    expect(() => D.reviewAppeal(s, { cardId: 'c-105', decision: 'upheld', note: 'ok', userId: 'u-men-gul' })).toThrow(/huquqi/);
+    s = D.reviewAppeal(s, { cardId: 'c-105', decision: 'reassess', note: 'Kuzatuv dalili qayta ko‘riladi', codes: [code], userId: 'u-super' });
+    const c = D.getCard(s, 'c-105');
+    expect(c.appeal).toMatchObject({ status: 'reassess', by: 'HR / L&D boshqaruvchisi' });
+    expect(D.getCard(s, c.appeal.reopened).prevCardId).toBe('c-105');
+    const late = { ...createSeed(), today: '2026-11-30' };
+    expect(() => D.fileAppeal(late, { cardId: 'c-105', employeeId: 'e-aziza', text: 'Kech yuborilgan shikoyat' })).toThrow(/muddati/);
+  });
+
+  it('Kirish: Telegram, SMS kod yoki login va parol (demo)', () => {
+    const s = createSeed();
+    const e = D.activeEmployees(s)[0];
+    expect(D.findLogin(s, { method: 'telegram', value: e.profile.telegram })).toMatchObject({ mode: 'employee', employeeId: e.id });
+    expect(D.findLogin(s, { method: 'sms', value: e.profile.phone })).toMatchObject({ mode: 'employee', employeeId: e.id });
+    expect(D.findLogin(s, { method: 'password', value: 'hr', password: D.DEMO_PASSWORD })).toMatchObject({ mode: 'admin', userId: 'u-hr' });
+    expect(() => D.findLogin(s, { method: 'password', value: 'hr', password: 'x' })).toThrow(/noto‘g‘ri/);
+    expect(() => D.findLogin(s, { method: 'telegram', value: '@yoq_odam' })).toThrow(/topilmadi/);
   });
 });

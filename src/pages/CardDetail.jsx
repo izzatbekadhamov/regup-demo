@@ -387,7 +387,7 @@ function Appointment({ card, emp }) {
   );
 }
 
-export default function CardDetail({ id }) {
+export default function CardDetail({ id, user }) {
   const s = useAppState();
   const [open, setOpen] = useState(null);
   const [onlyOpen, setOnlyOpen] = useState(false);
@@ -496,6 +496,7 @@ export default function CardDetail({ id }) {
               ) : <Empty>Tafovut yoki DE yo‘q — IDP bandi taklif qilinmadi.</Empty>}
             </Panel>
           )}
+          {card.appeal && <AppealReview card={card} model={model} user={user} />}
           {card.stage === 'published' && <ReassessPanel card={card} model={model} d={d} />}
 
           {history.length > 0 && (
@@ -545,6 +546,33 @@ export default function CardDetail({ id }) {
         </div>
       </div>
     </>
+  );
+}
+
+/** Shikoyat: kartani baholamagan, «E'lon va tayinlash» huquqi bor shaxs ko'rib chiqadi. */
+function AppealReview({ card, model, user }) {
+  const a = card.appeal;
+  const [f, setF] = useState({ note: '', codes: [] });
+  const assessors = D.cardAssessors(card);
+  const canReview = a.status === 'open' && user && D.can(user, 'cards.publish') && !assessors.includes(user.name);
+  return (
+    <Panel title={<div><h2>Shikoyat</h2><div className="muted small">Xodim yubordi {fmtDate(a.at)} · e’londan keyin {D.APPEAL_DAYS} kun ichida</div></div>} actions={<Pill tone={a.status === 'open' ? 'warn' : a.status === 'upheld' ? 'muted' : 'good'}>{a.status === 'open' ? 'ko‘rib chiqilmoqda' : a.status === 'upheld' ? 'natija o‘zgarmadi' : 'qayta baholanadi'}</Pill>}>
+      <div className="stack small">
+        <div>«{a.text}»</div>
+        {a.status !== 'open' && <div className="callout small">Qaror: {a.note} — {a.by}, {fmtDate(a.decidedAt)}{a.reopened && <> · qayta baholash kartasi <a href={`#/cards/${a.reopened}`}>{a.reopened}</a></>}</div>}
+        {a.status === 'open' && !canReview && <div className="muted">Shikoyatni «E’lon va tayinlash» huquqi bor va bu kartani baholamagan shaxs ko‘rib chiqadi{assessors.length ? ` (baholaganlar: ${assessors.join(', ')})` : ''}.</div>}
+        {canReview && (
+          <>
+            <label className="f">Qaror sababi<input className="i" value={f.note} onChange={(e) => setF({ ...f, note: e.target.value })} placeholder="Dalillar qayta ko‘rildi: ..." /></label>
+            <div className="row" style={{ flexWrap: 'wrap', gap: 6 }}>{model.competencies.filter((c) => !c.composite).map((c) => <label key={c.code} className="chk"><input type="checkbox" checked={f.codes.includes(c.code)} onChange={(e) => setF({ ...f, codes: e.target.checked ? [...f.codes, c.code] : f.codes.filter((x) => x !== c.code) })} />{c.code}</label>)}</div>
+            <div className="row">
+              <button className="btn" disabled={!f.note.trim()} onClick={() => run(D.reviewAppeal, { cardId: card.id, decision: 'upheld', note: f.note, userId: user.id }, 'Shikoyat ko‘rib chiqildi')}>Natija o‘zgarmaydi</button>
+              <button className="btn primary" disabled={!f.note.trim() || !f.codes.length} onClick={() => run(D.reviewAppeal, { cardId: card.id, decision: 'reassess', note: f.note, codes: f.codes, userId: user.id }, 'Qayta baholash ochildi')}>Tanlangan bandlarni qayta baholash ({f.codes.length})</button>
+            </div>
+          </>
+        )}
+      </div>
+    </Panel>
   );
 }
 

@@ -9,7 +9,7 @@ import { KIND, TASK_TYPE, CTX } from './Courses.jsx';
 const upd = (c, fn, ok) => run(D.updateCourse, { id: c.id, patch: fn }, ok);
 
 function AddComponent({ c }) {
-  const [f, setF] = useState({ kind: 'lesson', title: '', minutes: 30, passScore: 70, taskType: 'work', description: '', criteria: '', qtext: '', options: 'A variant\nB variant\nC variant', answer: 0, lvl: '' });
+  const [f, setF] = useState({ kind: 'lesson', title: '', minutes: 30, passScore: 70, maxAttempts: 3, taskType: 'work', description: '', criteria: '', qtext: '', options: 'A variant\nB variant\nC variant', answer: 0, lvl: '' });
   // Identifikator prefikslari: l — dars, t — test, a — amaliy topshiriq; band bo'lsa keyingi raqam.
   const prefix = { lesson: 'l', test: 't', task: 'a' }[f.kind];
   let n = c.components.filter((x) => x.kind === f.kind).length + 1;
@@ -18,7 +18,7 @@ function AddComponent({ c }) {
   const add = () => upd(c, (x) => {
     const base = { id, kind: f.kind, title: f.title.trim() };
     if (f.kind === 'lesson') x.components.push({ ...base, minutes: Number(f.minutes) });
-    if (f.kind === 'test') x.components.push({ ...base, passScore: Number(f.passScore), questions: f.qtext.trim() ? [{ text: f.qtext.trim(), options: f.options.split('\n').map((o) => o.trim()).filter(Boolean), answer: Number(f.answer), ...(f.lvl ? { lvl: Number(f.lvl) } : {}) }] : [] });
+    if (f.kind === 'test') x.components.push({ ...base, passScore: Number(f.passScore), maxAttempts: Math.max(1, Number(f.maxAttempts) || D.TEST_ATTEMPTS), questions: f.qtext.trim() ? [{ text: f.qtext.trim(), options: f.options.split('\n').map((o) => o.trim()).filter(Boolean), answer: Number(f.answer), ...(f.lvl ? { lvl: Number(f.lvl) } : {}) }] : [] });
     if (f.kind === 'task') x.components.push({ ...base, taskType: f.taskType, description: f.description, criteria: f.criteria, mentorRequired: true });
   }, `${KIND[f.kind]} qo‘shildi`) && setF({ ...f, title: '', qtext: '', description: '', criteria: '' });
   return (
@@ -29,7 +29,7 @@ function AddComponent({ c }) {
         <label className="f" style={{ gridColumn: 'span 2' }}>Nomi<input className="i" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></label>
         {f.kind === 'lesson' && <label className="f">Davomiyligi, daqiqa<input className="i" type="number" value={f.minutes} onChange={(e) => setF({ ...f, minutes: e.target.value })} /></label>}
         {f.kind === 'test' && <>
-          <label className="f">O‘tish bali, %<input className="i" type="number" value={f.passScore} onChange={(e) => setF({ ...f, passScore: e.target.value })} /></label>
+          <label className="f">O‘tish bali, %<input className="i" type="number" value={f.passScore} onChange={(e) => setF({ ...f, passScore: e.target.value })} /></label><label className="f">Urinishlar soni<input className="i" type="number" min="1" value={f.maxAttempts} onChange={(e) => setF({ ...f, maxAttempts: e.target.value })} /></label>
           <label className="f" style={{ gridColumn: 'span 2' }}>Birinchi savol<input className="i" value={f.qtext} onChange={(e) => setF({ ...f, qtext: e.target.value })} /></label>
           <label className="f" style={{ gridColumn: 'span 2' }}>Variantlar (har biri yangi qatorda)<textarea className="i" value={f.options} onChange={(e) => setF({ ...f, options: e.target.value })} /></label>
           <label className="f">To‘g‘ri javob (1-dan)<input className="i" type="number" min="1" value={Number(f.answer) + 1} onChange={(e) => setF({ ...f, answer: Number(e.target.value) - 1 })} /></label>
@@ -67,6 +67,9 @@ function AddRule({ s, c }) {
   );
 }
 
+/** Anonimlik: kamida 5 ta javob bo'lmasa natija ko'rsatilmaydi. */
+const Few = ({ n }) => <div className="small muted" style={{ marginTop: 6 }}>Javoblar kam: {n} / {D.ANON_MIN}. Anonimlik uchun natija kamida {D.ANON_MIN} ta javobdan keyin ko‘rinadi.</div>;
+
 function FeedbackPanel({ s, c, user }) {
   const st = D.courseFeedbackStats(s, c.id);
   const mod = D.can(user, 'courses.comments');
@@ -74,14 +77,14 @@ function FeedbackPanel({ s, c, user }) {
   return (
     <Panel title={<div><h2>Kurs fikrlari</h2><div className="muted small">Anonim: filial va lavozim kesimida · {st.n} ta kurs bahosi</div></div>}>
       <div className="grid g3">
-        <div><div className="small muted">Kursdan qoniqish bahosi</div><div className="big-num">{N(st.satisfaction)} <span className="small muted">/ 5</span></div></div>
-        <div><div className="small muted">NPS (tavsiya qilish)</div><div className="big-num">{st.nps === null ? '—' : st.nps}</div><div className="small muted">−100…+100</div></div>
-        <div><div className="small muted">Dars baholari</div>{st.lessons.map((l) => <div key={l.id} className="small">{l.title}: <b>{N(l.avg)}</b> <span className="muted">({l.n})</span></div>)}</div>
+        <div><div className="small muted">Kursdan qoniqish bahosi</div>{st.few ? <Few n={st.n} /> : <div className="big-num">{N(st.satisfaction)} <span className="small muted">/ 5</span></div>}</div>
+        <div><div className="small muted">NPS (tavsiya qilish)</div>{st.few ? <Few n={st.n} /> : <><div className="big-num">{st.nps === null ? '—' : st.nps}</div><div className="small muted">−100…+100</div></>}</div>
+        <div><div className="small muted">Dars baholari</div>{st.lessons.map((l) => <div key={l.id} className="small">{l.title}: {l.few ? <span className="muted">javoblar kam ({l.n} / {D.ANON_MIN})</span> : <><b>{N(l.avg)}</b> <span className="muted">({l.n})</span></>}</div>)}</div>
       </div>
       {st.comments.length > 0 && (
         <table className="small" style={{ marginTop: 10 }}><tbody>{st.comments.map((x) => (
           <tr key={x.id}>
-            <td>«{x.comment}»<div className="muted">{x.author || 'Anonim'} · {D.getBranch(s, x.branchId)?.name} · qoniqish {x.satisfaction}/5 · NPS {x.nps}</div></td>
+            <td>«{x.comment}»<div className="muted">{x.author || 'Anonim'}{st.few ? '' : ` · ${D.getBranch(s, x.branchId)?.name} · qoniqish ${x.satisfaction}/5 · NPS ${x.nps}`}</div></td>
             <td className="num" style={{ whiteSpace: 'nowrap' }}>{x.status === 'published' ? <Pill tone="good">e’lon qilingan</Pill> : x.status === 'hidden' ? <Pill tone="muted">yashirilgan</Pill> : <Pill tone="warn">tekshiruvda</Pill>}
               {mod && x.status !== 'published' && <button className="btn sm" style={{ marginLeft: 6 }} onClick={() => run(D.moderateFeedback, { id: x.id, decision: 'published', userId: user.id }, 'E’lon qilindi')}>E’lon qilish</button>}
               {mod && x.status === 'published' && <button className="btn sm" style={{ marginLeft: 6 }} onClick={() => run(D.moderateFeedback, { id: x.id, decision: 'hidden', userId: user.id }, 'Yashirildi')}>Yashirish</button>}</td>
@@ -129,7 +132,7 @@ export default function CourseDetail({ id, user }) {
                       <td><Pill tone={x.kind === 'task' ? 'warn' : x.kind === 'test' ? 'brand' : 'muted'}>{KIND[x.kind]}</Pill></td>
                       <td>
                         <b>{x.title}</b>
-                        {x.kind === 'test' && <div className="muted small">{x.questions.length} savol · o‘tish bali {x.passScore}%{x.questions.some((q) => q.lvl) && ` · indikatorlar: ${x.questions.map((q) => (q.lvl ? `${q.lvl}-d.` : '—')).join(', ')}`}</div>}
+                        {x.kind === 'test' && <div className="muted small">{x.questions.length} savol · o‘tish bali {x.passScore}% · {D.testAttempts(x)} urinish (oxirgisi hisoblanadi){x.questions.some((q) => q.lvl) && ` · indikatorlar: ${x.questions.map((q) => (q.lvl ? `${q.lvl}-d.` : '—')).join(', ')}`}</div>}
                         {x.kind === 'task' && <div className="small ink2">{TASK_TYPE[x.taskType]} · {x.description}<div className="muted">Mentor baholaydi: {x.criteria}</div></div>}
                         {x.kind === 'lesson' && <div className="muted small">{x.minutes} daqiqa</div>}
                       </td>

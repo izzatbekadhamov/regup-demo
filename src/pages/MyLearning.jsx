@@ -76,7 +76,7 @@ export default function MyLearning({ emp }) {
             const c = D.getCourse(s, e.courseId);
             const pr = D.courseProgress(c, e);
             const g = D.courseGrade(c, e);
-            return <tr key={e.id} className="clickable" onClick={() => go(`/learn/${e.id}`)}><td><b>{c.title}</b>{e.mandatory && e.status !== 'completed' && <> <Pill tone={e.mandatory.deadline < s.today ? 'bad' : 'warn'}>majburiy · muddat {fmtDate(e.mandatory.deadline)}</Pill></>}<div className="muted small">Kurslar bajarilishi {pr.pct}% ({pr.done} / {pr.total}){g !== null ? ` · kurs bahosi ${n1(g)}` : ''}{e.mandatory ? ` · KPI bo‘yicha biriktirilgan (${D.monthName(e.mandatory.month)})` : ''}</div></td><td><RuleChips s={s} course={c} compact /></td><td>{e.status === 'completed' ? <Pill tone="good">yakunlangan</Pill> : <Pill tone="brand">o‘qimoqda</Pill>}</td></tr>;
+            return <tr key={e.id} className="clickable" onClick={() => go(`/learn/${e.id}`)}><td><b>{c.title}</b>{e.mandatory && e.status !== 'completed' && <> <Pill tone={e.mandatory.deadline < s.today ? 'bad' : 'warn'}>majburiy · muddat {fmtDate(e.mandatory.deadline)}</Pill></>}<div className="muted small">Kurslar bajarilishi {pr.pct}% ({pr.done} / {pr.total}){g !== null ? ` · kurs bahosi ${n1(g)}` : ''}{e.mandatory ? ` · KPI bo‘yicha biriktirilgan (${D.monthName(e.mandatory.month)})` : ''}</div></td><td><RuleChips s={s} course={c} compact /></td><td>{e.status === 'completed' ? <Pill tone="good">yakunlangan</Pill> : e.awaitingFeedback ? <Pill tone="warn">2 ta savol qoldi</Pill> : <Pill tone="brand">o‘qimoqda</Pill>}</td></tr>;
           })}</tbody></table>
         </Panel>
       )}

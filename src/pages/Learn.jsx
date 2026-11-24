@@ -7,11 +7,14 @@ import { KIND, TASK_TYPE, CTX } from './Courses.jsx';
 
 function TestBlock({ enr, c, p, readOnly }) {
   const [ans, setAns] = useState({});
-  const passed = (p?.best ?? -1) >= c.passScore;
+  const score = D.testScore(p);
+  const passed = (score ?? -1) >= c.passScore;
+  const max = D.testAttempts(c);
+  const left = max - (p?.attempts || 0);
   return (
     <div className="stack">
-      {p && <div className={`callout small ${passed ? 'good' : 'warn'}`}>Oxirgi natija: {p.last}% · eng yaxshi: {p.best}% ({D.testBall(p.best)} ball) · {p.attempts} urinish. {passed ? 'Test topshirildi.' : `O‘tish uchun ${c.passScore}% kerak — qayta urinib ko‘ring.`}{typeof p.found === 'number' && passed && <> Savollar indikatorlarga bog‘langan: <b>{p.found ? `${p.found}-daraja indikatorlari topildi` : 'birinchi daraja indikatorlari ham topilmadi'}</b>.</>}</div>}
-      {!passed && !readOnly && (
+      {p && <div className={`callout small ${passed ? 'good' : 'warn'}`}>Oxirgi urinish: {score}% ({D.testBall(score)} ball) — kurs bahosiga shu kiradi · urinish {p.attempts} / {max}. {passed ? 'Test topshirildi.' : left > 0 ? `O‘tish uchun ${c.passScore}% kerak — yana ${left} ta urinish bor.` : 'Urinishlar tugadi — mentoringiz yoki L&D bilan bog‘laning.'}{typeof p.found === 'number' && passed && <> Savollar indikatorlarga bog‘langan: <b>{p.found ? `${p.found}-daraja indikatorlari topildi` : 'birinchi daraja indikatorlari ham topilmadi'}</b>.</>}</div>}
+      {!passed && !readOnly && left > 0 && (
         <>
           {c.questions.map((qq, i) => (
             <div key={i} className="quiz-q">
@@ -21,7 +24,7 @@ function TestBlock({ enr, c, p, readOnly }) {
               ))}
             </div>
           ))}
-          <div className="row"><button className="btn primary" disabled={Object.keys(ans).length < c.questions.length} onClick={() => run(D.submitTest, { enrollmentId: enr.id, componentId: c.id, answers: c.questions.map((_, i) => ans[i]) }, 'Test topshirildi') && setAns({})}>Testni topshirish</button><span className="muted small">O‘tish bali {c.passScore}%</span></div>
+          <div className="row"><button className="btn primary" disabled={Object.keys(ans).length < c.questions.length} onClick={() => run(D.submitTest, { enrollmentId: enr.id, componentId: c.id, answers: c.questions.map((_, i) => ans[i]) }, 'Test topshirildi') && setAns({})}>Testni topshirish</button><span className="muted small">O‘tish bali {c.passScore}% · {left} / {max} urinish qoldi · bahoga oxirgi urinish kiradi</span></div>
         </>
       )}
     </div>
@@ -43,13 +46,14 @@ function CourseFeedback({ enr }) {
   const [f, setF] = useState({ satisfaction: 0, nps: -1, comment: '', showName: false });
   if (enr.feedbackGiven) return <div className="callout good small">Fikringiz uchun rahmat. Baholar anonim hisoblanadi.</div>;
   return (
-    <Panel title="Kurs haqida fikringiz">
+    <Panel title={enr.awaitingFeedback ? 'Kursni yakunlash: 2 ta majburiy savol' : 'Kurs haqida fikringiz'}>
       <div className="stack">
+        {enr.awaitingFeedback && <div className="callout warn small">Kurs kontenti bajarildi. Kurs yakunlangan deb qayd etilishi uchun kursdan qoniqish bahosi va tavsiya qilish (NPS) savollariga javob bering. Yakunlanish sanasi — kontent bajarilgan kun ({fmtDate(enr.doneAt)}).</div>}
         <div className="small"><b>Kursdan qoniqish bahosi</b> (1–5)<div className="row" style={{ gap: 4, marginTop: 4 }}>{[1, 2, 3, 4, 5].map((v) => <button key={v} className={`btn sm ${f.satisfaction === v ? 'primary' : ''}`} onClick={() => setF({ ...f, satisfaction: v })}>{v}</button>)}</div></div>
         <div className="small"><b>Bu kursni hamkasbingizga tavsiya qilasizmi?</b> (0–10)<div className="row" style={{ gap: 3, marginTop: 4, flexWrap: 'wrap' }}>{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v) => <button key={v} className={`btn sm ${f.nps === v ? 'primary' : ''}`} onClick={() => setF({ ...f, nps: v })}>{v}</button>)}</div></div>
         <label className="f small">O‘quv dastur haqida fikringiz (ixtiyoriy)<textarea className="i" value={f.comment} onChange={(e) => setF({ ...f, comment: e.target.value })} placeholder="Nima foydali bo‘ldi, nimani yaxshilash kerak" /></label>
         {f.comment.trim() && <label className="chk small"><input type="checkbox" checked={f.showName} onChange={(e) => setF({ ...f, showName: e.target.checked })} /> Fikrim e’lon qilinsa, ismim ko‘rsatilsin</label>}
-        <div className="row"><button className="btn primary" disabled={!f.satisfaction || f.nps < 0} onClick={() => run(D.submitCourseFeedback, { enrollmentId: enr.id, ...f }, 'Fikr yuborildi')}>Yuborish</button><span className="small muted">Baholar anonim: faqat filial va lavozim kesimida hisoblanadi.</span></div>
+        <div className="row"><button className="btn primary" disabled={!f.satisfaction || f.nps < 0} onClick={() => run(D.submitCourseFeedback, { enrollmentId: enr.id, ...f }, enr.awaitingFeedback ? 'Kurs yakunlandi' : 'Fikr yuborildi')}>{enr.awaitingFeedback ? 'Yuborish va kursni yakunlash' : 'Yuborish'}</button><span className="small muted">Baholar anonim: faqat filial va lavozim kesimida hisoblanadi.</span></div>
       </div>
     </Panel>
   );
@@ -101,7 +105,7 @@ export default function Learn({ id, emp }) {
     <>
       <section className="panel hero compact-hero">
         <div className="crumbs"><a href="#/learning"><Icon name="back" size={13} /> Kurslarim</a>{enr.pathId && <span>{D.getPath(s, enr.pathId)?.title}</span>}</div>
-        <div className="row" style={{ marginTop: 4 }}><h1>{course.title}</h1>{enr.status === 'completed' ? <Pill tone="good">yakunlangan</Pill> : <Pill tone="brand">Kurslar bajarilishi {Math.round((100 * done) / course.components.length)}% · {done} / {course.components.length}</Pill>}{grade !== null && <Pill tone={grade >= minGrade ? 'good' : 'warn'}>Kurs bahosi: {String(grade).replace('.', ',')} / 5</Pill>}</div>
+        <div className="row" style={{ marginTop: 4 }}><h1>{course.title}</h1>{enr.status === 'completed' ? <Pill tone="good">yakunlangan</Pill> : enr.awaitingFeedback ? <Pill tone="warn">2 ta savol qoldi</Pill> : <Pill tone="brand">Kurslar bajarilishi {Math.round((100 * done) / course.components.length)}% · {done} / {course.components.length}</Pill>}{grade !== null && <Pill tone={grade >= minGrade ? 'good' : 'warn'}>Kurs bahosi: {String(grade).replace('.', ',')} / 5</Pill>}</div>
         <p className="ink2">{course.summary}</p>
         <div className="near-bar" style={{ maxWidth: 420 }}><i style={{ width: `${(100 * done) / course.components.length}%` }} /></div>
         {enr.mandatory && enr.status !== 'completed' && (() => { const r = s.kpiRules.find((x) => x.id === enr.mandatory.ruleId); return <div className="callout warn small"><b>Majburiy kurs</b> — {D.monthName(enr.mandatory.month)}: {D.KPI_METRICS[r.metric].label} {enr.mandatory.value.toFixed(1).replace('.', ',')}%, chegara {enr.mandatory.min}%. Muddat: {fmtDate(enr.mandatory.deadline)}. Mas’ulingiz natijani kuzatib boradi.</div>; })()}
@@ -170,7 +174,7 @@ export default function Learn({ id, emp }) {
               <p className="small muted"><b>Kurs bahosi</b> — kursni qanchalik yaxshi yakunlaganingiz. <b>Kompetensiya darajasi</b> — topshiriqlarda topilgan indikatorlar; u kurs qaysi darajagacha mo‘ljallanganiga bog‘liq. Shuning uchun 3-daraja kursini 5 ga yakunlash 3-daraja dalilini beradi. Lavozimga o‘tish — baholash kartasi va panel orqali.</p>
             </div>
           </Panel>
-          {enr.status === 'completed' && <CourseFeedback enr={enr} />}
+          {(enr.status === 'completed' || enr.awaitingFeedback) && <CourseFeedback enr={enr} />}
           {published.length > 0 && (
             <Panel title="Hamkasblar fikri">
               <div className="stack">{published.slice(0, 3).map((x) => <div key={x.id} className="small"><div>«{x.comment}»</div><div className="muted">— {x.author || 'Anonim'}, kursdan qoniqish {x.satisfaction} / 5</div></div>)}</div>

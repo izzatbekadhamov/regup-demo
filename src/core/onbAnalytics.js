@@ -18,7 +18,7 @@ function liveRow(s, ob) {
     const t = c.components.find((x) => x.kind === 'test');
     const p = t && e.progress[t.id];
     const doneN = c.components.filter((x) => D.componentDone(c, e, x.id)).length;
-    return { courseId: e.courseId, grade: D.courseGrade(c, e), pct: c.components.length ? (100 * doneN) / c.components.length : 0, testPct: typeof p?.best === 'number' ? p.best : null, firstPass: p ? p.attempts === 1 && p.best >= t.passScore : null,
+    return { courseId: e.courseId, grade: D.courseGrade(c, e), pct: c.components.length ? (100 * doneN) / c.components.length : 0, testPct: D.testScore(p), firstPass: p ? p.attempts === 1 && D.testScore(p) >= t.passScore : null,
       onTime: e.status === 'completed' ? e.completedAt <= e.deadline : e.deadline < s.today ? false : null, days: e.status === 'completed' ? D.daysBetween(e.startedAt, e.completedAt) : null, done: e.status === 'completed' };
   });
   const parts = Object.fromEntries(r.parts.map((p) => [p.key, p.value]));
@@ -171,7 +171,7 @@ export function processTotals(list) {
   const resp = list.reduce((a, r) => a + r.d8[0], 0);
   const enpsW = list.filter((r) => r.d30[0] + r.d60[0] > 0);
   const enpsN = enpsW.reduce((a, r) => a + r.d30[0] + r.d60[0], 0);
-  return { hires, rate: pct(resp, hires), checklist: avg(items), items, jobsterOnTime: w('jobsterOnTime'), dataIn3: w('dataIn3'), enps: enpsN ? enpsW.reduce((a, r) => a + r.enps * (r.d30[0] + r.d60[0]), 0) / enpsN : null, low: list.filter((r) => r.rate !== null && r.rate < D.SURVEY_MIN_RATE).length };
+  return { hires, rate: pct(resp, hires), checklist: avg(items), items, jobsterOnTime: w('jobsterOnTime'), dataIn3: w('dataIn3'), enps: enpsN >= D.ANON_MIN ? enpsW.reduce((a, r) => a + r.enps * (r.d30[0] + r.d60[0]), 0) / enpsN : null, enpsN, low: list.filter((r) => r.rate !== null && r.rate < D.SURVEY_MIN_RATE).length };
 }
 
 /** Mentor yuklamasi (T7): hozir moslashuvdagi xodimlar soni, mentor bo'yicha. */

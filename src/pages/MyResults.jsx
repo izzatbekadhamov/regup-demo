@@ -1,4 +1,5 @@
-import { useAppState } from '../state/store.js';
+import { useState } from 'react';
+import { useAppState, run } from '../state/store.js';
 import { Panel, Pill, Empty, fmtDate, Avatar, Gauge, ScoreChip, Stepper } from '../ui/common.jsx';
 import * as D from '../core/domain.js';
 import { positionName, profileThreshold, competencyLibrary } from '../core/modelKit.js';
@@ -6,6 +7,23 @@ import { fmtPct, isNum } from '../core/calc.js';
 import { IDP_STATUS, CONTEXT_LABEL } from '../ui/labels.js';
 import { STAGE_LABELS } from '../data/models.js';
 
+
+/** Shikoyat: e'lon qilingan natijadan norozi bo'lsa, 10 kun ichida izoh bilan. */
+function Appeal({ card, emp, today }) {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState('');
+  const a = card.appeal;
+  const until = D.appealDeadline(card);
+  if (a) return <div className={`callout small ${a.status === 'open' ? 'warn' : ''}`}><b>Shikoyatingiz</b> ({fmtDate(a.at)}): {a.status === 'open' ? 'boshqa baholovchi ko‘rib chiqmoqda.' : a.status === 'upheld' ? `natija o‘zgarmadi — ${a.note}` : `qayta baholanadi — ${a.note}`}</div>;
+  if (today > until) return null;
+  return open ? (
+    <div className="stack small">
+      <label className="f">Nimadan norozisiz va nega?<textarea className="i" value={text} onChange={(e) => setText(e.target.value)} placeholder="Masalan: GEN-05 bo‘yicha oktabrdagi dars kuzatuvi hisobga olinmagan" /></label>
+      <div className="row"><button className="btn primary sm" disabled={text.trim().length < 10} onClick={() => run(D.fileAppeal, { cardId: card.id, employeeId: emp.id, text }, 'Shikoyat yuborildi') && setOpen(false)}>Yuborish</button><button className="btn sm" onClick={() => setOpen(false)}>Bekor qilish</button></div>
+      <div className="muted">Shikoyatni kartani baholamagan boshqa baholovchi ko‘rib chiqadi; qaror va sababi sizga yuboriladi.</div>
+    </div>
+  ) : <div className="small"><button className="btn sm" onClick={() => setOpen(true)}>Natijadan norozimisiz? Shikoyat yuborish</button> <span className="muted">{fmtDate(until)} gacha</span></div>;
+}
 
 export default function MyResults({ emp }) {
   const s = useAppState();
@@ -50,6 +68,7 @@ export default function MyResults({ emp }) {
                 {d.reasons.length > 0 && <div className="callout warn small"><b>Nimalar yetishmadi</b><ul style={{ margin: '4px 0 0', paddingLeft: 16 }}>{d.reasons.slice(0, 4).map((r) => <li key={r}>{r}</li>)}</ul></div>}
                 {d.explain && <div className="callout good small">{d.explain}</div>}
                 <div className="small"><b>Keyingi qadam:</b> {d.ready ? 'Natija rahbaringiz va HR bilan muhokama qilinadi.' : 'Rivojlanish rejangizdagi vazifalarni bajaring.'}</div>
+                <Appeal card={c} emp={emp} today={s.today} />
               </div>
             </div>
           </Panel>

@@ -49,6 +49,53 @@ function reviewerText(s, enr) {
 const progressText = (r) => [`kurslar ${r.coursesDone}/${r.courses}`, r.card.tasks.length ? `topshiriqlar ${r.tasksDone}/${r.card.tasks.length}` : null, r.need ? `${r.card.practice === 'lesson' ? 'dars kuzatuvi' : 'ish kuzatuvi'} ${r.checks}/${r.need}` : null].filter(Boolean).join(', ');
 
 /** Kursdan tashqari amaliy topshiriqlar: mentor yoki mas'ul shaxs 1–5 baholaydi. */
+/** Minimumdan o'tmasa: mentor rejasi bilan uzaytirish (≤ 14 kun). */
+function ExtendForm({ s, ob, user }) {
+  const max = D.onbExtendMax(s);
+  const [f, setF] = useState({ days: max, plan: '' });
+  return (
+    <div className="onb-course">
+      <b>Uzaytirish va qayta baholash</b>
+      <div className="small muted">Mentor past qism bo‘yicha reja tuzadi; onboarding {max} kungacha uzaytiriladi va faqat past qismlar qayta baholanadi. Ishdan bo‘shatish yoki sinov muddati qarori LMS’dan tashqarida — filial rahbari va HR.</div>
+      <div className="row" style={{ gap: 6, marginTop: 6, alignItems: 'flex-end' }}>
+        <label className="f" style={{ width: 90 }}>Kun<input className="i" type="number" min="1" max={max} value={f.days} onChange={(e) => setF({ ...f, days: e.target.value })} /></label>
+        <label className="f" style={{ flex: 1 }}>Mentor rejasi<input className="i" value={f.plan} placeholder="Masalan: 2 ta qo‘shimcha dars kuzatuvi, ICQ bo‘yicha mashq" onChange={(e) => setF({ ...f, plan: e.target.value })} /></label>
+        <button className="btn primary" disabled={!f.plan.trim()} onClick={() => run(D.extendOnboarding, { id: ob.id, days: Number(f.days), plan: f.plan, userId: user.id }, 'Onboarding uzaytirildi')}>Uzaytirish</button>
+      </div>
+    </div>
+  );
+}
+
+/** Uzaytirish davri: faqat past qismlar qayta baholanadi. */
+function Reassess({ s, ob, r, user }) {
+  const ext = ob.extension;
+  const emp = D.getEmployee(s, ob.employeeId);
+  const can = ob.status === 'active' && D.canAny(user, ['onb.assign', 'onb.approve', 'onb.observe']) && D.inScope(s, user, emp);
+  const [g, setG] = useState({});
+  return (
+    <div className="callout warn small">
+      <b>Uzaytirilgan: {fmtDate(ext.until)} gacha ({ext.days} kun)</b> · {ext.by}, {fmtDate(ext.at)}
+      <div>Reja: {ext.plan}</div>
+      {ext.parts.map((k) => {
+        const p = r.parts.find((x) => x.key === k);
+        const re = ext.regrades?.[k];
+        return (
+          <div key={k} style={{ marginTop: 6 }}>
+            <b>{p?.label || k}</b>: {re ? <>qayta baho <b>{re.grade} / 5</b> — {re.note} ({re.by})</> : 'qayta baholanmagan'}
+            {can && (
+              <div className="row" style={{ gap: 6, marginTop: 4 }}>
+                <select className="i compact" value={g[k]?.grade || ''} onChange={(e) => setG({ ...g, [k]: { ...g[k], grade: e.target.value } })}><option value="">baho</option>{[5, 4, 3, 2, 1].map((x) => <option key={x} value={x}>{x}</option>)}</select>
+                <input className="i" style={{ flex: 1 }} placeholder="Izoh: nima o‘zgardi" value={g[k]?.note || ''} onChange={(e) => setG({ ...g, [k]: { ...g[k], note: e.target.value } })} />
+                <button className="btn sm" disabled={!g[k]?.grade || !g[k]?.note?.trim()} onClick={() => run(D.reassessOnbPart, { id: ob.id, part: k, grade: Number(g[k].grade), note: g[k].note, userId: user.id }, 'Qayta baholandi')}>{re ? 'Yangilash' : 'Qayta baholash'}</button>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function OnbTasks({ s, ob, r, user }) {
   const emp = D.getEmployee(s, ob.employeeId);
   const can = ob.status === 'active' && D.canAny(user, ['onb.assign', 'onb.approve']) && D.inScope(s, user, emp);
@@ -131,7 +178,7 @@ export function OnbDetail({ s, ob, user }) {
                   {enr.status === 'completed' ? <Pill tone="good">yakunlangan {fmtDate(enr.completedAt)}</Pill> : <Pill tone={late ? 'bad' : 'brand'}>{doneN}/{c.components.length} · muddat {fmtDate(enr.deadline)}</Pill>}
                 </div>
                 <div className="small ink2">
-                  {t && <>Test: {typeof tp?.best === 'number' ? `${tp.best}% → ${D.testBall(tp.best)} ball` : 'topshirilmagan'}</>}
+                  {t && <>Test: {D.testScore(tp) !== null ? `${D.testScore(tp)}% → ${D.testBall(D.testScore(tp))} ball (oxirgi urinish)` : 'topshirilmagan'}</>}
                   {a && <> · Topshiriq: {ap?.status === 'accepted' ? `${ap.mentor.grade} ball (${ap.mentor.by})` : ap?.status === 'pending' ? `tekshiruvda — ${reviewerText(s, enr)}` : ap?.status === 'returned' ? 'qaytarilgan' : 'yuborilmagan'}</>}
                   {' · '}Kurs bahosi: <b>{num(D.courseGrade(c, enr))}</b>
                 </div>
@@ -175,8 +222,10 @@ export function OnbDetail({ s, ob, user }) {
                   : `Dastur tugashiga ${days - day} kun qoldi: ${progressText(r)}.`}
             </div>
           )}
-          {canApprove && (r.ready || day >= days) && <div><button className="btn primary" onClick={() => run(D.approveOnboarding, { id: ob.id, userId: user.id }, 'Onboarding natijasi tasdiqlandi')}>Onboarding natijasini tasdiqlash</button> <span className="small muted">Kuzatuv ballari kompetensiya profiliga ish dalili sifatida yoziladi.</span></div>}
-          {ob.final && <div className={`callout small ${ob.final.passed ? 'good' : 'warn'}`}>{ob.final.passed ? 'Onboarding muvaffaqiyatli yakunlandi: barcha qismlar minimumdan o‘tgan.' : 'Minimumdan o‘tmagan qism bor — mentor bilan rivojlanish rejasi tuziladi.'} 30 kundan keyin KPI Edu’dan olinadi; 60-kunda kompetensiya kartasi bo‘yicha birinchi lavozim darajasi beriladi.</div>}
+          {ob.extension && ob.status === 'active' && <Reassess s={s} ob={ob} r={r} user={user} />}
+          {canApprove && (r.ready || day >= days) && !r.passed && !ob.extension && <ExtendForm s={s} ob={ob} user={user} />}
+          {canApprove && (r.ready || day >= days || ob.extension) && (r.passed || ob.extension) && <div><button className="btn primary" onClick={() => run(D.approveOnboarding, { id: ob.id, userId: user.id }, 'Onboarding natijasi tasdiqlandi')}>{ob.extension ? 'Qayta baholashdan keyin yakuniy tasdiqlash' : 'Onboarding natijasini tasdiqlash'}</button> <span className="small muted">Kuzatuv ballari kompetensiya profiliga ish dalili sifatida yoziladi.</span></div>}
+          {ob.final && <div className={`callout small ${ob.final.passed ? 'good' : 'warn'}`}>{ob.final.passed ? `Onboarding muvaffaqiyatli yakunlandi${ob.final.extended ? ' (uzaytirish va qayta baholashdan keyin)' : ''}: barcha qismlar minimumdan o‘tgan.` : 'Qayta baholashdan keyin ham minimumdan o‘tmagan qism bor — keyingi qarorni filial rahbari va HR qabul qiladi.'} 30 kundan keyin KPI Edu’dan olinadi; 60-kunda kompetensiya kartasi bo‘yicha birinchi lavozim darajasi beriladi.</div>}
           {D.can(user, 'onb.assign') && ob.status === 'active' && <AssignPeople s={s} emp={emp} user={user} />}
           {user?.role === 'mentor' && ob.status === 'active' && <AssignCourse s={s} emp={emp} user={user} />}
         </div>
@@ -322,7 +371,7 @@ export default function Onboarding({ user, focus }) {
                 <Fragment key={ob.id}>
                   <tr className="clickable" onClick={() => setOpen(isOpen ? null : ob.id)}>
                     <td><Person name={emp.name} sub={`${positionName(s.models, emp.currentLevel)} · ${D.getBranch(s, emp.branchId)?.name}`} /><OnbTags s={s} ob={ob} /></td>
-                    <td>{ob.status === 'active' ? <OnbStages day={D.onbDay(s, ob)} days={D.obDays(s, ob)} /> : ob.status === 'archived' ? <Pill tone="muted">to‘xtatildi</Pill> : <Pill tone="good">yakunlandi {fmtDate(ob.final?.at)}</Pill>}</td>
+                    <td>{ob.status === 'active' && ob.extension ? <Pill tone="warn">uzaytirilgan · {fmtDate(ob.extension.until)} gacha</Pill> : ob.status === 'active' ? <OnbStages day={D.onbDay(s, ob)} days={D.obDays(s, ob)} /> : ob.status === 'archived' ? <Pill tone="muted">to‘xtatildi</Pill> : <Pill tone="good">yakunlandi {fmtDate(ob.final?.at)}</Pill>}</td>
                     <td className="num">{r.coursesDone}/{r.courses}</td>
                     <td className="num">{r.needObs ? `${r.obs}/${r.needObs}` : '—'}</td>
                     <td className="small">{mt ? (mt.attended.includes(emp.id) ? <span style={{ color: 'var(--good)' }}>✓ qatnashdi</span> : mt.date >= s.today ? 'taklif qilingan' : 'qatnashmadi') : <span className="muted">—</span>}</td>

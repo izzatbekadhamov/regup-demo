@@ -376,22 +376,88 @@ export function recordAppointment(state, { cardId, docNo, effectiveDate, actor =
 
 /** Qayta baholash: avvalgi kartaga bog'langan, faqat tanlangan bandlar qayta ochiladi (DEV 02, UAT 14). */
 export function openReassessment(state, { cardId, codes, actor = 'HR/L&D' }) {
+  return mutate(state, (s) => { reopenCard(s, getCard(s, cardId), codes, actor); });
+}
+function reopenCard(s, prev, codes, actor) {
+  if (prev.stage !== 'published') fail('Qayta baholash faqat e’lon qilingan karta bo‘yicha');
+  if (!codes?.length) fail('Qayta ochiladigan bandlarni tanlang');
+  const id = nextId(s, 'c');
+  const scores = structuredClone(prev.scores);
+  const hrScores = structuredClone(prev.hrScores);
+  for (const c of codes) {
+    if (c === 'FUN-05') for (const k of Object.keys(hrScores)) delete hrScores[k];
+    delete scores[c];
+  }
+  s.cards.unshift({
+    ...structuredClone(prev), id, prevCardId: prev.id, reopened: codes, scores, hrScores, stage: 'assessment', revision: 1,
+    panel: null, appointment: null, published: null, createdAt: s.today,
+  });
+  log(s, actor, 'Qayta baholash ochildi', id, { before: prev.id, after: codes.join(', ') });
+  return id;
+}
+
+// ---------- Tizimga kirish: Telegram, SMS kod yoki login va parol (TZ 14-bo'lim). Prototipda — demo, haqiqiy autentifikatsiya yo'q ----------
+export const DEMO_SMS_CODE = '1234';
+export const DEMO_PASSWORD = 'demo';
+const digits = (x) => String(x || '').replace(/\D/g, '');
+/** method: 'telegram' (username), 'sms' (telefon), 'password' (Gmail yoki admin logini). Topilsa sessiya qismi qaytadi. */
+export function findLogin(s, { method, value, password }) {
+  const v = String(value || '').trim().toLowerCase();
+  if (!v) fail(method === 'telegram' ? 'Telegram username kiriting' : method === 'sms' ? 'Telefon raqamini kiriting' : 'Login kiriting');
+  const act = activeEmployees(s);
+  if (method === 'telegram') {
+    const e = act.find((x) => (x.profile?.telegram || '').toLowerCase() === (v.startsWith('@') ? v : `@${v}`));
+    if (!e) fail('Bu Telegram akkaunti EduTizim profilida topilmadi');
+    return { mode: 'employee', employeeId: e.id, name: e.name };
+  }
+  if (method === 'sms') {
+    const e = act.find((x) => digits(x.profile?.phone || x.phone).endsWith(digits(v).slice(-9)) && digits(v).length >= 9);
+    if (!e) fail('Bu telefon raqami EduTizim profilida topilmadi');
+    return { mode: 'employee', employeeId: e.id, name: e.name };
+  }
+  if (password !== DEMO_PASSWORD) fail('Login yoki parol noto‘g‘ri');
+  const u = s.staff.find((x) => x.active !== false && (x.id === v || x.id === `u-${v}`));
+  if (u) return { mode: 'admin', userId: u.id, name: u.name };
+  const e = act.find((x) => (x.profile?.email || '').toLowerCase() === v);
+  if (!e) fail('Login yoki parol noto‘g‘ri');
+  return { mode: 'employee', employeeId: e.id, name: e.name };
+}
+
+// ---------- Shikoyat (apellyatsiya): e'londan keyin 10 kun ichida, boshqa baholovchi ko'rib chiqadi (TZ, 2026-11-24) ----------
+export const APPEAL_DAYS = 10;
+/** Kartani baholagan shaxslar — shikoyatni ular ko'rib chiqa olmaydi. */
+export const cardAssessors = (card) => [...new Set(Object.values(card.scores || {}).map((x) => x.by).filter(Boolean))];
+export const appealDeadline = (card) => (card.published ? addDays(card.published.at, APPEAL_DAYS) : null);
+export function fileAppeal(state, { cardId, employeeId, text }) {
   return mutate(state, (s) => {
-    const prev = getCard(s, cardId);
-    if (prev.stage !== 'published') fail('Qayta baholash faqat e’lon qilingan karta bo‘yicha');
-    if (!codes?.length) fail('Qayta ochiladigan bandlarni tanlang');
-    const id = nextId(s, 'c');
-    const scores = structuredClone(prev.scores);
-    const hrScores = structuredClone(prev.hrScores);
-    for (const c of codes) {
-      if (c === 'FUN-05') for (const k of Object.keys(hrScores)) delete hrScores[k];
-      delete scores[c];
-    }
-    s.cards.unshift({
-      ...structuredClone(prev), id, prevCardId: prev.id, reopened: codes, scores, hrScores, stage: 'assessment', revision: 1,
-      panel: null, appointment: null, published: null, createdAt: s.today,
-    });
-    log(s, actor, 'Qayta baholash ochildi', id, { before: prev.id, after: codes.join(', ') });
+    const card = getCard(s, cardId);
+    if (!card || card.stage !== 'published') fail('Shikoyat faqat e’lon qilingan natija bo‘yicha');
+    if (card.employeeId !== employeeId) fail('Shikoyatni faqat xodimning o‘zi yuboradi');
+    if (card.appeal) fail('Bu natija bo‘yicha shikoyat allaqachon yuborilgan');
+    if (s.today > appealDeadline(card)) fail(`Shikoyat muddati o‘tgan: e’londan keyin ${APPEAL_DAYS} kun ichida (${appealDeadline(card)} gacha)`);
+    if (String(text || '').trim().length < 10) fail('Nimadan norozi ekaningizni va sababini yozing');
+    const emp = getEmployee(s, employeeId);
+    card.appeal = { text: text.trim(), at: s.today, status: 'open' };
+    const hr = s.staff.find((u) => u.role === 'hr');
+    notify(s, `appeal:${card.id}`, hr?.name || 'HR Admin', `${emp.name}: ${card.id} natijasi bo‘yicha shikoyat. Uni kartani baholamagan boshqa baholovchi ko‘rib chiqadi.`);
+    log(s, emp.name, 'Shikoyat yuborildi', card.id, { reason: text.trim() });
+  });
+}
+/** decision: 'upheld' — natija o'zgarmaydi; 'reassess' — tanlangan bandlar qayta baholash kartasida ochiladi. */
+export function reviewAppeal(state, { cardId, decision, note, codes = [], userId }) {
+  return mutate(state, (s) => {
+    const card = getCard(s, cardId);
+    if (card?.appeal?.status !== 'open') fail('Ko‘rib chiqiladigan shikoyat yo‘q');
+    const user = getStaff(s, userId);
+    if (!user || !can(user, 'cards.publish')) fail('Shikoyatni «E’lon va tayinlash» huquqi bor shaxs ko‘rib chiqadi');
+    if (cardAssessors(card).includes(user.name)) fail('Shikoyatni kartani baholamagan boshqa baholovchi ko‘rib chiqadi');
+    if (!['upheld', 'reassess'].includes(decision)) fail('Noto‘g‘ri qaror');
+    if (!String(note || '').trim()) fail('Qaror sababi majburiy');
+    const reopened = decision === 'reassess' ? reopenCard(s, card, codes, user.name) : null;
+    card.appeal = { ...card.appeal, status: decision, note: note.trim(), by: user.name, decidedAt: s.today, reopened };
+    const emp = getEmployee(s, card.employeeId);
+    notify(s, `appeal-done:${card.id}`, emp.name, decision === 'upheld' ? `Shikoyatingiz ko‘rib chiqildi: natija o‘zgarmadi. Sabab: ${note.trim()}` : `Shikoyatingiz qabul qilindi: ${codes.join(', ')} qayta baholanadi (${reopened}). ${note.trim()}`);
+    log(s, user.name, 'Shikoyat ko‘rib chiqildi', card.id, { after: decision, reason: note.trim() });
   });
 }
 
@@ -878,13 +944,17 @@ export const getCourse = (s, id) => (s.courses || []).find((c) => c.id === id);
 export const getPath = (s, id) => (s.paths || []).find((p) => p.id === id);
 export const getEnrollment = (s, id) => (s.enrollments || []).find((e) => e.id === id);
 
+/** Test urinishlari: standart 3, testda sozlanadi. Kurs bahosiga OXIRGI urinish kiradi (TZ, 2026-11-24). */
+export const TEST_ATTEMPTS = 3;
+export const testAttempts = (c) => c?.maxAttempts ?? TEST_ATTEMPTS;
+export const testScore = (p) => (p ? (isNum(p.last) ? p.last : isNum(p.best) ? p.best : null) : null);
 /** Komponent bajarilganmi: dars — o'qildi; test — o'tish bali; topshiriq — mentor qabul qildi. */
 export function componentDone(course, enr, compId) {
   const c = course.components.find((x) => x.id === compId);
   const p = enr.progress[compId];
   if (!c || !p) return false;
   if (c.kind === 'lesson') return !!p.done;
-  if (c.kind === 'test') return isNum(p.best) && p.best >= c.passScore;
+  if (c.kind === 'test') return isNum(testScore(p)) && testScore(p) >= c.passScore;
   return p.status === 'accepted';
 }
 
@@ -905,7 +975,7 @@ export function courseGrade(course, enr) {
   const xs = [];
   for (const c of course.components) {
     const p = enr.progress[c.id];
-    if (c.kind === 'test' && isNum(p?.best)) xs.push(testBall(p.best));
+    if (c.kind === 'test' && isNum(testScore(p))) xs.push(testBall(testScore(p)));
     if (c.kind === 'task' && p?.status === 'accepted' && isNum(p.mentor?.grade)) xs.push(p.mentor.grade);
   }
   return xs.length ? Math.round((10 * xs.reduce((a, b) => a + b, 0)) / xs.length) / 10 : null;
@@ -979,21 +1049,35 @@ function settleEnrollment(s, enr, actor) {
     awardSkill(s, emp, k.skillId, k.level, `Kurs «${course.title}»`, actor);
   });
   if (enr.status !== 'completed' && course.components.every((c) => componentDone(course, enr, c.id))) {
-    enr.status = 'completed';
-    enr.completedAt = s.today;
-    for (const it of s.idp.filter((x) => x.employeeId === emp.id && (x.courseId === course.id || x.courseId === course.exodeId))) it.learningStatus = 'Kurs yakunlangan';
-    notify(s, `crs-done:${enr.id}`, emp.name, `Kurs yakunlandi: «${course.title}».`);
-    log(s, actor, 'Kurs yakunlandi', `${emp.id} · ${course.id}`);
-    if (enr.pathId) {
-      const path = getPath(s, enr.pathId);
-      const pe = s.pathEnrollments.find((x) => x.employeeId === emp.id && x.pathId === path.id);
-      const all = path.courses.every((cid) => s.enrollments.some((e) => e.employeeId === emp.id && e.courseId === cid && e.status === 'completed'));
-      if (pe && all && pe.status !== 'completed') {
-        pe.status = 'completed';
-        pe.completedAt = s.today;
-        notify(s, `path-done:${pe.id}`, emp.name, `Learning Path yakunlandi: «${path.title}». Lavozim shartlari (KPI, staj, baholash) bo‘yicha HR bilan keyingi qadam.`);
-        log(s, actor, 'Learning Path yakunlandi', `${emp.id} · ${path.id}`);
+    // Kurs yakunlanishi kursdan qoniqish bahosi va NPS'dan keyin qayd etiladi (2 ta majburiy savol, TZ 2026-11-24).
+    if (!enr.feedbackGiven) {
+      if (!enr.awaitingFeedback) {
+        enr.awaitingFeedback = true;
+        enr.doneAt = s.today;
+        notify(s, `crs-fb:${enr.id}`, emp.name, `«${course.title}»: kontent bajarildi. Kurs yakunlanishi uchun 2 ta savolga javob bering — kursdan qoniqish bahosi va tavsiya qilish (NPS).`);
       }
+      return;
+    }
+    finishEnrollment(s, enr, course, emp, actor);
+  }
+}
+
+function finishEnrollment(s, enr, course, emp, actor) {
+  enr.status = 'completed';
+  enr.completedAt = enr.doneAt || s.today;
+  delete enr.awaitingFeedback;
+  for (const it of s.idp.filter((x) => x.employeeId === emp.id && (x.courseId === course.id || x.courseId === course.exodeId))) it.learningStatus = 'Kurs yakunlangan';
+  notify(s, `crs-done:${enr.id}`, emp.name, `Kurs yakunlandi: «${course.title}».`);
+  log(s, actor, 'Kurs yakunlandi', `${emp.id} · ${course.id}`);
+  if (enr.pathId) {
+    const path = getPath(s, enr.pathId);
+    const pe = s.pathEnrollments.find((x) => x.employeeId === emp.id && x.pathId === path.id);
+    const all = path.courses.every((cid) => s.enrollments.some((e) => e.employeeId === emp.id && e.courseId === cid && e.status === 'completed'));
+    if (pe && all && pe.status !== 'completed') {
+      pe.status = 'completed';
+      pe.completedAt = s.today;
+      notify(s, `path-done:${pe.id}`, emp.name, `Learning Path yakunlandi: «${path.title}». Lavozim shartlari (KPI, staj, baholash) bo‘yicha HR bilan keyingi qadam.`);
+      log(s, actor, 'Learning Path yakunlandi', `${emp.id} · ${path.id}`);
     }
   }
 }
@@ -1056,10 +1140,11 @@ export function submitTest(state, { enrollmentId, componentId, answers }) {
     const correct = c.questions.filter((qq, i) => Number(answers[i]) === qq.answer).length;
     const score = Math.round((100 * correct) / c.questions.length);
     const p = enr.progress[componentId] || { attempts: 0 };
+    if ((p.attempts || 0) >= testAttempts(c)) fail(`Urinishlar tugadi (${p.attempts}/${testAttempts(c)}). Bahoga oxirgi urinish kirdi`);
     const course = getCourse(s, enr.courseId);
     const cap = Math.max(0, ...course.rules.filter((r) => r.needs.includes(componentId)).map((r) => r.level));
     const found = cap ? foundLevel(c.questions, answers, cap) : null;
-    enr.progress[componentId] = { ...p, attempts: (p.attempts || 0) + 1, last: score, best: Math.max(p.best ?? 0, score), at: s.today, ...(found !== null ? { found: Math.max(p.found ?? 0, found) } : {}) };
+    enr.progress[componentId] = { ...p, attempts: (p.attempts || 0) + 1, last: score, best: Math.max(p.best ?? 0, score), at: s.today, ...(found !== null ? { found } : {}) };
     log(s, getEmployee(s, enr.employeeId).name, 'Test topshirildi', `${enr.courseId} · ${componentId}`, { after: `${score}%` });
     settleEnrollment(s, enr, 'Tizim');
   });
@@ -1127,7 +1212,7 @@ export function rateLesson(state, { enrollmentId, componentId, value }) {
 export function submitCourseFeedback(state, { enrollmentId, satisfaction, nps, comment = '', showName = false }) {
   return mutate(state, (s) => {
     const enr = getEnrollment(s, enrollmentId);
-    if (enr.status !== 'completed') fail('Fikr kurs yakunlangach qoldiriladi');
+    if (enr.status !== 'completed' && !enr.awaitingFeedback) fail('Fikr kurs kontenti bajarilgach qoldiriladi');
     if (enr.feedbackGiven) fail('Bu kurs bo‘yicha fikr allaqachon qoldirilgan');
     const sat = Number(satisfaction);
     const n = Number(nps);
@@ -1138,6 +1223,7 @@ export function submitCourseFeedback(state, { enrollmentId, satisfaction, nps, c
     s.courseFeedback.push({ id: nextId(s, 'fb'), kind: 'course', courseId: enr.courseId, satisfaction: sat, nps: n, comment: text, author: text && showName ? emp.name : null,
       status: text ? 'pending' : null, branchId: emp.branchId, position: emp.position, at: s.today });
     enr.feedbackGiven = true;
+    if (enr.awaitingFeedback) finishEnrollment(s, enr, getCourse(s, enr.courseId), emp, emp.name);
   });
 }
 export function moderateFeedback(state, { id, decision, userId }) {
@@ -1151,18 +1237,20 @@ export function moderateFeedback(state, { id, decision, userId }) {
     log(s, user.name, decision === 'published' ? 'Kurs fikri e’lon qilindi' : 'Kurs fikri yashirildi', `${f.courseId} · ${id}`);
   });
 }
-/** Kurs bo'yicha jamlanma: dars baholari, kursdan qoniqish, NPS (promouterlar % − tanqidchilar %). */
+/** Anonim jamlanma kamida 5 ta javob bo'lsa ko'rsatiladi (TZ, 2026-11-24). */
+export const ANON_MIN = 5;
+/** Kurs bo'yicha jamlanma: dars baholari, kursdan qoniqish, NPS (promouterlar % − tanqidchilar %). few — javob kam, ko'rsatilmaydi. */
 export function courseFeedbackStats(s, courseId) {
   const all = (s.courseFeedback || []).filter((f) => f.courseId === courseId);
   const course = getCourse(s, courseId);
   const lessons = course.components.filter((c) => c.kind === 'lesson').map((c) => {
     const xs = all.filter((f) => f.kind === 'lesson' && f.lessonId === c.id).map((f) => f.value);
-    return { id: c.id, title: c.title, n: xs.length, avg: xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null };
+    return { id: c.id, title: c.title, n: xs.length, few: xs.length < ANON_MIN, avg: xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null };
   });
   const cs = all.filter((f) => f.kind === 'course');
   const npsN = cs.length;
   const nps = npsN ? Math.round((100 * (cs.filter((f) => f.nps >= 9).length - cs.filter((f) => f.nps <= 6).length)) / npsN) : null;
-  return { lessons, n: cs.length, satisfaction: cs.length ? cs.reduce((a, f) => a + f.satisfaction, 0) / cs.length : null, nps, comments: cs.filter((f) => f.comment) };
+  return { lessons, n: cs.length, few: cs.length < ANON_MIN, satisfaction: cs.length ? cs.reduce((a, f) => a + f.satisfaction, 0) / cs.length : null, nps, comments: cs.filter((f) => f.comment) };
 }
 
 // ---------- Kurs konstruktori ----------
@@ -1574,9 +1662,10 @@ export function onboardingScore(s, ob) {
     practice: card.need ? avg(checks.map(obsMean)) : null,
   };
   const on = { onTime: card.onTime, courses: true, tasks: card.tasks.length > 0, practice: card.need > 0 };
+  const regr = ob.extension?.regrades || {};
   const parts = Object.keys(ONB_PARTS).filter((k) => on[k]).map((k) => {
-    const value = r1(vals[k]);
-    return { key: k, label: ONB_PARTS[k][0], hint: k === 'practice' ? PRACTICE_KIND[card.practice] : k === 'tasks' ? card.tasks.map((t) => t.name).join('; ') : ONB_PARTS[k][1], value, ok: value !== null && value >= card.min };
+    const value = regr[k] ? regr[k].grade : r1(vals[k]);
+    return { key: k, label: ONB_PARTS[k][0], hint: k === 'practice' ? PRACTICE_KIND[card.practice] : k === 'tasks' ? card.tasks.map((t) => t.name).join('; ') : ONB_PARTS[k][1], value, ok: value !== null && value >= card.min, regraded: !!regr[k] };
   });
   const used = parts.filter((p) => p.value !== null);
   const score = used.length ? r1(avg(used.map((p) => p.value))) : null;
@@ -1584,8 +1673,9 @@ export function onboardingScore(s, ob) {
   const tasksDone = taskGrades.length;
   const ready = enrs.length > 0 && coursesDone === enrs.length && checks.length >= card.need && tasksDone === card.tasks.length;
   const passed = ready && parts.every((p) => p.ok);
+  const failed = parts.filter((p) => p.value !== null && !p.ok).map((p) => p.key);
   const obs = card.practice === 'lesson' ? checks.length : 0;
-  return { parts, score, label: ONB_LABEL(score), ready, passed, min: card.min, card, coursesDone, courses: enrs.length, tasksDone, checks: checks.length, need: card.need, obs, needObs: card.practice === 'lesson' ? card.need : 0 };
+  return { parts, failed, extension: ob.extension || null, score, label: ONB_LABEL(score), ready, passed, min: card.min, card, coursesDone, courses: enrs.length, tasksDone, checks: checks.length, need: card.need, obs, needObs: card.practice === 'lesson' ? card.need : 0 };
 }
 
 function onbNotify(s, key, to, text) {
@@ -1764,9 +1854,10 @@ export function approveOnboarding(state, { id, userId = 'u-super' }) {
     const head = branchHead(s, emp.branchId);
     if (!user || !can(user, 'onb.approve') || !inScope(s, user, emp)) fail('Yakuniy bahoni tasdiqlash huquqi va xodim doirasi kerak (odatda filial rahbari)');
     const r = onboardingScore(s, ob);
-    if (!r.ready && onbDay(s, ob) < obDays(s, ob)) fail(`Hali erta: ${onbDay(s, ob)}-kun, kurslar ${r.coursesDone}/${r.courses}${r.card.tasks.length ? `, topshiriqlar ${r.tasksDone}/${r.card.tasks.length}` : ''}${r.need ? `, kuzatuv ${r.checks}/${r.need}` : ''}`);
+    if (!r.passed && !ob.extension && (r.ready || onbDay(s, ob) >= obDays(s, ob))) fail(`Minimumdan o‘tmagan qism bor (${r.parts.filter((p) => !p.ok).map((p) => p.label).join(', ') || 'dastur to‘liq bajarilmagan'}): avval mentor rejasi bilan ${ONB_EXTEND_DAYS} kungacha uzaytiring, past qismlar qayta baholanadi`);
+    if (!r.ready && !ob.extension && onbDay(s, ob) < obDays(s, ob)) fail(`Hali erta: ${onbDay(s, ob)}-kun, kurslar ${r.coursesDone}/${r.courses}${r.card.tasks.length ? `, topshiriqlar ${r.tasksDone}/${r.card.tasks.length}` : ''}${r.need ? `, kuzatuv ${r.checks}/${r.need}` : ''}`);
     ob.status = 'completed';
-    ob.final = { score: r.score, label: r.label, passed: r.passed, min: r.min, ready: r.ready, parts: r.parts, by: user.name, at: s.today, byRole: user.role === 'branch' ? 'Filial rahbari' : head ? user.title : `${user.title} (filial rahbari vakant)` };
+    ob.final = { score: r.score, label: r.label, passed: r.passed, min: r.min, ready: r.ready, parts: r.parts, extended: !!ob.extension, by: user.name, at: s.today, byRole: user.role === 'branch' ? 'Filial rahbari' : head ? user.title : `${user.title} (filial rahbari vakant)` };
     const obs = onbObservations(s, ob);
     const codes = [...new Set(obs.flatMap((o) => Object.keys(o.ratings)))];
     for (const code of codes) {
@@ -1775,7 +1866,7 @@ export function approveOnboarding(state, { id, userId = 'u-super' }) {
     }
     onbNotify(s, `onb-done:${id}`, emp.name, r.passed
       ? `Onboarding muvaffaqiyatli yakunlandi: natija ${String(r.score).replace('.', ',')} / 5 (${r.label}). Barcha qismlar minimumdan (${r.min}) o‘tdi.`
-      : `Onboarding yakunlandi: natija ${r.score === null ? '—' : String(r.score).replace('.', ',')} / 5 (${r.label}). Minimumdan o‘tmagan qism: ${r.parts.filter((p) => !p.ok).map((p) => p.label).join(', ') || 'dastur to‘liq bajarilmagan'} — mentoringiz bilan rivojlanish rejasi tuziladi.`);
+      : `Onboarding yakunlandi: natija ${r.score === null ? '—' : String(r.score).replace('.', ',')} / 5 (${r.label}). Qayta baholashdan keyin ham minimumdan o‘tmagan qism: ${r.parts.filter((p) => !p.ok).map((p) => p.label).join(', ') || 'dastur to‘liq bajarilmagan'}. Keyingi qarorni filial rahbari va HR qabul qiladi.`);
     log(s, user.name, 'Onboarding natijasi tasdiqlandi', `${emp.id} · ${id}`, { after: String(r.score), passed: r.passed });
   });
 }
@@ -1811,6 +1902,53 @@ export function setOnbCard(state, { position, patch, actor = 'HR/L&D' }) {
     if (card.practice === 'work') prog.observations = 0;
     else if (!prog.observations) prog.observations = 2;
     log(s, actor, 'Onboarding natijasi kartasi', position, { before, after: JSON.stringify(onbCard(prog)) });
+  });
+}
+
+// ---------- Minimumdan o'tmasa: uzaytirish va faqat past qismlarni qayta baholash (TZ, 2026-11-24) ----------
+export const ONB_EXTEND_DAYS = 14;
+export const onbExtendMax = (s) => s.onboardingConfig?.extendDays ?? ONB_EXTEND_DAYS;
+/** Onboarding holati: faol, uzaytirilgan, yakunlangan, arxivlangan. */
+export const onbStatusLabel = (ob) => (ob.status === 'active' ? (ob.extension ? 'uzaytirilgan' : 'faol') : ob.status === 'completed' ? (ob.final?.passed ? 'muvaffaqiyatli' : 'yakunlangan') : ob.status === 'archived' ? 'arxivlangan' : ob.status);
+export function extendOnboarding(state, { id, days, plan, userId }) {
+  return mutate(state, (s) => {
+    const ob = getOnboarding(s, id);
+    if (!ob || ob.status !== 'active') fail('Faol moslashuv topilmadi');
+    if (ob.extension) fail('Onboarding faqat bir marta uzaytiriladi');
+    const emp = getEmployee(s, ob.employeeId);
+    const user = getStaff(s, userId);
+    if (!user || !can(user, 'onb.approve') || !inScope(s, user, emp)) fail('Uzaytirishni onboarding natijasini tasdiqlash huquqi bor shaxs (odatda filial rahbari) qiladi');
+    const r = onboardingScore(s, ob);
+    if (!(r.ready || onbDay(s, ob) >= obDays(s, ob))) fail('Dastur hali yakunlanmagan — uzaytirish natija chiqqandan keyin');
+    if (r.passed) fail('Barcha qismlar minimumdan o‘tgan — uzaytirish kerak emas');
+    const d = Number(days);
+    const max = onbExtendMax(s);
+    if (!(Number.isInteger(d) && d >= 1 && d <= max)) fail(`Uzaytirish 1–${max} kun`);
+    if (!String(plan || '').trim()) fail('Mentor rejasi majburiy: past qism bo‘yicha nima qilinadi');
+    const parts = r.failed.length ? r.failed : r.parts.filter((p) => p.value === null).map((p) => p.key);
+    ob.extension = { at: s.today, until: addDays(s.today, d), days: d, parts, plan: plan.trim(), by: user.name, regrades: {} };
+    const labels = parts.map((k) => ONB_PARTS[k][0]).join(', ');
+    onbNotify(s, `onb-ext:${ob.id}`, emp.name, `Onboarding ${d} kunga (${ob.extension.until} gacha) uzaytirildi. Qayta baholanadigan qism: ${labels}. Reja: ${plan.trim()}`);
+    const mentor = emp.supervisorId ? getEmployee(s, emp.supervisorId) : null;
+    if (mentor) onbNotify(s, `onb-ext:${ob.id}:mentor`, mentor.name, `${emp.name}: onboarding ${ob.extension.until} gacha uzaytirildi. Qayta baholash: ${labels}.`);
+    log(s, user.name, 'Onboarding uzaytirildi', `${emp.id} · ${ob.id}`, { after: `${d} kun`, reason: plan.trim() });
+  });
+}
+/** Uzaytirish davrida faqat past qismni qayta baholash (1–5); yangi baho shu qismning qiymatini almashtiradi. */
+export function reassessOnbPart(state, { id, part, grade, note = '', userId }) {
+  return mutate(state, (s) => {
+    const ob = getOnboarding(s, id);
+    if (!ob || ob.status !== 'active' || !ob.extension) fail('Uzaytirilgan faol onboarding topilmadi');
+    if (!ob.extension.parts.includes(part)) fail('Faqat minimumdan o‘tmagan qism qayta baholanadi');
+    const emp = getEmployee(s, ob.employeeId);
+    const user = getStaff(s, userId);
+    if (!user || !canAny(user, ['onb.assign', 'onb.approve', 'onb.observe']) || !inScope(s, user, emp)) fail('Qayta baholashni mentor, kuzatuvchi yoki filial rahbari qiladi (huquq va xodim doirasi kerak)');
+    const g = Number(grade);
+    if (!(Number.isInteger(g) && g >= 1 && g <= 5)) fail('Baho 1–5');
+    if (!String(note || '').trim()) fail('Qayta baholash izohi majburiy');
+    ob.extension.regrades = { ...(ob.extension.regrades || {}), [part]: { grade: g, note: note.trim(), by: user.name, at: s.today } };
+    onbNotify(s, `onb-re:${ob.id}:${part}:${g}`, emp.name, `«${ONB_PARTS[part][0]}» qayta baholandi: ${g} / 5 — ${note.trim()}.`);
+    log(s, user.name, 'Onboarding qismi qayta baholandi', `${emp.id} · ${part}`, { after: String(g), reason: note.trim() });
   });
 }
 
@@ -1889,7 +2027,8 @@ export function surveyBranch(s, branchId) {
   if (!v) return null;
   const rate = v.hires ? (100 * v.d8[0]) / v.hires : null;
   const checklist = v.checklist.length ? v.checklist.reduce((a, b) => a + b, 0) / v.checklist.length : null;
-  return { ...v, branchId, rate, checklistPct: checklist };
+  // Javoblar mazmuni (o'rtachalar, eNPS, standartlar) kamida 5 ta javob bo'lsa ko'rsatiladi; javob ulushi — qatnashuv, har doim.
+  return { ...v, branchId, rate, checklistPct: checklist, few: { d8: v.d8[0] < ANON_MIN, d30: v.d30[0] < ANON_MIN, d60: v.d60[0] < ANON_MIN, enps: v.d30[0] + v.d60[0] < ANON_MIN } };
 }
 /** Javob ulushi past filiallar rahbarlariga eslatma: «filialingizda qatnashish foizi past». */
 export function remindLowResponse(state, { actor = 'Tizim (eslatmalar)' } = {}) {
@@ -2216,7 +2355,7 @@ export function employeePoints(s, employeeId) {
       const p = enr.progress[c.id];
       if (!p) continue;
       if (c.kind === 'lesson' && p.done) items.push({ kind: 'lesson', at: p.at, course: course.title });
-      if (c.kind === 'test' && isNum(p.best) && p.best >= c.passScore) items.push({ kind: 'test', at: p.at, course: course.title });
+      if (c.kind === 'test' && isNum(testScore(p)) && testScore(p) >= c.passScore) items.push({ kind: 'test', at: p.at, course: course.title });
       if (c.kind === 'task' && p.status === 'accepted') items.push({ kind: 'task', at: p.mentor?.at || p.submittedAt, course: course.title });
     }
     if (enr.status === 'completed') {
