@@ -1001,3 +1001,22 @@ describe('Model konstruktori — kengaytma (qaror №49)', () => {
     expect(() => D.moveProfile(s, { id: m.id, code: 'LT-1', dir: 'up' })).toThrow(/Siljitib/);
   });
 });
+
+describe('Lavozim shablonlari (qaror №69)', () => {
+  it('Shablon tanlanganda huquqlar va doira avtomatik; beruvchida yo‘q huquq berilmaydi; keyin qo‘lda o‘zgartiriladi', () => {
+    let s = createSeed();
+    s = D.addStaff(s, { employeeId: 'e-dildora', role: 'branch', byId: 'u-super' });
+    const u = s.staff.find((x) => x.employeeId === 'e-dildora');
+    expect(u.rights).toEqual(D.ALL_RIGHTS.filter((r) => D.ROLE_PRESETS.branch.includes(r)));
+    expect(u.scope).toEqual({ kind: 'branches', branchIds: ['b-chil'] });
+    expect(() => D.addStaff(s, { employeeId: 'e-dildora', role: 'mentor', byId: 'u-super' })).toThrow(/allaqachon admin/);
+    // L&D assistentda «Kartada baholash» yo'q — Akademik bo'lim shablonidan u berilmaydi.
+    s = D.applyRoleTemplate(s, { userId: u.id, role: 'academic', byId: 'u-lda' });
+    const v = D.getStaff(s, u.id);
+    expect(v.role).toBe('academic');
+    expect(v.rights).not.toContain('cards.assess');
+    expect(v.rights).toContain('people.message');
+    s = D.setStaffRight(s, { userId: u.id, right: 'onb.reminders', on: true, byId: 'u-lda' });
+    expect(D.getStaff(s, u.id).rights).toContain('onb.reminders');
+  });
+});

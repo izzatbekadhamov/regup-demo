@@ -3172,3 +3172,55 @@ export function moveProfile(state, { id, code, dir, actor = 'HR/L&D' }) {
     log(s, actor, 'Lavozim darajalari tartibi', id, { after: m.profiles.map((p) => p.code).join(' → ') });
   });
 }
+
+// ---------------------------------------------------------------------------
+// Lavozim shablonlari (TZ 3-bo'lim, qaror №69): admin qo'shishda yoki tahrirlashda shablon tanlanadi — shablondagi
+// huquqlar va odatdagi doira avtomatik belgilanadi; keyin har bir huquq qo'lda qo'shiladi yoki olib tashlanadi.
+// Beruvchida yo'q huquqlar shablondan o'tkazib yuboriladi (qaror №57).
+// ---------------------------------------------------------------------------
+export const TEMPLATE_ROLES = ['hr', 'lda', 'branch', 'supervisor', 'academic', 'mentor', 'methodist', 'curator'];
+/** Shablon uchun odatdagi doira. */
+export function templateScope(s, role, emp) {
+  if (role === 'hr' || role === 'lda') return { kind: 'all' };
+  if (role === 'branch' || role === 'supervisor') return { kind: 'branches', branchIds: emp?.branchId ? [emp.branchId] : [s.branches[0].id] };
+  if (role === 'academic') return { kind: 'positions', positions: ['GE'], branchIds: [] };
+  return { kind: 'assigned' };
+}
+/** Shablondan beruvchi bera oladigan va bera olmaydigan huquqlar. */
+export function templateRights(s, role, byId) {
+  const by = byId ? getStaff(s, byId) : null;
+  const list = ROLE_PRESETS[role] || [];
+  return { ok: list.filter((r) => !by || can(by, r)), skipped: list.filter((r) => by && !can(by, r)) };
+}
+export function applyRoleTemplate(state, { userId, role, byId, actor = 'Super Admin' }) {
+  return mutate(state, (s) => {
+    const u = getStaff(s, userId);
+    if (!u || u.role === 'super') fail('Bu admin uchun shablon qo‘llanmaydi');
+    if (!ROLE_PRESETS[role]) fail('Shablon topilmadi');
+    const by = checkGranter(s, byId);
+    if (by && by.id === u.id) fail('O‘zingizga shablon qo‘llay olmaysiz');
+    const { ok, skipped } = templateRights(s, role, byId);
+    const before = (u.rights || []).length;
+    u.role = role;
+    u.rights = ALL_RIGHTS.filter((r) => ok.includes(r));
+    u.changedAt = s.today;
+    log(s, by?.name || actor, 'Shablon qo‘llandi', `${u.name} · ${ROLE_LABEL[role]}`, { before: `${before} ta huquq`, after: `${ok.length} ta huquq${skipped.length ? `; berilmadi: ${skipped.map((r) => RIGHT_LABEL[r]).join(', ')}` : ''}` });
+  });
+}
+/** Yangi admin: xodim tanlanadi, shablon bo'yicha huquqlar va doira avtomatik; keyin qo'lda o'zgartiriladi. */
+export function addStaff(state, { employeeId, role, title = '', byId, actor = 'Super Admin' }) {
+  return mutate(state, (s) => {
+    const emp = getEmployee(s, employeeId);
+    if (!emp || emp.status === 'archived') fail('Xodimni tanlang');
+    if (!ROLE_PRESETS[role]) fail('Shablonni tanlang');
+    if (s.staff.some((u) => u.employeeId === emp.id)) fail(`${emp.name} allaqachon admin — huquqlarini «Adminlar» ro‘yxatida o‘zgartiring`);
+    const by = checkGranter(s, byId);
+    const scope = templateScope(s, role, emp);
+    if (by && scope.kind !== 'assigned' && !scopeWithin(s, by, scope)) fail('Shablondagi doira sizning doirangizdan keng — avval doirani toraytiring yoki boshqa admin qo‘shsin');
+    const { ok, skipped } = templateRights(s, role, byId);
+    const id = nextId(s, 'u');
+    s.staff.push({ id, role, name: emp.name, title: String(title).trim() || `${ROLE_LABEL[role]} — ${getBranch(s, emp.branchId)?.name || ''}`, employeeId: emp.id,
+      branchIds: scope.branchIds || [], rights: ALL_RIGHTS.filter((r) => ok.includes(r)), scope, active: true, changedAt: s.today });
+    log(s, by?.name || actor, 'Admin qo‘shildi', `${emp.name} · ${ROLE_LABEL[role]}`, { after: `${ok.length} ta huquq, doira: ${scopeText(s, scope)}${skipped.length ? `; berilmadi: ${skipped.map((r) => RIGHT_LABEL[r]).join(', ')}` : ''}` });
+  });
+}

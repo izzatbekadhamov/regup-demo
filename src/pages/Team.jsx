@@ -1,5 +1,6 @@
-import { useAppState, run } from '../state/store.js';
-import { Panel, Pill, Avatar, fmtDate } from '../ui/common.jsx';
+import { useState } from 'react';
+import { useAppState, run, getState } from '../state/store.js';
+import { Panel, Pill, Avatar, fmtDate, ask, go } from '../ui/common.jsx';
 import * as D from '../core/domain.js';
 
 const POS = { GE: 'Ustoz (GE)', FIN: 'Moliya menejeri', FR: 'Filial rahbari', ADM: 'Markaz admini' };
@@ -9,6 +10,43 @@ function Checks({ label, items, value, onChange }) {
       <div className="small muted">{label}</div>
       <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
         {items.map(([k, l]) => { const on = value.includes(k); return <label key={k} className="row small" style={{ gap: 4 }}><input type="checkbox" checked={on} onChange={() => onChange(on ? value.filter((x) => x !== k) : [...value, k])} /> {l}</label>; })}
+      </div>
+    </div>
+  );
+}
+
+/** Shablon tanlash: huquqlar shablon bo'yicha avtomatik belgilanadi, keyin qo'lda o'zgartiriladi. */
+function TemplatePicker({ s, u, user }) {
+  const [role, setRole] = useState(D.ROLE_PRESETS[u.role] ? u.role : 'hr');
+  const t = D.templateRights(s, role, user.id);
+  return (
+    <div className="row small" style={{ gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+      <b>Shablon:</b>
+      <select className="i compact" value={role} onChange={(e) => setRole(e.target.value)}>{D.TEMPLATE_ROLES.map((r) => <option key={r} value={r}>{D.ROLE_LABEL[r]} — {D.ROLE_PRESETS[r].length} huquq</option>)}</select>
+      <button className="btn sm" onClick={() => ask(`${u.name} huquqlari «${D.ROLE_LABEL[role]}» shablonidagiga almashtiriladi (${t.ok.length} ta huquq${t.skipped.length ? `; sizda yo‘qligi uchun ${t.skipped.length} tasi berilmaydi` : ''}). Keyin qo‘lda qo‘shish yoki olib tashlash mumkin. Davom etasizmi?`, () => run(D.applyRoleTemplate, { userId: u.id, role, byId: user.id, actor: user.name }, 'Shablon qo‘llandi — huquqlarni qo‘lda ham o‘zgartirishingiz mumkin'))}>Shablonni qo‘llash</button>
+      <span className="muted" title={D.ROLE_PRESETS[role].map((r) => D.RIGHT_LABEL[r]).join(', ')}>{D.ROLE_PRESETS[role].slice(0, 4).map((r) => D.RIGHT_LABEL[r]).join(', ')}…</span>
+    </div>
+  );
+}
+
+function AddAdmin({ s, user, onDone }) {
+  const [f, setF] = useState({ employeeId: '', role: 'branch', title: '' });
+  const free = D.activeEmployees(s).filter((e) => !s.staff.some((u) => u.employeeId === e.id) && D.inScope(s, user, e));
+  const emp = D.getEmployee(s, f.employeeId);
+  const t = D.templateRights(s, f.role, user.id);
+  const sc = D.templateScope(s, f.role, emp);
+  return (
+    <div className="panel add-box" style={{ marginBottom: 8 }}>
+      <b className="small">Yangi admin</b>
+      <div className="stack" style={{ gap: 6, marginTop: 6 }}>
+        <select className="i compact" value={f.employeeId} onChange={(e) => setF({ ...f, employeeId: e.target.value })}><option value="">Xodimni tanlang…</option>{free.map((e) => <option key={e.id} value={e.id}>{e.name} · {D.getBranch(s, e.branchId)?.name}</option>)}</select>
+        <select className="i compact" value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })}>{D.TEMPLATE_ROLES.map((r) => <option key={r} value={r}>{D.ROLE_LABEL[r]} — {D.ROLE_PRESETS[r].length} huquq</option>)}</select>
+        <input className="i compact" placeholder="Lavozim nomi (ixtiyoriy)" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} />
+        <div className="small muted">Shablon bo‘yicha {t.ok.length} ta huquq{t.skipped.length ? ` (sizda yo‘q ${t.skipped.length} tasi berilmaydi)` : ''}; doira: {D.scopeText(s, sc)}. Keyin qo‘lda o‘zgartiriladi.</div>
+        <div className="row" style={{ gap: 6 }}>
+          <button className="btn sm primary" disabled={!f.employeeId} onClick={() => { if (run(D.addStaff, { ...f, byId: user.id, actor: user.name }, 'Admin qo‘shildi')) { const nu = getState().staff.find((x) => x.employeeId === f.employeeId); onDone(); if (nu) go(`/team/${nu.id}`); } }}>Qo‘shish</button>
+          <button className="btn sm" onClick={onDone}>Bekor qilish</button>
+        </div>
       </div>
     </div>
   );
@@ -24,6 +62,8 @@ export default function Team({ user, focus }) {
   const setScope = (x) => run(D.setStaffScope, { userId: u.id, kind: x.kind, branchIds: x.branchIds || [], departmentIds: x.departmentIds || [], positions: x.positions || [], actor: user.name, byId: user.id });
   const positions = [...new Set(s.employees.map((e) => e.position))];
   const toggle = (right, on) => run(D.setStaffRight, { userId: u.id, right, on, actor: user.name, byId: user.id });
+  const [adding, setAdding] = useState(false);
+  const canGrant = D.can(user, 'team.manage');
   const setGroup = (list, on) => list.forEach(([k]) => { if ((u.rights || []).includes(k) !== on) toggle(k, on); });
   return (
     <>
@@ -34,7 +74,8 @@ export default function Team({ user, focus }) {
         </div>
       </div>
       <div className="grid" style={{ gridTemplateColumns: 'minmax(220px, 280px) 1fr', alignItems: 'start' }}>
-        <Panel title="Adminlar">
+        <Panel title="Adminlar" actions={canGrant && !adding && <button className="btn sm primary" onClick={() => setAdding(true)}>+ Admin</button>}>
+          {adding && <AddAdmin s={s} user={user} onDone={() => setAdding(false)} />}
           <div className="stack" style={{ gap: 4 }}>
             {s.staff.map((x) => (
               <a key={x.id} href={`#/team/${x.id}`} className={`team-row ${x.id === u.id ? 'on' : ''}`}>
@@ -58,8 +99,8 @@ export default function Team({ user, focus }) {
               <Pill tone="brand">{n} ta huquq berilgan</Pill>
               {u.changedAt && <span className="small muted">{fmtDate(u.changedAt)} o‘zgartirildi</span>}
               {isSuper && <span className="small muted">Super Admin barcha huquqlarga ega va barcha filiallarni ko‘radi.</span>}
-              {!isSuper && D.ROLE_PRESETS[u.role] && <button className="link-btn small" title={D.ROLE_PRESETS[u.role].map((r) => D.RIGHT_LABEL[r]).join(', ')} onClick={() => D.ALL_RIGHTS.forEach((r) => { const want = D.ROLE_PRESETS[u.role].includes(r); if ((u.rights || []).includes(r) !== want) toggle(r, want); })}>«{D.ROLE_LABEL[u.role]}» shablonini qo‘llash ({D.ROLE_PRESETS[u.role].length} huquq)</button>}
             </div>
+            {!isSuper && canGrant && <TemplatePicker key={u.id + u.role} s={s} u={u} user={user} />}
             {!isSuper && (
               <div className="stack" style={{ marginTop: 12 }}>
                 <h3 className="small" style={{ margin: 0 }}>Doira: qaysi xodimlar ko‘rinadi</h3>
