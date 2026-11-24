@@ -109,7 +109,7 @@ export default function Learn({ id, emp }) {
         <p className="ink2">{course.summary}</p>
         <div className="near-bar" style={{ maxWidth: 420 }}><i style={{ width: `${(100 * done) / course.components.length}%` }} /></div>
         {enr.mandatory && enr.status !== 'completed' && (() => { const r = s.kpiRules.find((x) => x.id === enr.mandatory.ruleId); return <div className="callout warn small"><b>Majburiy kurs</b> — {D.monthName(enr.mandatory.month)}: {D.KPI_METRICS[r.metric].label} {enr.mandatory.value.toFixed(1).replace('.', ',')}%, chegara {enr.mandatory.min}%. Muddat: {fmtDate(enr.mandatory.deadline)}. Mas’ulingiz natijani kuzatib boradi.</div>; })()}
-        {enr.onboardingId && enr.status !== 'completed' && <div className="callout small"><b>Moslashuv kursi</b> — muddat {fmtDate(enr.deadline)}. Test va topshiriq kurs bahosini beradi, u onboarding natijasiga kiradi. Topshiriqni {D.taskReviewer(s, enr).kind === 'curator' ? `kurs kuratori (${D.taskReviewer(s, enr).user.name})` : 'mentoringiz'} tekshiradi.</div>}
+        {enr.onboardingId && enr.status !== 'completed' && <div className="callout small"><b>Moslashuv kursi</b> — muddat {fmtDate(enr.deadline)}. Test va topshiriq kurs bahosini beradi, u onboarding natijasiga kiradi. Topshiriqni {D.taskReviewer(s, enr).kind === 'mentor' ? 'mentoringiz' : `${D.REVIEWER_KIND[D.taskReviewer(s, enr).kind]} (${D.taskReviewer(s, enr).user?.name || '—'})`} tekshiradi.</div>}
         {locked && <div className="callout warn small">Bu kurs Learning Path’dagi oldingi kurs yakunlangach ochiladi.</div>}
       </section>
       <div className="split">

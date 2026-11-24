@@ -575,7 +575,9 @@ describe('Onboarding dashboard analitikasi', () => {
     expect(A.liveProgress(s, D.onboardingOf(s, 'e-sanjar')).status).toBe('notStarted');
     expect(A.liveProgress(s, D.onboardingOf(s, 'e-nilufar')).status).toBe('ontrack');
     const risk = A.riskList(s);
-    expect(risk.map((x) => x.emp.id).sort()).toEqual(['e-sanjar', 'e-ziyoda']);
+    expect(risk.map((x) => x.emp.id).sort()).toEqual(['e-jahongir', 'e-sanjar', 'e-ziyoda']);
+    // Yangi mezon (qaror №55): D30 tekshiruvi 2 kundan ortiq kechikmoqda.
+    expect(risk.find((x) => x.emp.id === 'e-jahongir').reasons.join(' ')).toMatch(/tekshiruv kechikmoqda/);
     s = D.flagRisk(s, { onboardingId: D.onboardingOf(s, 'e-sanjar').id, reasons: ['boshlamagan'] });
     expect(s.notifications[0]).toMatchObject({ to: 'Gulbahor Rasulova', tg: true });
     expect(() => D.flagRisk(s, { onboardingId: D.onboardingOf(s, 'e-sanjar').id, reasons: ['boshlamagan'] })).toThrow(/allaqachon/);
@@ -802,8 +804,8 @@ describe('TZ 2026-11-24 qarorlari', () => {
     s = D.fileAppeal(s, { cardId: 'c-105', employeeId: 'e-aziza', text: 'GEN-05 bo‘yicha oktabrdagi kuzatuv hisobga olinmagan' });
     expect(() => D.fileAppeal(s, { cardId: 'c-105', employeeId: 'e-aziza', text: 'Yana bir shikoyat matni' })).toThrow(/allaqachon/);
     const code = Object.keys(D.getCard(s, 'c-105').scores)[0];
-    D.getCard(s, 'c-105').scores[code].by = 'Madina Xasanova';
-    expect(() => D.reviewAppeal(s, { cardId: 'c-105', decision: 'upheld', note: 'ok', userId: 'u-hr' })).toThrow(/baholamagan/);
+    D.getCard(s, 'c-105').scores[code].by = 'Shahzoda Donyorova';
+    expect(() => D.reviewAppeal(s, { cardId: 'c-105', decision: 'upheld', note: 'ok', userId: 'u-lda' })).toThrow(/baholamagan/);
     expect(() => D.reviewAppeal(s, { cardId: 'c-105', decision: 'upheld', note: 'ok', userId: 'u-men-gul' })).toThrow(/huquqi/);
     s = D.reviewAppeal(s, { cardId: 'c-105', decision: 'reassess', note: 'Kuzatuv dalili qayta ko‘riladi', codes: [code], userId: 'u-super' });
     const c = D.getCard(s, 'c-105');
@@ -821,5 +823,123 @@ describe('TZ 2026-11-24 qarorlari', () => {
     expect(D.findLogin(s, { method: 'password', value: 'hr', password: D.DEMO_PASSWORD })).toMatchObject({ mode: 'admin', userId: 'u-hr' });
     expect(() => D.findLogin(s, { method: 'password', value: 'hr', password: 'x' })).toThrow(/noto‘g‘ri/);
     expect(() => D.findLogin(s, { method: 'telegram', value: '@yoq_odam' })).toThrow(/topilmadi/);
+  });
+});
+
+describe('Eski TZ va Jobster qarorlari (2026-11-24)', () => {
+  it('Adminlik berish: o‘zida yo‘q huquqni bera olmaydi, huquqsiz admin umuman bera olmaydi', () => {
+    let s = createSeed();
+    expect(() => D.setStaffRight(s, { userId: 'u-cur', right: 'audit.view', on: true, byId: 'u-lda' })).toThrow(/O‘zingizda yo‘q/);
+    s = D.setStaffRight(s, { userId: 'u-cur', right: 'onb.view', on: true, byId: 'u-lda' });
+    expect(D.getStaff(s, 'u-cur').rights).toContain('onb.view');
+    expect(() => D.setStaffRight(s, { userId: 'u-cur', right: 'onb.view', on: false, byId: 'u-br-chil' })).toThrow(/Adminlik berish/);
+    // Doira: filial rahbariga «Adminlik berish» berilsa ham, barcha filiallar doirasini bera olmaydi.
+    s = D.setStaffRight(s, { userId: 'u-br-chil', right: 'team.manage', on: true });
+    expect(() => D.setStaffScope(s, { userId: 'u-cur', kind: 'all', byId: 'u-br-chil' })).toThrow(/kengroq/);
+    expect(() => D.setStaffScope(s, { userId: 'u-cur', kind: 'branches', branchIds: ['b-chil'], byId: 'u-br-chil' })).not.toThrow();
+  });
+
+  it('Hech kim o‘zini baholamaydi: kurator o‘z topshirig‘ini tekshirmaydi — zaxira tekshiruvchiga o‘tadi', () => {
+    const s = createSeed();
+    const enr = s.enrollments.find((e) => e.id === 'enr-o5'); // Sanjar, CRS-ON-CORP (kurator Laylo Karimova)
+    expect(D.taskReviewer(s, enr).kind).toBe('curator');
+    D.getStaff(s, 'u-cur').employeeId = 'e-sanjar';
+    const r = D.taskReviewer(s, enr);
+    expect(r.kind).not.toBe('curator');
+    expect(D.canReviewTask(s, D.getStaff(s, 'u-cur'), enr)).toBe(false);
+    expect(D.isSelf(D.getStaff(s, 'u-cur'), 'e-sanjar')).toBe(true);
+  });
+
+  it('Onboarding doskasi: kunlar bo‘yicha ustun, «Tekshirish»da tasdiqsiz o‘tmaydi, qo‘lda ko‘chirish huquq bilan', () => {
+    let s = createSeed();
+    const ob = D.onboardingOf(s, 'e-sanjar'); // 10-kun, D8 tasdiqlanmagan
+    expect(D.boardColumn(s, ob)).toBe('check8');
+    expect(D.checkLate(s, ob)).toBe(3);
+    expect(D.boardColumn(s, D.onboardingOf(s, 'e-jahongir'))).toBe('check30');
+    expect(() => D.moveBoardCard(s, { id: ob.id, column: 'd8', userId: 'u-br-chil' })).toThrow(/Onboarding doskasini yuritish/);
+    expect(() => D.confirmCheck(s, { id: ob.id, which: 'd8', result: 'working', userId: 'u-lda' })).toThrow(/D8\/D30 tekshiruvini/);
+    s = D.confirmCheck(s, { id: ob.id, which: 'd8', result: 'working', userId: 'u-br-chil' });
+    expect(D.boardColumn(s, D.onboardingOf(s, 'e-sanjar'))).toBe('d8');
+    s = D.moveBoardCard(s, { id: ob.id, column: 'induction', note: 'qayta orientatsiya', userId: 'u-hr' });
+    expect(D.boardColumn(s, D.onboardingOf(s, 'e-sanjar'))).toBe('induction');
+    // D8 so'rovnomasi doskadagi ustun bo'yicha: qo'lda orqaga ko'chirilgan xodimga hali yuborilmaydi.
+    expect(D.dueSurveySends(s).some((x) => x.emp.id === 'e-sanjar')).toBe(false);
+  });
+
+  it('«Ketdi»: ketish kutilmoqda + HR’ga EduTizim’da arxivlash vazifasi; arxiv signali vazifani yopadi', () => {
+    let s = createSeed();
+    const ob = D.onboardingOf(s, 'e-sanjar');
+    s = D.confirmCheck(s, { id: ob.id, which: 'd8', result: 'left', note: 'Ishga chiqmayapti', userId: 'u-br-chil' });
+    expect(D.onboardingOf(s, 'e-sanjar').leaving).toMatchObject({ by: 'Anvar Qosimov' });
+    const t = s.boardTasks.find((x) => x.key === 'archive:e-sanjar');
+    expect(t).toMatchObject({ status: 'new', assignee: 'Madina Xasanova' });
+    s = { ...s, hrInbox: [{ id: 'ev-x', type: 'archive', at: s.today, payload: { employeeId: 'e-sanjar', reasonCode: 'schedule', leftAt: s.today, eduWaitDays: 30 } }] };
+    s = D.processHrInbox(s, { id: 'ev-x' });
+    expect(s.boardTasks.find((x) => x.key === 'archive:e-sanjar').status).toBe('done');
+    // 30 kun ichida ketgan: Fail Case havola orqali va filial rahbariga rahbar so'rovnomasi.
+    expect(s.surveySends.some((x) => x.surveyId === 'sv-fail' && x.employeeId === 'e-sanjar' && x.link)).toBe(true);
+    expect(s.surveySends.some((x) => x.surveyId === 'sv-manager' && x.about === 'e-sanjar' && x.to === 'Anvar Qosimov')).toBe(true);
+  });
+
+  it('Ketish sabablari katalogi: 20 ta, haydalish 3 sabab, «Qaytadi» — exit-intervyusiz', () => {
+    expect(D.EXIT_REASONS).toHaveLength(20);
+    expect(D.EXIT_REASONS.filter((r) => r[2] === 'fired').map((r) => r[3])).toEqual(['skills', 'discipline', 'values']);
+    const s = createSeed();
+    const emp = D.getEmployee(s, 'e-dildora');
+    expect(D.exitPlan(s, emp, { reasonCode: 'returns', leftAt: s.today })).toMatchObject({ type: 'returns', survey: null });
+    expect(D.exitPlan(s, emp, { reasonCode: 'fired-values', leftAt: s.today }).type).toBe('fired');
+    expect(D.exitPlan(s, emp, { reasonCode: 'salary', leftAt: s.today }).type).toBe('self');
+  });
+
+  it('So‘rovnoma: anonim javob xodimga bog‘lanmaydi; ismli salbiy javob — nomli vazifa va xavf guruhi', () => {
+    let s = createSeed();
+    s = D.confirmCheck(s, { id: D.onboardingOf(s, 'e-sanjar').id, which: 'd8', result: 'working', userId: 'u-br-chil' });
+    s = D.sendDueSurveys(s);
+    const send = s.surveySends.find((x) => x.employeeId === 'e-sanjar' && x.surveyId === 'sv-d8');
+    expect(send).toBeTruthy();
+    const all = { q1: 'yes', q2: 'yes', q3: 'yes', q4: 'yes', q5: 'yes', q6: 'no', q7: '4', q8: '' };
+    expect(() => D.answerSurvey(s, { sendId: send.id, answers: { q1: 'yes' } })).toThrow(/javob bering/);
+    s = D.answerSurvey(s, { sendId: send.id, answers: all });
+    expect(s.surveyResponses.at(-1)).toMatchObject({ employeeId: null, branchId: 'b-chil' });
+    expect(() => D.answerSurvey(s, { sendId: send.id, answers: all })).toThrow(/javob berilgan/);
+    // Ismli so'rovnoma (Malika, mentor bilan ishlash): «Yo'q» → xavf belgisi.
+    s = D.answerSurvey(s, { sendId: 'ss-2', answers: { q1: 'no', q2: '2', q3: '' } });
+    expect(s.surveyResponses.at(-1).employeeId).toBe('e-malika');
+    // Anonim natija: 5 tadan kam javobda ko'rsatilmaydi.
+    expect(D.surveyResults(s, 'sv-d30', null).few).toBe(true);
+    expect(D.surveyResults(s, 'sv-d8', null).few).toBe(false);
+  });
+
+  it('Jobster’dan import: ustun va sanalar bilan, «Department» → «Начальный»', () => {
+    expect(() => D.importJobsterBoard(createSeed(), { userId: 'u-br-chil' })).toThrow(/Integratsiya navbati/);
+    const s = D.importJobsterBoard(createSeed(), { userId: 'u-hr' });
+    const byName = (n) => D.onboardingOf(s, s.employees.find((e) => e.name === n).id);
+    expect(D.boardColumn(s, byName('Bobur Rahmonov'))).toBe('start');
+    expect(D.boardColumn(s, byName('Madina Sobirova'))).toBe('check30');
+    expect(D.boardColumn(s, byName('Javohir Ergashev'))).toBe('d8');
+    expect(() => D.importJobsterBoard(s, { userId: 'u-hr' })).toThrow(/qolmagan/);
+  });
+
+  it('Uchrashuv: xodim taklif qiladi, HR tasdiqlaydi, xodimlar o‘zi yoziladi', () => {
+    let s = createSeed();
+    s = D.proposeMeeting(s, { employeeId: 'e-dildora', title: 'Bilim almashish: Kids English o‘yinlari', date: '2026-11-25', format: 'offline', place: 'Chilonzor, 2-xona' });
+    const id = s.meetings.at(-1).id;
+    expect(() => D.joinMeeting(s, { id, employeeId: 'e-otabek' })).toThrow(/Yozilish ochiq/);
+    expect(() => D.reviewMeeting(s, { id, decision: 'approved', userId: 'u-br-chil' })).toThrow(/Uchrashuvlarni tasdiqlash/);
+    s = D.reviewMeeting(s, { id, decision: 'approved', userId: 'u-hr' });
+    s = D.joinMeeting(s, { id, employeeId: 'e-otabek' });
+    expect(s.meetings.find((m) => m.id === id).invited).toEqual(['e-otabek']);
+  });
+
+  it('Xabar yuborish huquq va doira bilan; o‘zini baholash daraja hisobiga kirmaydi', () => {
+    let s = createSeed();
+    expect(() => D.sendMessage(s, { userId: 'u-br-chil', text: 'Salom' })).toThrow(/Xabar yuborish/);
+    s = D.sendMessage(s, { userId: 'u-hr', text: 'Ertaga metodik kun', branchId: 'b-chil', position: 'GE' });
+    expect(s.messages[0].n).toBeGreaterThan(0);
+    const before = D.cardDecision(s, D.getCard(s, 'c-110'));
+    s = D.setSelfScore(s, { cardId: 'c-110', employeeId: 'e-nilufar', code: 'GEN-01', level: 4, note: 'Lesson plan yozaman' });
+    expect(D.getCard(s, 'c-110').selfScores['GEN-01'].level).toBe(4);
+    expect(D.cardDecision(s, D.getCard(s, 'c-110')).match.match).toEqual(before.match.match);
+    expect(() => D.setSelfScore(s, { cardId: 'c-110', employeeId: 'e-malika', code: 'GEN-01', level: 3 })).toThrow(/topilmadi/);
   });
 });

@@ -2,7 +2,7 @@
 import { frModel, geModel, abModel, HR_CODES } from './models.js';
 import { compMethods } from '../core/modelKit.js';
 import { resolveScores, computeMatch } from '../core/calc.js';
-import { idpProposal } from '../core/domain.js';
+import { idpProposal, ROLE_PRESETS } from '../core/domain.js';
 import { COURSES, PATHS } from './courses.js';
 
 import { createOnbHistory } from './onbHistory.js';
@@ -468,19 +468,14 @@ export function createSeed() {
 
   // ---------------- Onboarding (TZ): rollar, moslashuv dasturlari, integratsiya navbati, uchrashuvlar ----------------
   // Jamoa a'zolari: huquqlar shaxsga beriladi, har biriga filial doirasi (role — faqat lavozim shabloni).
-  const PRESET = {
-    hr: ['onb.view', 'onb.approve', 'onb.assign', 'onb.observe', 'onb.integration', 'onb.meetings', 'onb.reminders', 'cards.assign', 'cards.assess', 'cards.publish', 'talent.view', 'courses.view', 'courses.manage', 'courses.review', 'courses.comments', 'kpi.view', 'audit.view', 'people.view', 'org.manage'],
-    lda: ['onb.view', 'onb.assign', 'onb.integration', 'onb.meetings', 'onb.reminders', 'cards.assign', 'courses.view', 'courses.comments', 'people.view', 'gami.manage'],
-    branch: ['onb.view', 'onb.approve', 'onb.assign', 'onb.observe', 'onb.meetings', 'onb.reminders', 'cards.assign', 'kpi.view', 'courses.view', 'people.view'],
-    mentor: ['onb.view', 'onb.assign', 'cards.assign', 'courses.review', 'kpi.view', 'onb.meetings'],
-    methodist: ['onb.view', 'onb.observe', 'cards.assess', 'onb.meetings'],
-    curator: ['courses.review', 'courses.view'],
-  };
+  const PRESET = ROLE_PRESETS;
   const staff = [
     { id: 'u-super', role: 'super', name: 'HR / L&D boshqaruvchisi', title: 'Super Admin', rights: [], scope: { kind: 'all' }, active: true },
     { id: 'u-hr', role: 'hr', name: 'Madina Xasanova', title: 'HR Admin', rights: PRESET.hr, scope: { kind: 'all' }, active: true },
     { id: 'u-lda', role: 'lda', name: 'Shahzoda Donyorova', title: 'L&D assistent', rights: PRESET.lda, scope: { kind: 'all' }, active: true },
     { id: 'u-br-chil', role: 'branch', name: 'Anvar Qosimov', title: 'Chilonzor filiali rahbari', branchIds: ['b-chil'], rights: PRESET.branch, scope: { kind: 'branches', branchIds: ['b-chil'] }, active: true },
+    { id: 'u-nazorat', role: 'supervisor', name: 'Bahodir Yusupov', title: 'Nazoratchi — Chilonzor va Yunusobod', rights: PRESET.supervisor, scope: { kind: 'branches', branchIds: ['b-chil', 'b-yunus'] }, active: true },
+    { id: 'u-akad', role: 'academic', name: 'Dilnoza Ergasheva', title: 'Akademik bo‘lim — ustozlar', rights: PRESET.academic, scope: { kind: 'positions', positions: ['GE'], branchIds: [] }, active: true },
     { id: 'u-men-gul', role: 'mentor', name: 'Gulbahor Rasulova', title: 'Mentor — Chilonzor ustozlari', employeeId: 'e-gulbahor', rights: PRESET.mentor, scope: { kind: 'assigned' }, active: true },
     { id: 'u-men-sher', role: 'mentor', name: 'Sherzod Ismoilov', title: 'Mentor — Yunusobod ustozlari', employeeId: 'e-sherzod', rights: PRESET.mentor, scope: { kind: 'assigned' }, active: true },
     { id: 'u-met', role: 'methodist', name: 'Shahnoza Mirzayeva', title: 'Metodist — General English', positions: ['GE'], rights: PRESET.methodist, scope: { kind: 'assigned' }, active: true },
@@ -521,10 +516,13 @@ export function createSeed() {
     { id: 'onb-0', employeeId: 'e-lola', startedAt: '2026-06-02', enteredAt: '2026-06-02', source: 'recruiting', status: 'completed', reboarding: false, restored: [],
       taskGrades: { gt1: { grade: 4, note: 'Vaqtni yaxshi taqsimladi.', by: 'Sherzod Ismoilov', at: '2026-06-26' } },
       final: { score: 4.2, label: 'Yaxshi', passed: true, min: 3, ready: true, parts: [], by: 'Yunusobod filiali rahbari', byRole: 'Filial rahbari', at: '2026-07-03' } },
-    { id: 'onb-1', employeeId: 'e-nilufar', startedAt: '2026-10-14', enteredAt: '2026-10-14', source: 'recruiting', status: 'active', reboarding: false, final: null, restored: [] },
-    { id: 'onb-2', employeeId: 'e-jahongir', startedAt: '2026-10-05', enteredAt: '2026-10-06', source: 'recruiting', status: 'active', reboarding: false, final: null, restored: [] },
+    { id: 'onb-1', employeeId: 'e-nilufar', startedAt: '2026-10-14', enteredAt: '2026-10-14', source: 'recruiting', status: 'active', reboarding: false, final: null, restored: [],
+      checks: { d8: { at: '2026-10-21', by: 'Yunusobod filiali rahbari', late: 0 } }, boardLog: [{ at: '2026-10-21', by: 'Yunusobod filiali rahbari', text: 'D8 tekshiruvi: ishlayapti' }] },
+    { id: 'onb-2', employeeId: 'e-jahongir', startedAt: '2026-10-05', enteredAt: '2026-10-06', source: 'recruiting', status: 'active', reboarding: false, final: null, restored: [],
+      checks: { d8: { at: '2026-10-13', by: 'Anvar Qosimov', late: 1 } }, notes: [{ at: '2026-11-08', by: 'Madina Xasanova', text: 'Qayta aloqaga chiqish kerak — guruh hali to‘liq emas' }] },
     { id: 'onb-3', employeeId: 'e-sanjar', startedAt: '2026-10-31', enteredAt: '2026-10-31', source: 'branch', status: 'active', reboarding: false, final: null, restored: [] },
-    { id: 'onb-4', employeeId: 'e-ziyoda', startedAt: '2026-10-22', enteredAt: '2026-10-24', source: 'recruiting', status: 'active', reboarding: false, final: null, restored: [] },
+    { id: 'onb-4', employeeId: 'e-ziyoda', startedAt: '2026-10-22', enteredAt: '2026-10-24', source: 'recruiting', status: 'active', reboarding: false, final: null, restored: [],
+      checks: { d8: { at: '2026-10-29', by: 'Sergeli filiali rahbari', late: 0 } } },
   ];
   // Nilufar (GE, LT-0) — onboarding kompetensiya kartasi birinchi kundan: rekruting xulosasi shartli, kuzatuvlar qo'shilib boradi.
   cards.unshift({
@@ -565,14 +563,61 @@ export function createSeed() {
   const meetings = [
     { id: 'mt-1', kind: 'ceo', title: 'CEO va HRD bilan uchrashuv — Oktabr', date: '2026-10-29', time: '10:00', format: 'offline', link: '', place: 'Bosh ofis, 3-qavat majlislar zali', organizer: 'Madina Xasanova (HR Admin)', invited: ['e-jahongir', 'e-nilufar', 'e-ziyoda'], attended: ['e-jahongir'] },
     { id: 'mt-2', kind: 'ceo', title: 'CEO va HRD bilan uchrashuv — Noyabr', date: '2026-11-26', time: '15:00', format: 'online', link: 'https://meet.google.com/reg-ceo-nov', place: '', organizer: 'Madina Xasanova (HR Admin)', invited: [], attended: [] },
+    { id: 'mt-4', kind: 'share', status: 'proposed', proposerId: 'e-aziza', selfSignup: true, title: 'Bilim almashish: IELTS Speaking — baholash mezonlari', about: 'Band descriptorlarini amaliy misollar bilan ko‘rib chiqamiz', date: '2026-11-20', time: '17:00', format: 'online', link: 'https://meet.google.com/reg-ielts-speak', place: '', organizer: 'Aziza Qodirova', invited: [], attended: [] },
+    { id: 'mt-5', kind: 'share', status: 'approved', proposerId: 'e-sherzod', selfSignup: true, title: 'Bilim almashish: yangi ustoz bilan birinchi hafta', about: 'Mentorlar tajribasi', date: '2026-11-24', time: '16:00', format: 'offline', link: '', place: 'Yunusobod filiali, 1-xona', organizer: 'Sherzod Ismoilov', invited: ['e-kamola', 'e-farrux'], attended: [], review: { by: 'Madina Xasanova', at: '2026-11-06', note: '' } },
     { id: 'mt-3', kind: 'share', title: 'Bilim almashish: Kahoot va Wordwall bilan tezkor tekshiruv', date: '2026-11-18', time: '16:00', format: 'offline', link: '', place: 'Chilonzor filiali, 2-xona', organizer: 'Gulbahor Rasulova', invited: ['e-malika', 'e-dildora', 'e-otabek', 'e-sanjar'], attended: [] },
+  ];
+  // So'rovnomalar RegUP'da yaratiladi va yuboriladi (TZ 11-bo'lim); standart — anonim.
+  const yn = (id, text, standard = null) => ({ id, text, type: 'yesno', standard });
+  const surveys = [
+    { id: 'sv-d8', name: 'D8 — ilk hafta taassurotlari', trigger: 'd8', hrVisible: false, active: true, questions: [
+      yn('q1', 'Ishga chiqishdan oldin manzil, vaqt va birinchi kun tartibi yuborildimi?', 0), yn('q2', 'Rahbariyat kompaniya taqdimotini o‘tkazdimi?', 1), yn('q3', 'Rahbar bilan 1:1 suhbat bo‘ldimi?', 2),
+      yn('q4', 'Birinchi kundan mentor yoki buddy biriktirildimi?', 3), yn('q5', 'Ish qurollari va jihozlar bilan ta’minlandingizmi?', 4), yn('q6', 'Welcome pack berildimi?', 5),
+      { id: 'q7', text: 'Birinchi hafta umumiy taassurotingiz', type: 'scale5', negative: true }, { id: 'q8', text: 'Nimani yaxshilash kerak?', type: 'text' }] },
+    { id: 'sv-d30', name: 'D30 — dastlabki oy taassurotlari', trigger: 'd30', hrVisible: false, active: true, questions: [
+      yn('q1', 'Tanishtiruv videosi jamoa guruhiga yuborildimi?', 6), yn('q2', 'Bir oylik natijalar bo‘yicha rahbar bilan 1:1 feedback suhbati bo‘ldimi?', 7),
+      { id: 'q3', text: 'Registon’ni ish joyi sifatida do‘stlaringizga tavsiya qilasizmi? (eNPS)', type: 'nps', negative: true }, { id: 'q4', text: 'Mentor yordami', type: 'scale5', negative: true }, { id: 'q5', text: 'Izoh', type: 'text' }] },
+    { id: 'sv-d60', name: 'D60 — ikki oy', trigger: 'd60', hrVisible: false, active: true, questions: [
+      { id: 'q1', text: 'Registon’ni ish joyi sifatida tavsiya qilasizmi? (eNPS)', type: 'nps', negative: true }, { id: 'q2', text: 'Vazifalaringiz kutganingizga mosmi?', type: 'scale5', negative: true }, { id: 'q3', text: 'Izoh', type: 'text' }] },
+    { id: 'sv-fail', name: 'Fail Case — 30 kun ichida ketganlar', trigger: 'fail', hrVisible: false, active: true, questions: [
+      { id: 'q1', text: 'Ketishingizga asosiy sabab', type: 'single', options: ['Rahbar bilan murakkab munosabatlar', 'Jarayonlar tushunarli emas edi', 'Juda katta ish hajmi', 'Oylik maosh', 'Ish grafigi', 'Boshqa joydan yaxshiroq taklif', 'Shaxsiy sabablar'] },
+      { id: 'q2', text: 'Nima o‘zgarganda qolgan bo‘lardingiz?', type: 'text' }] },
+    { id: 'sv-exit-self', name: 'O‘z xohishi | exit-intervyu', trigger: 'exit-self', hrVisible: true, active: true, questions: [
+      { id: 'q1', text: 'Ketishingizga asosiy sabab', type: 'single', options: ['O‘sish va rivojlanish sharoitlari', 'Rahbar bilan munosabat', 'Oylik maosh', 'Ish hajmi', 'Boshqa joydan yaxshiroq taklif', 'Shaxsiy sabablar'] },
+      { id: 'q2', text: 'Kelajakda qaytishni o‘ylaysizmi?', type: 'yesno' }, { id: 'q3', text: 'Izoh', type: 'text' }] },
+    { id: 'sv-exit-fired', name: 'Haydalgan | exit-intervyu', trigger: 'exit-fired', hrVisible: true, active: true, questions: [
+      { id: 'q1', text: 'Sizga talablar oldindan aniq aytilganmi?', type: 'yesno' }, { id: 'q2', text: 'Mentor va rahbar yordami', type: 'scale5' }, { id: 'q3', text: 'Izoh', type: 'text' }] },
+    { id: 'sv-manager', name: 'Rahbar so‘rovnomasi — xodim ketishi', trigger: 'manager-exit', hrVisible: true, active: true, questions: [
+      { id: 'q1', text: 'Ketishni oldini olish mumkin edimi?', type: 'yesno' }, { id: 'q2', text: 'Sizningcha asosiy sabab', type: 'single', options: ['Ko‘nikma yetarli emas', 'Mas’uliyatsizlik', 'Moslasha olmadi', 'Maosh', 'Ish grafigi', 'Shaxsiy sabablar'] }, { id: 'q3', text: 'Izoh', type: 'text' }] },
+    { id: 'sv-mentor', name: 'Mentor bilan ishlash (ismli)', trigger: 'manual', hrVisible: true, active: true, questions: [
+      { id: 'q1', text: 'Mentoringiz haftasiga kamida bir marta siz bilan gaplashadimi?', type: 'yesno', negative: true }, { id: 'q2', text: 'Mentor yordami', type: 'scale5', negative: true }, { id: 'q3', text: 'Nima kerak?', type: 'text' }] },
+  ];
+  // Chilonzor: D8 ga 6 ta anonim javob — 2 tasi «Welcome pack berilmadi» (vazifa doskada).
+  const surveyResponses = [1, 2, 3, 4, 5, 6].map((i) => ({ id: `sr-${i}`, surveyId: 'sv-d8', employeeId: null, about: null, branchId: 'b-chil', position: i % 3 ? 'GE' : 'FIN', at: '2026-10-2' + (i % 9),
+    answers: { q1: 'yes', q2: 'yes', q3: i === 4 ? 'no' : 'yes', q4: 'yes', q5: 'yes', q6: i <= 2 ? 'no' : 'yes', q7: String(3 + (i % 3)), q8: '' } }));
+  const surveySends = [
+    { id: 'ss-1', key: 'sv-d8:e-nilufar:', surveyId: 'sv-d8', employeeId: 'e-nilufar', to: 'Nilufar Tursunova', about: null, onboardingId: 'onb-1', at: '2026-10-21', answeredAt: '2026-10-22', link: false },
+    { id: 'ss-2', key: 'sv-mentor:e-malika:', surveyId: 'sv-mentor', employeeId: 'e-malika', to: 'Malika Yusupova', about: null, onboardingId: null, at: '2026-11-09', answeredAt: null, link: false },
+  ];
+  const boardTasks = [
+    { id: 'tk-1', key: 'std:sv-d8:b-chil:q6', title: 'Chilonzor: «Welcome pack berildi» — 2 ta yangi xodim «Yo‘q» dedi (6 ta javob)', source: 'survey', branchId: 'b-chil', employeeId: null, about: null, assignee: 'Anvar Qosimov', standard: 5, status: 'new', createdAt: '2026-10-28' },
+    { id: 'tk-2', key: 'std:sv-d8:b-chil:q3', title: 'Chilonzor: «Rahbar bilan 1:1 suhbat bo‘ldi» — 1 ta yangi xodim «Yo‘q» dedi (6 ta javob)', source: 'survey', branchId: 'b-chil', employeeId: null, about: null, assignee: 'Anvar Qosimov', standard: 2, status: 'done', createdAt: '2026-10-28', doneAt: '2026-10-30', doneBy: 'Anvar Qosimov', note: '1:1 jadvali filial guruhiga yuborildi' },
+  ];
+  // Jobster «Мониторинг Адаптации» doskasidagi jarayondagi xodimlar (demo, ~204 dan namunaviy 6 ta): ishga tushirish kuni import qilinadi.
+  const jobsterBoard = [
+    { name: 'Zarina Abdullayeva', position: 'GE', level: 'LT-0', branchId: 'b-chil', phone: '+998901110101', jobsterId: 'JB-0504', eduId: 'EDU-0504', startedAt: '2026-11-10', column: 'Начальный', columnAt: '2026-11-09', gender: 'F' },
+    { name: 'Bobur Rahmonov', position: 'FIN', level: 'MOL', branchId: 'b-yunus', phone: '+998901110102', jobsterId: 'JB-0464', eduId: 'EDU-0464', startedAt: '2026-11-02', column: 'Department', columnAt: '2026-11-03', gender: 'M', note: 'Bo‘limga taqsimlash kutilmoqda' },
+    { name: 'Shahnoza Qurbonova', position: 'GE', level: 'LT-0', branchId: 'b-serg', phone: '+998901110103', jobsterId: 'JB-0496', eduId: 'EDU-0496', startedAt: '2026-11-05', column: 'Induction', columnAt: '2026-11-05', gender: 'F' },
+    { name: 'Javohir Ergashev', position: 'GE', level: 'LT-0', branchId: 'b-yunus', phone: '+998901110104', jobsterId: 'JB-0448', eduId: 'EDU-0448', startedAt: '2026-10-28', column: 'D8', columnAt: '2026-11-05', gender: 'M' },
+    { name: 'Madina Sobirova', position: 'FIN', level: 'MOL', branchId: 'b-chil', phone: '+998901110105', jobsterId: 'JB-0379', eduId: 'EDU-0379', startedAt: '2026-10-08', column: 'Tekshirish - D30', columnAt: '2026-11-07', gender: 'F', note: 'Qayta aloqaga chiqish kerak' },
+    { name: 'Ulug‘bek Toshpo‘latov', position: 'GE', level: 'LT-0', branchId: 'b-mirz', phone: '+998901110106', jobsterId: 'JB-0341', eduId: 'EDU-0341', startedAt: '2026-10-06', column: 'D30', columnAt: '2026-11-05', gender: 'M' },
   ];
   // Integratsiya navbati: Jobster ATS → Edu → RegUP hodisalari (demo — bir tugma bilan qabul qilinadi).
   const hrInbox = [
     { id: 'ev-1', type: 'hire', at: '2026-11-10', stage: 'Induction', payload: { name: 'Shahlo Nazarova', position: 'GE', level: 'LT-0', branchId: 'b-chil', department: 'Akademik bo‘lim', phone: '+998 90 111 22 33', jobsterId: 'JB-5521', eduId: 'EDU-30412', startedAt: '2026-11-09', source: 'recruiting', recruiting: { via: 'telegram', scores: { 'GEN-01': 2, 'BEH-01': 3, 'BEH-02': 2 }, note: 'sinov darsi va suhbat' } } },
     { id: 'ev-2', type: 'hire', at: '2026-11-10', stage: 'Induction', payload: { name: 'Bobur Xolmatov', position: 'FIN', level: 'MOL', branchId: 'b-serg', department: 'Moliya', phone: '+998 93 444 55 66', jobsterId: 'JB-5534', eduId: 'EDU-30418', startedAt: '2026-11-01', source: 'branch' } },
     { id: 'ev-3', type: 'hire', at: '2026-11-10', stage: 'Induction', payload: { name: 'Dilnoza Rahimova', position: 'ADM', level: 'ADM', branchId: 'b-yunus', department: 'Markaz admini', phone: '+998 71 200 00 01', personalPhone: '+998 97 321 45 67', jobsterId: 'JB-5540', eduId: 'EDU-30420', startedAt: '2026-11-10', source: 'recruiting' } },
-    { id: 'ev-4', type: 'archive', at: '2026-11-10', stage: 'D30 dan oldin chiqarildi', payload: { employeeId: 'e-ziyoda', reason: 'O‘z xohishi bilan ketdi (D8 dan keyin)', exitType: 'self', leftAt: '2026-11-07', eduWaitDays: 30 } },
+    { id: 'ev-4', type: 'archive', at: '2026-11-10', stage: 'D30 dan oldin chiqarildi', payload: { employeeId: 'e-ziyoda', reasonCode: 'schedule', reason: 'Ish grafigi', exitType: 'self', leftAt: '2026-11-07', eduWaitDays: 30, interviewer: 'Madina Xasanova' } },
     { id: 'ev-5', type: 'return', at: '2026-11-10', stage: 'Qayta ishga kirish', payload: { employeeId: 'e-lola', startedAt: '2026-11-10', branchId: 'b-yunus', source: 'recruiting' } },
   ];
 
@@ -611,7 +656,7 @@ export function createSeed() {
   if (malika) malika.colleagues = { kind: 'branches', branchIds: ['b-yunus'] };
 
   return {
-    schema: 18,
+    schema: 19,
     today: TODAY,
     models,
     branches,
@@ -660,6 +705,12 @@ export function createSeed() {
     ],
     dataIssues: { duplicates: 2, lateArchive: 1 }, // DEMO: oktabr tekshiruvida topilgan dublikat va kech arxivlangan akkauntlar
     onboardings,
+    surveys,
+    surveyResponses,
+    surveySends,
+    boardTasks,
+    jobsterBoard,
+    messages: [],
     observations,
     workChecks: [],
     meetings,

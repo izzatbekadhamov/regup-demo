@@ -21,16 +21,16 @@ export default function Team({ user, focus }) {
   const isSuper = u.role === 'super';
   const n = isSuper ? D.ALL_RIGHTS.length : (u.rights || []).length;
   const sc = u.scope || { kind: 'all' };
-  const setScope = (x) => run(D.setStaffScope, { userId: u.id, kind: x.kind, branchIds: x.branchIds || [], departmentIds: x.departmentIds || [], positions: x.positions || [], actor: user.name });
+  const setScope = (x) => run(D.setStaffScope, { userId: u.id, kind: x.kind, branchIds: x.branchIds || [], departmentIds: x.departmentIds || [], positions: x.positions || [], actor: user.name, byId: user.id });
   const positions = [...new Set(s.employees.map((e) => e.position))];
-  const toggle = (right, on) => run(D.setStaffRight, { userId: u.id, right, on, actor: user.name });
+  const toggle = (right, on) => run(D.setStaffRight, { userId: u.id, right, on, actor: user.name, byId: user.id });
   const setGroup = (list, on) => list.forEach(([k]) => { if ((u.rights || []).includes(k) !== on) toggle(k, on); });
   return (
     <>
       <div className="page-head">
         <div>
           <h1>Adminlar</h1>
-          <p>Huquqlar qat’iy rolga emas, shaxsga beriladi. Filialdagi holatga qarab bir vazifani turli lavozimdagi odam bajarishi mumkin. Har bir huquq tanlangan doirada ishlaydi: bir yoki bir nechta filial, bo‘lim yoki barcha filiallardagi bir lavozim (masalan, barcha GE ustozlari). Barcha xodimlar «Umumiy jamoa a’zolari» bo‘limida.</p>
+          <p>Huquqni faqat «Adminlik berish» huquqi bor admin beradi: o‘zida yo‘q huquqni va o‘z doirasidan kengroq doirani bera olmaydi. Huquqlar qat’iy rolga emas, shaxsga beriladi. Filialdagi holatga qarab bir vazifani turli lavozimdagi odam bajarishi mumkin. Har bir huquq tanlangan doirada ishlaydi: bir yoki bir nechta filial, bo‘lim yoki barcha filiallardagi bir lavozim (masalan, barcha GE ustozlari). Barcha xodimlar «Umumiy jamoa a’zolari» bo‘limida.</p>
         </div>
       </div>
       <div className="grid" style={{ gridTemplateColumns: 'minmax(220px, 280px) 1fr', alignItems: 'start' }}>
@@ -58,6 +58,7 @@ export default function Team({ user, focus }) {
               <Pill tone="brand">{n} ta huquq berilgan</Pill>
               {u.changedAt && <span className="small muted">{fmtDate(u.changedAt)} o‘zgartirildi</span>}
               {isSuper && <span className="small muted">Super Admin barcha huquqlarga ega va barcha filiallarni ko‘radi.</span>}
+              {!isSuper && D.ROLE_PRESETS[u.role] && <button className="link-btn small" title={D.ROLE_PRESETS[u.role].map((r) => D.RIGHT_LABEL[r]).join(', ')} onClick={() => D.ALL_RIGHTS.forEach((r) => { const want = D.ROLE_PRESETS[u.role].includes(r); if ((u.rights || []).includes(r) !== want) toggle(r, want); })}>«{D.ROLE_LABEL[u.role]}» shablonini qo‘llash ({D.ROLE_PRESETS[u.role].length} huquq)</button>}
             </div>
             {!isSuper && (
               <div className="stack" style={{ marginTop: 12 }}>

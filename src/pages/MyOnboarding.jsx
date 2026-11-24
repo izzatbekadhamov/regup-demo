@@ -1,9 +1,34 @@
-import { useAppState } from '../state/store.js';
+import { useState } from 'react';
+import { useAppState, run } from '../state/store.js';
 import { Panel, Pill, Empty, fmtDate } from '../ui/common.jsx';
 import * as D from '../core/domain.js';
 import { OnbScore, OnbStages } from './Onboarding.jsx';
 
 const num = (v) => (v === null || v === undefined ? '—' : String(v).replace('.', ','));
+
+/** O'z-o'zini baholash (qaror №60): baholovchiga ko'rinadi, daraja hisobiga va «2 manba» qoidasiga kirmaydi. */
+function SelfAssess({ s, emp }) {
+  const card = D.onboardingCardOf(s, emp.id);
+  const [code, setCode] = useState('');
+  const [lv, setLv] = useState('');
+  const [note, setNote] = useState('');
+  if (!card || card.stage === 'published') return null;
+  const model = D.getModel(s, card.modelVersionId);
+  const max = model.scale?.max || 5;
+  const comps = model.competencies.filter((c) => !c.composite);
+  return (
+    <Panel title="Kompetensiyalar bo‘yicha o‘zimni baholash">
+      <div className="small muted">Baholovchi sizning bahoingizni ko‘radi va suhbatda foydalanadi. U lavozim darajasi hisobiga kirmaydi.</div>
+      <div className="row" style={{ gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+        <select className="i compact" value={code} onChange={(e) => setCode(e.target.value)}><option value="">Kompetensiya…</option>{comps.map((c) => <option key={c.code} value={c.code}>{c.code} {c.name}</option>)}</select>
+        <select className="i compact" value={lv} onChange={(e) => setLv(e.target.value)}><option value="">Daraja</option>{Array.from({ length: max }, (_, i) => i + 1).map((v) => <option key={v} value={v}>{v}</option>)}</select>
+        <input className="i compact" placeholder="Izoh (ixtiyoriy)" value={note} onChange={(e) => setNote(e.target.value)} />
+        <button className="btn sm primary" disabled={!code || !lv} onClick={() => run(D.setSelfScore, { cardId: card.id, employeeId: emp.id, code, level: Number(lv), note }, 'Saqlandi') && setNote('')}>Saqlash</button>
+      </div>
+      {Object.keys(card.selfScores || {}).length > 0 && <div className="small" style={{ marginTop: 6 }}>Mening baholarim: {Object.entries(card.selfScores).map(([k, v]) => `${k} — ${v.level}`).join(', ')}</div>}
+    </Panel>
+  );
+}
 
 function Step({ ok, title, children }) {
   return (
@@ -60,10 +85,11 @@ export default function MyOnboarding({ emp }) {
               <Step ok={mt?.attended.includes(emp.id)} title="CEO va HRD bilan uchrashuv">
                 {mt ? (mt.attended.includes(emp.id) ? `Qatnashdingiz (${fmtDate(mt.date)})` : mt.date >= s.today ? <>«{mt.title}» — {fmtDate(mt.date)}, {mt.time}. {mt.format === 'online' ? <span className="code">{mt.link}</span> : mt.place}</> : 'Uchrashuvda qatnashilmagan — HR keyingisiga taklif qiladi') : 'Bir oy ishlagandan keyin HR taklif yuboradi.'}
               </Step>
-              <Step ok={day >= 60} title="So‘rovnomalar — D8, D30, D60 (anonim)">Telegram bot orqali {fmtDate(D.addDays(ob.startedAt, 7))}, {fmtDate(D.addDays(ob.startedAt, 30))} va {fmtDate(D.addDays(ob.startedAt, 60))} da keladi. Javoblaringiz anonim: ism so‘ralmaydi, natija faqat filial bo‘yicha ko‘rinadi.</Step>
+              <Step ok={day >= 60} title="So‘rovnomalar — D8, D30, D60">Siz D8 va D30 bosqichiga o‘tganingizda va 60-kunda Telegram bot va platformada keladi (<a href="#/surveys">So‘rovnomalarim</a>). Har so‘rovnomada javoblaringiz anonimmi yoki HR’ga ismingiz bilan ko‘rinishi oldindan yoziladi.</Step>
               <Step ok={ob.status === 'completed'} title="Onboarding natijasi">{ob.final ? `${num(ob.final.score)} / 5 — ${ob.final.label}${ob.final.passed ? ', muvaffaqiyatli yakunlandi' : ''}` : `${days} kunlik dastur yakunida ${head ? `filial rahbari (${head.name})` : 'HR'} tasdiqlaydi.`}</Step>
             </div>
           </Panel>
+          <SelfAssess s={s} emp={emp} />
         </div>
         <div className="stack sticky">
           <Panel title="Onboarding natijam — izohlari bilan">

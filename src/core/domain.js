@@ -250,6 +250,9 @@ export function advanceStage(state, { cardId, actor = 'HR/L&D', requestKey }) {
     }
     if (to === 'approval' && model.panelRequired && !card.panel) fail('Panel protokoli kiritilmagan — panel bosqichi majburiy');
     if (to === 'published') {
+      if (cardAssessors(card).includes(actor)) fail(`${actor} bu kartada baholovchi bo‘lgan — darajani boshqa «E’lon va tayinlash» huquqi bor admin e’lon qiladi`);
+      const self = (s.staff || []).find((u) => u.name === actor);
+      if (isSelf(self, card.employeeId)) fail('O‘z darajangizni e’lon qila olmaysiz');
       card.published = { at: s.today, by: actor, revision: card.revision, context: cardContext(s, card).context };
       publishEffects(s, card, model, d);
     }
@@ -1174,7 +1177,8 @@ export function reviewTask(state, { enrollmentId, componentId, decision, level, 
     if (!p || p.status !== 'pending') fail('Topshiriq tekshiruvda emas');
     if (reviewerId && !canReviewTask(s, getStaff(s, reviewerId), enr)) {
       const r = taskReviewer(s, enr);
-      fail(`Bu topshiriqni ${r.kind === 'curator' ? `kurs kuratori (${r.user.name})` : r.kind === 'mentor' ? `xodim mentori (${r.user.name})` : 'HR'} tekshiradi`);
+      if (isSelf(getStaff(s, reviewerId), enr.employeeId)) fail('O‘z topshirig‘ingizni tekshira olmaysiz — uni boshqa baholovchi tekshiradi');
+      fail(`Bu topshiriqni ${REVIEWER_KIND[r.kind]}${r.user ? ` (${r.user.name})` : ''} tekshiradi`);
     }
     if (!String(note || '').trim()) fail('Mentor xulosasi majburiy');
     const cap = Math.max(0, ...course.rules.filter((r) => r.needs.includes(componentId)).map((r) => r.level));
@@ -1768,17 +1772,46 @@ export const EXIT_TYPES = {
   returns: 'Qaytadi (rahbar bilan kelishib vaqtincha to‘xtatdi)',
   duplicate: 'Ikkinchi akkaunt / dublikat',
 };
-/** Haydalish faqat ikki sabab bilan qayd etiladi; boshqa barcha holat — «o'z xohishi bilan». */
-export const FIRE_REASONS = { skills: 'Lavozim uchun ko‘nikma yetarli emas', discipline: 'Ishga mas’uliyatsiz / tartibsiz yondashuv' };
+/** Haydalish uch sabab bilan qayd etiladi (qaror №44); boshqa barcha holat — «o'z xohishi bilan». */
+export const FIRE_REASONS = { skills: 'Lavozim uchun ko‘nikma yetarli emas', discipline: 'Ishga mas’uliyatsiz yondashuv', values: 'Qadriyatlari mos kelmadi' };
+/**
+ * Ketish sabablari katalogi — 20 ta (TZ 12-bo'lim). Yagona katalog EduTizim'da yuritiladi; RegUP ro'yxatni va
+ * sababni arxiv signali bilan oladi. Uchinchi ustun — sabab tanlanganda ketish turi.
+ */
+export const EXIT_REASONS = [
+  ['growth', 'O‘sish va rivojlanish sharoitlari qoniqarli emasligi', 'self'],
+  ['manager', 'Rahbar bilan murakkab munosabatlar', 'self'],
+  ['duties', 'Lavozimdagi funksional vazifalardan qoniqmaslik', 'self'],
+  ['workload', 'Juda katta ish hajmi', 'self'],
+  ['salary', 'Oylik maosh', 'self'],
+  ['offer', 'Boshqa joydan yaxshiroq taklif', 'self'],
+  ['team', 'Jamoaga moslasha olmaslik', 'self'],
+  ['unclear', 'Jarayonlar tushunarli emas edi', 'self'],
+  ['process', 'Kompaniyada ichki jarayonlar yetarli darajada yo‘lga qo‘yilmaganligi', 'self'],
+  ['schedule', 'Ish grafigi', 'self'],
+  ['place', 'Ish joyining noqulayligi', 'self'],
+  ['personal', 'Shaxsiy sabablar (rejalar o‘zgarishi, sog‘liq, ko‘chib ketish, oilaviy vaziyat)', 'self'],
+  ['group', 'Guruh yig‘ib berilmaganligi', 'self'],
+  ['motivation', 'Ishga nisbatan past motivatsiya', 'self'],
+  ['contract', 'Shartnoma bandlari nomzodga mos kelmadi', 'self'],
+  ['fired-skills', 'Ishdan ketkazilgan: lavozim uchun ko‘nikmalar kamligi', 'fired', 'skills'],
+  ['fired-discipline', 'Ishdan ketkazilgan: ishga nisbatan mas’uliyatsizlik', 'fired', 'discipline'],
+  ['fired-values', 'Ishdan ketkazilgan: qadriyatlari mos kelmadi', 'fired', 'values'],
+  ['duplicate', 'Ikkinchi akkaunt', 'duplicate'],
+  ['returns', 'Vaqtinchalik to‘xtatyapti. Qaytadi', 'returns'],
+];
+export const exitReason = (code) => EXIT_REASONS.find((r) => r[0] === code) || null;
 export function exitPlan(s, emp, p) {
-  const type = p.exitType === 'fired' && !FIRE_REASONS[p.fireReason] ? 'self' : (p.exitType || 'self');
+  const cat = exitReason(p.reasonCode);
+  const p2 = cat ? { ...p, exitType: cat[2], fireReason: cat[3] || null } : p;
+  const type = p2.exitType === 'fired' && !FIRE_REASONS[p2.fireReason] ? 'self' : (p2.exitType || 'self');
   const worked = daysBetween(emp.rehiredAt || emp.hiredAt, p.leftAt);
   const sinceLeft = daysBetween(p.leftAt, s.today);
   if (type === 'returns') return { type, survey: null, text: 'Exit-intervyu yuborilmaydi — dam olishi yaxshi o‘tishi tilanadi' };
   if (type === 'duplicate') return { type, survey: null, text: 'Qo‘shimcha akkaunt — so‘rovnoma yuborilmaydi' };
   if (sinceLeft > 30) return { type, survey: null, late: true, text: `Ketganiga ${sinceLeft} kun bo‘lgan — xodimga yozilmaydi; filialdan kechikish sababi so‘raladi` };
-  if (worked < 30) return { type, survey: 'Fail Case 30-day', text: 'Jobster orqali Fail Case so‘rovnomasi avtomatik boradi — mas’ul menejer eslatadi' };
-  return { type, survey: type === 'fired' ? 'Ish haydalgan | D60 exit intervyu' : 'O‘z xohishi | D60 exit intervyu', text: 'L&D menejeri xayrlashadi va mos exit-intervyuni yuboradi' };
+  if (worked < 30) return { type, survey: 'Fail Case 30-day', text: 'Fail Case so‘rovnomasi RegUP havolasi bilan boradi (tizimga kirmasdan to‘ldiriladi); filial rahbariga rahbar so‘rovnomasi' };
+  return { type, survey: type === 'fired' ? 'Ish haydalgan | D60 exit intervyu' : 'O‘z xohishi | D60 exit intervyu', text: 'L&D menejeriga topshiriqlar doskasida vazifa: xayrlashish va mos exit-intervyuni yuborish; filial rahbariga rahbar so‘rovnomasi' };
 }
 
 function hrResult(s, ev, tone, text, employeeId = null) {
@@ -1816,8 +1849,10 @@ function applyHrEvent(s, ev, actor) {
   if (ev.type === 'archive') {
     if (emp.status === 'archived') return hrResult(s, ev, 'muted', 'Allaqachon arxivda.', emp.id);
     const plan = exitPlan(s, emp, p);
-    Object.assign(emp, { status: 'archived', archivedAt: s.today, leftAt: p.leftAt, archiveReason: p.reason, eduArchiveAt: addDays(p.leftAt, p.eduWaitDays),
-      exit: { type: plan.type, fireReason: plan.type === 'fired' ? p.fireReason : null, survey: plan.survey, text: plan.text } });
+    const cat = exitReason(p.reasonCode);
+    Object.assign(emp, { status: 'archived', archivedAt: s.today, leftAt: p.leftAt, archiveReason: cat ? cat[1] : p.reason, eduArchiveAt: addDays(p.leftAt, p.eduWaitDays),
+      exit: { type: plan.type, reasonCode: p.reasonCode || null, fireReason: plan.type === 'fired' ? (cat?.[3] || p.fireReason) : null, survey: plan.survey, text: plan.text, interviewer: p.interviewer || null } });
+    exitFollowUps(s, emp, plan);
     if (plan.late) { const head = branchHead(s, emp.branchId); if (head) onbNotify(s, `latearch:${emp.id}`, head.name, `${emp.name} ${fmtIso(p.leftAt)} da ketgan, arxivga ${daysBetween(p.leftAt, s.today)} kun kechikib yuborildi. Kechikish sababini yozing va keyingi safar ketgan kuni yuboring.`); }
     for (const ob of s.onboardings.filter((o) => o.employeeId === emp.id && o.status === 'active')) ob.status = 'archived';
     for (const e of s.enrollments.filter((x) => x.employeeId === emp.id && x.status === 'in_progress')) e.status = 'archived';
@@ -1853,6 +1888,7 @@ export function approveOnboarding(state, { id, userId = 'u-super' }) {
     const user = getStaff(s, userId);
     const head = branchHead(s, emp.branchId);
     if (!user || !can(user, 'onb.approve') || !inScope(s, user, emp)) fail('Yakuniy bahoni tasdiqlash huquqi va xodim doirasi kerak (odatda filial rahbari)');
+    if (isSelf(user, emp.id)) fail('O‘z onboarding natijangizni tasdiqlay olmaysiz — uni shu huquqi bor boshqa admin yoki L&D tasdiqlaydi');
     const r = onboardingScore(s, ob);
     if (!r.passed && !ob.extension && (r.ready || onbDay(s, ob) >= obDays(s, ob))) fail(`Minimumdan o‘tmagan qism bor (${r.parts.filter((p) => !p.ok).map((p) => p.label).join(', ') || 'dastur to‘liq bajarilmagan'}): avval mentor rejasi bilan ${ONB_EXTEND_DAYS} kungacha uzaytiring, past qismlar qayta baholanadi`);
     if (!r.ready && !ob.extension && onbDay(s, ob) < obDays(s, ob)) fail(`Hali erta: ${onbDay(s, ob)}-kun, kurslar ${r.coursesDone}/${r.courses}${r.card.tasks.length ? `, topshiriqlar ${r.tasksDone}/${r.card.tasks.length}` : ''}${r.need ? `, kuzatuv ${r.checks}/${r.need}` : ''}`);
@@ -1943,6 +1979,7 @@ export function reassessOnbPart(state, { id, part, grade, note = '', userId }) {
     const emp = getEmployee(s, ob.employeeId);
     const user = getStaff(s, userId);
     if (!user || !canAny(user, ['onb.assign', 'onb.approve', 'onb.observe']) || !inScope(s, user, emp)) fail('Qayta baholashni mentor, kuzatuvchi yoki filial rahbari qiladi (huquq va xodim doirasi kerak)');
+    if (isSelf(user, emp.id)) fail('O‘zingizni baholay olmaysiz — boshqa baholovchi kerak');
     const g = Number(grade);
     if (!(Number.isInteger(g) && g >= 1 && g <= 5)) fail('Baho 1–5');
     if (!String(note || '').trim()) fail('Qayta baholash izohi majburiy');
@@ -1960,6 +1997,7 @@ export function gradeOnbTask(state, { onboardingId, taskId, grade, note = '', us
     const emp = getEmployee(s, ob.employeeId);
     const user = getStaff(s, userId);
     if (!user || !canAny(user, ['onb.assign', 'onb.approve']) || !inScope(s, user, emp)) fail('Topshiriqni mentor yoki mas’ul shaxs baholaydi (huquq va xodim doirasi kerak)');
+    if (isSelf(user, emp.id)) fail('O‘zingizni baholay olmaysiz — boshqa baholovchi kerak');
     const task = onbCard(onbProgram(s, emp)).tasks.find((t) => t.id === taskId);
     if (!task) fail('Topshiriq topilmadi');
     const g = Number(grade);
@@ -1977,6 +2015,7 @@ export function addWorkCheck(state, { employeeId, ratings, note = '', userId, da
     if (!emp || emp.status === 'archived') fail('Xodim topilmadi');
     const user = getStaff(s, userId);
     if (!user || !canAny(user, ['onb.observe', 'onb.approve']) || !inScope(s, user, emp)) fail('Ish kuzatuvini filial rahbari yoki kuzatuv huquqi bor shaxs kiritadi');
+    if (isSelf(user, emp.id)) fail('O‘zingizni baholay olmaysiz — boshqa baholovchi kerak');
     const card = onbCard(onbProgram(s, emp));
     const r = Object.fromEntries(card.indicators.map((k) => [k, ratings?.[k]]).filter(([, v]) => v !== '' && v !== null && v !== undefined).map(([k, v]) => [k, Number(v)]));
     if (Object.keys(r).length < card.indicators.length) fail('Barcha ko‘rsatkichlarni 1–5 baholang');
@@ -1996,6 +2035,7 @@ export function addOnbObservation(state, { employeeId, methodist, date, lesson, 
     if (!emp || emp.status === 'archived') fail('Xodim topilmadi');
     const user = userId ? getStaff(s, userId) : null;
     if (user && !(can(user, 'onb.observe') && inScope(s, user, emp))) fail('Kuzatuvni «Dars kuzatuvi» huquqi bor xodim (metodist) kiritadi');
+    if (isSelf(user, emp.id)) fail('O‘zingizni baholay olmaysiz — boshqa baholovchi kerak');
     const r = Object.fromEntries(Object.entries(ratings || {}).filter(([, v]) => v !== '' && v !== null && v !== undefined).map(([k, v]) => [k, Number(v)]));
     if (Object.keys(r).length < 3) fail('Checklistdan kamida 3 bandni baholang');
     if (Object.values(r).some((v) => !(Number.isInteger(v) && v >= 1 && v <= 5))) fail('Ball 1–5');
@@ -2054,7 +2094,13 @@ export const RIGHTS = [
     ['onb.assign', 'Mentor, buddy va kurs biriktirish', 'Doirasidagi xodimlarga mentor, buddy va qo‘shimcha kurs biriktiradi'],
     ['onb.observe', 'Ish amaliyotini kuzatish', 'Ustozda dars kuzatuvi (checklist), menejerda ish ko‘rsatkichlari, 1–5'],
     ['onb.integration', 'Integratsiya navbati', 'Jobster va EduTizim hodisalarini qabul qiladi'],
+    ['onb.board', 'Onboarding doskasini yuritish', 'Kartani ustunlar orasida qo‘lda ko‘chiradi, izoh qo‘shadi, «Ketdi» deb belgilaydi'],
+    ['onb.checkin', 'D8/D30 tekshiruvini tasdiqlash', '«Tekshirish» ustunlarida xodim «Ishlayapti» yoki «Ketdi» deb tasdiqlaydi'],
+    ['onb.surveys', 'So‘rovnomalarni boshqarish', 'So‘rovnoma yaratadi, bosqichga bog‘laydi, natijalarni ko‘radi (ismli so‘rovnomada — ism bilan)'],
+    ['onb.tasks', 'Topshiriqlar doskasi', 'SOP standartlari va offboarding vazifalarini ko‘radi va «Bajarildi» deb belgilaydi'],
+    ['onb.risk', 'Xavf guruhini ko‘rish', 'Doiradagi xavf guruhi ro‘yxati va har xodimning sababi'],
     ['onb.meetings', 'Uchrashuvlarni boshqarish', 'CEO/HRD uchrashuvi: taklif, havola, qatnashuv'],
+    ['onb.meetApprove', 'Uchrashuvlarni tasdiqlash', 'Xodimlar taklif qilgan uchrashuvni tasdiqlaydi yoki rad etadi'],
     ['onb.reminders', 'Eslatmalar', 'Kurs va so‘rovnoma eslatmalarini yuboradi'],
   ]],
   ['Baholash', [
@@ -2062,7 +2108,7 @@ export const RIGHTS = [
     ['cards.assess', 'Kartada baholash', 'Mezon bo‘yicha kompetensiya darajasini qo‘yadi'],
     ['cards.publish', 'E’lon va tayinlash', 'Panel, natijani e’lon qilish, rasmiy tayinlash, stretch va qo‘shimcha dalillar'],
     ['talent.view', 'IDP, nomzod va vorislik', 'Rivojlanish rejalari, ko‘nikmalar, nomzod tanlash, kadrlar zaxirasi'],
-    ['models.manage', 'Lavozim modellari', 'Kompetensiya modellarini yaratish va o‘zgartirish'],
+    ['models.manage', 'Kompetensiya modellarini boshqarish', 'Model konstruktori: kompetensiyalar, indikatorlar, maqsadli darajalar, o‘tish shartlari'],
   ]],
   ['Kurslar', [
     ['courses.view', 'Kurslarni ko‘rish', 'Kurslar ro‘yxati va mazmuni'],
@@ -2074,7 +2120,8 @@ export const RIGHTS = [
     ['kpi.view', 'KPI ko‘rsatkichlari', 'Ustozlar KPI va yangi filial KPI'],
     ['people.view', 'Umumiy jamoa a’zolari', 'Doirasidagi barcha xodimlar, profil va foydalanuvchi tarixi'],
     ['org.manage', 'Tashkiliy tuzilma', 'Bo‘limlarni yuritadi, xodimni bo‘limga va jamoadoshlar doirasini belgilaydi'],
-    ['team.manage', 'Adminlar va huquqlar', 'Adminlarga huquq va doira beradi'],
+    ['team.manage', 'Adminlik berish', 'Adminlarga huquq va doira beradi — faqat o‘zidagi huquqlarni, o‘z doirasi ichida'],
+    ['people.message', 'Xabar yuborish', 'Doiradagi xodimlarga filtr bilan qo‘lda xabar: platforma va Telegram'],
     ['gami.manage', 'Gamifikatsiyani boshqarish', 'Ball qoidalari va badge’lar katalogi: nom, belgi, berilish sharti'],
   ]],
   ['Tizim', [
@@ -2085,7 +2132,18 @@ export const RIGHTS = [
 export const ALL_RIGHTS = RIGHTS.flatMap(([, list]) => list.map(([k]) => k));
 export const RIGHT_LABEL = Object.fromEntries(RIGHTS.flatMap(([, list]) => list.map(([k, l]) => [k, l])));
 /** Lavozim shabloni — faqat yorliq va boshlang'ich huquqlar to'plami; amalda shaxsga berilgan huquqlar ishlaydi. */
-export const ROLE_LABEL = { super: 'Super Admin', hr: 'HR Admin', lda: 'L&D assistent', branch: 'Filial rahbari', mentor: 'Mentor', methodist: 'Metodist', curator: 'Kurator' };
+export const ROLE_LABEL = { super: 'Super Admin', hr: 'HR Admin', lda: 'L&D assistent', branch: 'Filial rahbari', supervisor: 'Nazoratchi', academic: 'Akademik bo‘lim', mentor: 'Mentor', methodist: 'Metodist', curator: 'Kurator' };
+/** Lavozim shablonlarining boshlang'ich huquqlari (TZ 3-bo'lim). Keyin har bir huquq alohida yoqiladi yoki o'chiriladi. */
+export const ROLE_PRESETS = {
+  hr: ['onb.view', 'onb.approve', 'onb.assign', 'onb.observe', 'onb.integration', 'onb.board', 'onb.surveys', 'onb.tasks', 'onb.risk', 'onb.meetings', 'onb.meetApprove', 'onb.reminders', 'cards.assign', 'cards.assess', 'talent.view', 'courses.view', 'courses.manage', 'courses.review', 'courses.comments', 'kpi.view', 'audit.view', 'people.view', 'people.message', 'org.manage', 'team.manage'],
+  lda: ['onb.view', 'onb.assign', 'onb.integration', 'onb.board', 'onb.surveys', 'onb.tasks', 'onb.risk', 'onb.meetings', 'onb.reminders', 'cards.assign', 'cards.publish', 'courses.view', 'courses.comments', 'people.view', 'people.message', 'gami.manage', 'team.manage'],
+  branch: ['onb.view', 'onb.approve', 'onb.assign', 'onb.observe', 'onb.checkin', 'onb.tasks', 'onb.meetings', 'onb.reminders', 'cards.assign', 'cards.publish', 'kpi.view', 'courses.view', 'people.view'],
+  supervisor: ['onb.view', 'onb.assign', 'onb.tasks', 'cards.assess', 'courses.view', 'people.view'],
+  academic: ['onb.view', 'cards.assess', 'models.manage', 'people.view', 'people.message', 'courses.view'],
+  mentor: ['onb.view', 'onb.assign', 'cards.assign', 'courses.review', 'kpi.view', 'onb.meetings'],
+  methodist: ['onb.view', 'onb.observe', 'cards.assess', 'onb.meetings'],
+  curator: ['courses.review', 'courses.view'],
+};
 export const SCOPE_LABEL = { all: 'Barcha filiallar', branches: 'Tanlangan filiallar', departments: 'Tanlangan bo‘limlar', positions: 'Tanlangan lavozimlar', assigned: 'Faqat o‘ziga biriktirilganlar' };
 export const can = (user, right) => !!user && user.active !== false && (user.role === 'super' || (user.rights || []).includes(right));
 export const canAny = (user, rights) => rights.some((r) => can(user, r));
@@ -2134,12 +2192,29 @@ export function assignMentorBuddy(state, { employeeId, mentorId, buddyId, userId
   });
 }
 
-export function setStaffRight(state, { userId, right, on, actor = 'Super Admin' }) {
+/** Huquq beruvchi: «Adminlik berish» huquqi bor, o'zida yo'q huquqni bera olmaydi (TZ 3-bo'lim, qaror №57). */
+function checkGranter(s, byId, right) {
+  if (!byId) return null;
+  const by = getStaff(s, byId);
+  if (!by || !can(by, 'team.manage')) fail('Huquq berish uchun «Adminlik berish» huquqi kerak');
+  if (right && !can(by, right)) fail(`O‘zingizda yo‘q huquqni bera olmaysiz: «${RIGHT_LABEL[right]}»`);
+  return by;
+}
+/** Doira tor-kengligi: berilayotgan doira beruvchining doirasidan keng bo'lmasin. */
+function scopeWithin(s, by, scope) {
+  const mine = scopeEmployees(s, by);
+  if (mine === null) return true;
+  const theirs = scopeEmployees(s, { scope, role: 'x' });
+  return theirs !== null && [...theirs].every((id) => mine.has(id));
+}
+export function setStaffRight(state, { userId, right, on, actor = 'Super Admin', byId }) {
   return mutate(state, (s) => {
     const u = getStaff(s, userId);
     if (!u) fail('Admin topilmadi');
     if (u.role === 'super') fail('Super Admin barcha huquqlarga ega');
     if (!ALL_RIGHTS.includes(right)) fail('Noma’lum huquq');
+    const by = checkGranter(s, byId, right);
+    if (by && by.id === u.id) fail('O‘zingizga huquq bera olmaysiz');
     const set = new Set(u.rights || []);
     if (on) set.add(right); else set.delete(right);
     u.rights = ALL_RIGHTS.filter((r) => set.has(r));
@@ -2147,11 +2222,13 @@ export function setStaffRight(state, { userId, right, on, actor = 'Super Admin' 
     log(s, actor, on ? 'Huquq berildi' : 'Huquq olib tashlandi', `${u.name} · ${RIGHT_LABEL[right]}`);
   });
 }
-export function setStaffScope(state, { userId, kind, branchIds = [], departmentIds = [], positions = [], actor = 'Super Admin' }) {
+export function setStaffScope(state, { userId, kind, branchIds = [], departmentIds = [], positions = [], actor = 'Super Admin', byId }) {
   return mutate(state, (s) => {
     const u = getStaff(s, userId);
     if (!u) fail('Admin topilmadi');
     if (!SCOPE_LABEL[kind]) fail('Noma’lum doira');
+    const by = checkGranter(s, byId);
+    if (by && kind !== 'assigned' && !scopeWithin(s, by, { kind, branchIds, departmentIds, positions })) fail('O‘z doirangizdan kengroq doira bera olmaysiz');
     if (kind === 'branches' && !branchIds.length) fail('Kamida bitta filialni tanlang');
     if (kind === 'departments' && !departmentIds.length) fail('Kamida bitta bo‘limni tanlang');
     if (kind === 'positions' && !positions.length) fail('Kamida bitta lavozimni tanlang');
@@ -2178,18 +2255,30 @@ export function setStaffActive(state, { userId, active, actor = 'Super Admin' })
   });
 }
 
-/** Bitta topshiriqni bitta mas'ul tekshiradi: kursda kurator bo'lsa — kurator, aks holda xodim mentori (K4). */
+/** Admin o'z yozuvi bo'yicha baholovchi bo'la olmaydi (TZ 3-bo'lim, qaror №59). */
+export const isSelf = (user, employeeId) => !!user && !!employeeId && user.employeeId === employeeId;
+/**
+ * Topshiriqni bitta mas'ul tekshiradi. Zaxira tartib: kurs kuratori (topshiriq egasining o'zi bo'lmasa) → mentor →
+ * doiradagi boshqa «Kurs kuratori» → L&D. Hech kim o'z topshirig'ini tekshirmaydi.
+ */
 export function taskReviewer(s, enr) {
   const course = getCourse(s, enr.courseId);
-  if (course.curatorId) return { kind: 'curator', user: getStaff(s, course.curatorId) };
   const emp = getEmployee(s, enr.employeeId);
+  const ok = (u) => u && u.active !== false && !isSelf(u, emp.id);
+  const cur = course.curatorId ? getStaff(s, course.curatorId) : null;
+  if (ok(cur)) return { kind: 'curator', user: cur };
   const mentor = emp.supervisorId ? s.staff.find((u) => u.role === 'mentor' && u.employeeId === emp.supervisorId) : null;
-  return mentor ? { kind: 'mentor', user: mentor } : { kind: 'hr', user: null };
+  if (ok(mentor)) return { kind: 'mentor', user: mentor };
+  const other = s.staff.find((u) => u.role !== 'super' && ok(u) && u.id !== cur?.id && can(u, 'courses.review') && inScope(s, u, emp));
+  if (other) return { kind: 'curator2', user: other };
+  const ld = s.staff.find((u) => u.role === 'lda' && ok(u)) || s.staff.find((u) => u.role === 'hr' && ok(u));
+  return { kind: 'ld', user: ld || null };
 }
+export const REVIEWER_KIND = { curator: 'kurs kuratori', mentor: 'xodim mentori', curator2: 'boshqa kurator (zaxira)', ld: 'L&D (zaxira)' };
 export function canReviewTask(s, user, enr) {
-  if (!user) return false;
+  if (!user || isSelf(user, enr.employeeId)) return false;
   if (can(user, 'courses.manage')) return true;
-  return can(user, 'courses.review') && taskReviewer(s, enr).user?.id === user.id;
+  return taskReviewer(s, enr).user?.id === user.id;
 }
 
 // ---------- Uchrashuvlar (CEO/HRD va bilim almashish) ----------
@@ -2513,4 +2602,437 @@ export const DEPT_BY_POSITION = { GE: 'd-acad', FIN: 'd-fin', FR: 'd-mgmt', ADM:
 export function deptFor(s, position, name) {
   const byName = name && (s.departments || []).find((d) => d.name.toLowerCase().startsWith(String(name).toLowerCase().split(' ')[0]));
   return byName?.id || DEPT_BY_POSITION[position] || null;
+}
+
+// ---------------------------------------------------------------------------
+// Onboarding doskasi (TZ 5-bo'lim): Jobster'dagi «Мониторинг Адаптации» o'rnini bosadi.
+// Karta ish boshlash sanasidan kunlar bo'yicha avtomatik o'tadi; «Tekshirish» ustunida filial rahbari
+// tasdiqlamaguncha keyingi ustunga o'tmaydi; «Onboarding doskasini yuritish» huquqi bor admin qo'lda ko'chiradi.
+// ---------------------------------------------------------------------------
+export const ONB_BOARD = [
+  ['start', 'Начальный (qabul kuni)', 'Preboarding: akkaunt, dastur, mentor va buddy'],
+  ['induction', 'Induction', 'Ishga chiqqan kundan 7-kungacha: orientatsiya'],
+  ['check8', 'Tekshirish — D8', 'Filial rahbari «Ishlayapti» yoki «Ketdi» deb tasdiqlaydi'],
+  ['d8', 'D8', 'D8 so‘rovnomasi yuboriladi'],
+  ['check30', 'Tekshirish — D30', 'Filial rahbari tasdiqlaydi'],
+  ['d30', 'D30', 'D30 so‘rovnomasi; KPI kela boshlaydi'],
+  ['hrd', 'HRD bilan suhbat', 'CEO/HRD uchrashuvi; 60-kungacha turadi'],
+];
+export const BOARD_LABEL = Object.fromEntries(ONB_BOARD.map(([k, l]) => [k, l]));
+const boardIdx = (k) => ONB_BOARD.findIndex(([x]) => x === k);
+export const CHECK_DUE = { d8: 7, d30: 30 };
+export const CHECK_LATE_DAYS = 2;
+/** Kunlar va tasdiqlar bo'yicha avtomatik ustun. */
+export function boardAuto(s, ob) {
+  const day = onbDay(s, ob);
+  const c = ob.checks || {};
+  if (day <= 0) return 'start';
+  if (day < CHECK_DUE.d8) return 'induction';
+  if (!c.d8) return 'check8';
+  if (day < CHECK_DUE.d30) return 'd8';
+  if (!c.d30) return 'check30';
+  const ceo = ceoMeetingOf(s, ob.employeeId);
+  return ceo ? 'hrd' : 'd30';
+}
+/** Qo'lda ko'chirish avtomatik ustun o'zgarmaguncha amal qiladi. */
+export function boardColumn(s, ob) {
+  const auto = boardAuto(s, ob);
+  const mv = ob.boardMove;
+  return mv && mv.autoAt === auto ? mv.column : auto;
+}
+/** «Tekshirish» ustunida necha kun turibdi (kechikish: 2 kundan ortiq). */
+export function checkLate(s, ob) {
+  const col = boardColumn(s, ob);
+  if (col !== 'check8' && col !== 'check30') return 0;
+  const due = col === 'check8' ? CHECK_DUE.d8 : CHECK_DUE.d30;
+  return Math.max(0, onbDay(s, ob) - due);
+}
+export const boardItems = (s, user) => (s.onboardings || []).filter((o) => o.status === 'active' && (!user || inScope(s, user, getEmployee(s, o.employeeId))));
+function boardLog(s, ob, by, text) {
+  ob.boardLog = [...(ob.boardLog || []), { at: s.today, by, text }];
+}
+export function moveBoardCard(state, { id, column, note = '', userId }) {
+  return mutate(state, (s) => {
+    const ob = getOnboarding(s, id);
+    if (!ob || ob.status !== 'active') fail('Faol moslashuv topilmadi');
+    const emp = getEmployee(s, ob.employeeId);
+    const user = getStaff(s, userId);
+    if (!can(user, 'onb.board') || !inScope(s, user, emp)) fail('Kartani ko‘chirish uchun «Onboarding doskasini yuritish» huquqi va xodim doirasi kerak');
+    if (boardIdx(column) < 0) fail('Noma’lum ustun');
+    const from = boardColumn(s, ob);
+    if (from === column) fail('Karta allaqachon shu ustunda');
+    ob.boardMove = { column, autoAt: boardAuto(s, ob), at: s.today, by: user.name };
+    boardLog(s, ob, user.name, `${BOARD_LABEL[from]} → ${BOARD_LABEL[column]} (qo‘lda)${note ? `: ${note}` : ''}`);
+    log(s, user.name, 'Onboarding doskasi: karta ko‘chirildi', `${emp.id} · ${ob.id}`, { before: from, after: column, reason: note || undefined });
+  });
+}
+export function addBoardNote(state, { id, text, userId }) {
+  return mutate(state, (s) => {
+    const ob = getOnboarding(s, id);
+    const emp = ob && getEmployee(s, ob.employeeId);
+    const user = getStaff(s, userId);
+    if (!ob || !can(user, 'onb.board') || !inScope(s, user, emp)) fail('Izoh uchun «Onboarding doskasini yuritish» huquqi va xodim doirasi kerak');
+    if (!String(text || '').trim()) fail('Izoh matnini yozing');
+    ob.notes = [...(ob.notes || []), { at: s.today, by: user.name, text: text.trim() }];
+    log(s, user.name, 'Onboarding doskasi: izoh', `${emp.id} · ${ob.id}`, { after: text.trim() });
+  });
+}
+/** D8/D30 tekshiruvi: «Ishlayapti» — karta keyingi ustunga o'tadi; «Ketdi» — ketish kutilmoqda + HR'ga EduTizim'da arxivlash vazifasi. */
+export function confirmCheck(state, { id, which, result, note = '', userId }) {
+  return mutate(state, (s) => {
+    const ob = getOnboarding(s, id);
+    if (!ob || ob.status !== 'active') fail('Faol moslashuv topilmadi');
+    const emp = getEmployee(s, ob.employeeId);
+    const user = getStaff(s, userId);
+    if (!can(user, result === 'left' ? 'onb.checkin' : 'onb.checkin') || !inScope(s, user, emp)) fail('Tekshiruvni «D8/D30 tekshiruvini tasdiqlash» huquqi bor admin (odatda filial rahbari) tasdiqlaydi');
+    if (isSelf(user, emp.id)) fail('O‘zingiz bo‘yicha tekshiruvni tasdiqlay olmaysiz');
+    if (!CHECK_DUE[which]) fail('Tekshiruv turi noto‘g‘ri');
+    if (onbDay(s, ob) < CHECK_DUE[which]) fail(`${which.toUpperCase()} tekshiruvi ${CHECK_DUE[which]}-kundan boshlanadi`);
+    if ((ob.checks || {})[which]) fail('Bu tekshiruv allaqachon tasdiqlangan');
+    if (which === 'd30' && !(ob.checks || {}).d8) fail('Avval D8 tekshiruvi tasdiqlanadi');
+    const late = Math.max(0, onbDay(s, ob) - CHECK_DUE[which]);
+    if (result === 'working') {
+      ob.checks = { ...(ob.checks || {}), [which]: { at: s.today, by: user.name, late } };
+      boardLog(s, ob, user.name, `${which.toUpperCase()} tekshiruvi: ishlayapti${late > CHECK_LATE_DAYS ? ` (${late} kun kechikib)` : ''}`);
+      log(s, user.name, `${which.toUpperCase()} tekshiruvi tasdiqlandi`, `${emp.id} · ${ob.id}`, { after: 'ishlayapti' });
+      return;
+    }
+    if (result !== 'left') fail('Natija: «Ishlayapti» yoki «Ketdi»');
+    markLeaving(s, ob, emp, user.name, note || `${which.toUpperCase()} tekshiruvida`);
+  });
+}
+function markLeaving(s, ob, emp, by, note) {
+  if (ob.leaving) fail('Xodim allaqachon «ketish kutilmoqda» holatida');
+  ob.leaving = { at: s.today, by, note };
+  boardLog(s, ob, by, `Ketdi deb belgilandi — ${note}`);
+  const hr = s.staff.find((u) => u.role === 'hr');
+  addBoardTask(s, { key: `archive:${emp.id}`, title: `${emp.name}: EduTizim'da arxivlang (ketish turi va sababi bilan)`, source: 'offboarding', branchId: emp.branchId, employeeId: null, about: emp.id, assignee: hr?.name || 'HR' });
+  log(s, by, 'Xodim «Ketdi» deb belgilandi', `${emp.id} · ${ob.id}`, { reason: note });
+}
+export function markLeft(state, { id, note = '', userId }) {
+  return mutate(state, (s) => {
+    const ob = getOnboarding(s, id);
+    if (!ob || ob.status !== 'active') fail('Faol moslashuv topilmadi');
+    const emp = getEmployee(s, ob.employeeId);
+    const user = getStaff(s, userId);
+    if (!canAny(user, ['onb.board', 'onb.checkin']) || !inScope(s, user, emp)) fail('«Ketdi» belgisi uchun doska yoki tekshiruv huquqi va xodim doirasi kerak');
+    markLeaving(s, ob, emp, user.name, note || 'doskada belgilandi');
+  });
+}
+/** D8/D30 tekshiruvlarini o'z vaqtida (2 kun ichida) tasdiqlash ulushi. */
+export function checkTimeliness(s, scope = null) {
+  const list = (s.onboardings || []).filter((o) => !scope || scope.has(getEmployee(s, o.employeeId)?.branchId)).flatMap((o) => Object.values(o.checks || {}));
+  if (!list.length) return { n: 0, pct: null };
+  return { n: list.length, pct: (100 * list.filter((c) => (c.late || 0) <= CHECK_LATE_DAYS).length) / list.length };
+}
+
+/** Jobster'dan o'tish: jarayondagi xodimlar ustuni, sanalari va izohlari bilan import qilinadi; «Department» → «Начальный». */
+export const JOBSTER_COLUMN = { 'Начальный': 'start', Department: 'start', Induction: 'induction', 'Tekshirish - D8': 'check8', D8: 'd8', 'Tekshirish - D30': 'check30', D30: 'd30', 'HRD bilan suhbat': 'hrd' };
+export function importJobsterBoard(state, { userId }) {
+  return mutate(state, (s) => {
+    const user = getStaff(s, userId);
+    if (!can(user, 'onb.integration')) fail('Import uchun «Integratsiya navbati» huquqi kerak');
+    const rows = (s.jobsterBoard || []).filter((r) => !r.imported);
+    if (!rows.length) fail('Jobster doskasidan import qilinadigan yozuv qolmagan');
+    for (const r of rows) {
+      const id = nextId(s, 'e');
+      const emp = { id, name: r.name, position: r.position, currentLevel: r.level, branchId: r.branchId, phone: r.phone, jobsterId: r.jobsterId, eduId: r.eduId, source: r.source || 'recruiting',
+        hiredAt: r.startedAt, levelSince: r.startedAt, kpi10m: null, status: 'active', supervisorId: null, history: [{ level: r.level, from: r.startedAt, doc: `Jobster ATS · ${r.jobsterId}` }], records: {} };
+      emp.departmentId = deptFor(s, r.position, r.department);
+      emp.profile = { gender: r.gender || null, city: getBranch(s, r.branchId)?.region || '', telegram: r.telegram || '', birthday: null, email: '', about: '' };
+      s.employees.push(emp);
+      const ob = startOnboarding(s, emp, { startedAt: r.startedAt, enteredAt: r.startedAt, source: emp.source, actor: 'Jobster import' });
+      const column = JOBSTER_COLUMN[r.column] || 'start';
+      const ci = boardIdx(column);
+      ob.checks = {};
+      if (ci > boardIdx('check8')) ob.checks.d8 = { at: r.columnAt || s.today, by: 'Jobster (import)', late: 0 };
+      if (ci > boardIdx('check30')) ob.checks.d30 = { at: r.columnAt || s.today, by: 'Jobster (import)', late: 0 };
+      if (boardAuto(s, ob) !== column) ob.boardMove = { column, autoAt: boardAuto(s, ob), at: s.today, by: 'Jobster (import)' };
+      ob.imported = { from: 'jobster', column: r.column, columnAt: r.columnAt || null };
+      ob.notes = r.note ? [{ at: r.columnAt || s.today, by: 'Jobster', text: r.note }] : [];
+      ob.boardLog = [{ at: r.columnAt || s.today, by: 'Jobster (import)', text: `Jobster ustuni «${r.column}» → ${BOARD_LABEL[column]}` }];
+      r.imported = id;
+    }
+    log(s, user.name, 'Jobster doskasidan import', 'onboarding', { count: rows.length });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Topshiriqlar doskasi (TZ 11-bo'lim): «Yangi» va «Bajarildi».
+// ---------------------------------------------------------------------------
+function addBoardTask(s, { key, title, source, branchId, employeeId = null, about = null, assignee, standard = null }) {
+  s.boardTasks ||= [];
+  if (key && s.boardTasks.some((t) => t.key === key && t.status !== 'done')) return null;
+  const t = { id: nextId(s, 'tk'), key, title, source, branchId, employeeId, about, assignee, standard, status: 'new', createdAt: s.today };
+  s.boardTasks.unshift(t);
+  if (assignee) onbNotify(s, `task:${t.id}`, assignee, `Topshiriqlar doskasida yangi vazifa: ${title}`);
+  return t;
+}
+export const TASK_SOURCE = { survey: 'So‘rovnoma (SOP standarti)', offboarding: 'Offboarding' };
+export const canSeeTask = (s, user, t) => {
+  if (!can(user, 'onb.tasks')) return false;
+  const br = scopeBranches(s, user);
+  return br === null || br.has(t.branchId);
+};
+/** Mas'ul «Bajarildi» deb belgilaydi; ismli holatda vazifa xodim tasdig'idan keyin yopiladi. */
+export function completeBoardTask(state, { id, note = '', userId }) {
+  return mutate(state, (s) => {
+    const t = (s.boardTasks || []).find((x) => x.id === id);
+    const user = getStaff(s, userId);
+    if (!t || t.status !== 'new') fail('Ochiq vazifa topilmadi');
+    if (!canSeeTask(s, user, t)) fail('Vazifani yopish uchun «Topshiriqlar doskasi» huquqi va filial doirasi kerak');
+    t.doneBy = user.name; t.doneAt = s.today; t.note = note;
+    if (t.employeeId) {
+      t.status = 'confirm';
+      const emp = getEmployee(s, t.employeeId);
+      onbNotify(s, `task-confirm:${t.id}`, emp.name, `${user.name}: «${t.title}» bajarildi deb belgiladi. Tasdiqlang yoki izoh yozing.`);
+    } else t.status = 'done';
+    log(s, user.name, 'Topshiriqlar doskasi: bajarildi', t.id, { after: t.title });
+  });
+}
+export function confirmBoardTask(state, { id, employeeId, ok = true }) {
+  return mutate(state, (s) => {
+    const t = (s.boardTasks || []).find((x) => x.id === id);
+    if (!t || t.status !== 'confirm' || t.employeeId !== employeeId) fail('Tasdiqlanadigan vazifa topilmadi');
+    t.status = ok ? 'done' : 'new';
+    t.confirmedAt = s.today;
+    log(s, getEmployee(s, employeeId).name, ok ? 'Vazifa bajarilganini tasdiqladi' : 'Vazifa bajarilmagan deb qaytardi', t.id);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// So'rovnoma konstruktori (TZ 11-bo'lim): D8, D30, D60, Fail Case, exit-intervyu, rahbar so'rovnomasi va qo'lda.
+// «Javoblar HR bo'limiga ko'rinsin» — har so'rovnomada, standart o'chiq (anonim).
+// ---------------------------------------------------------------------------
+export const SURVEY_TRIGGERS = { d8: 'D8 ustuni', d30: 'D30 ustuni', d60: '60-kun', fail: 'Fail Case (30 kun ichida ketdi)', 'exit-self': 'Exit: o‘z xohishi bilan', 'exit-fired': 'Exit: haydalgan', 'manager-exit': 'Rahbar so‘rovnomasi (ketish)', manual: 'Qo‘lda yuborish' };
+export const QUESTION_TYPES = { yesno: 'Ha / Yo‘q', scale5: 'Shkala 1–5', nps: 'Tavsiya 0–10', single: 'Bitta tanlov', multi: 'Bir nechta tanlov', text: 'Matn' };
+export const isNegative = (q, v) => {
+  if (v === undefined || v === null || v === '') return false;
+  if (q.type === 'yesno') return (q.standard !== null && q.standard !== undefined || q.negative) && v === 'no';
+  if (q.type === 'scale5') return !!q.negative && Number(v) <= 2;
+  if (q.type === 'nps') return !!q.negative && Number(v) <= 6;
+  if (q.type === 'single') return !!q.negative && (q.negativeOptions || []).includes(v);
+  return false;
+};
+export function saveSurvey(state, { survey, userId }) {
+  return mutate(state, (s) => {
+    const user = getStaff(s, userId);
+    if (!can(user, 'onb.surveys')) fail('So‘rovnoma uchun «So‘rovnomalarni boshqarish» huquqi kerak');
+    const name = String(survey.name || '').trim();
+    if (!name) fail('So‘rovnoma nomi majburiy');
+    if (!SURVEY_TRIGGERS[survey.trigger]) fail('Bog‘lanish turini tanlang');
+    const qs = (survey.questions || []).map((q) => ({ ...q, text: String(q.text || '').trim(), options: (q.options || []).map((o) => String(o).trim()).filter(Boolean) })).filter((q) => q.text);
+    if (!qs.length) fail('Kamida bitta savol kiriting');
+    for (const q of qs) {
+      if (!QUESTION_TYPES[q.type]) fail(`Savol turi noto‘g‘ri: ${q.text}`);
+      if (['single', 'multi'].includes(q.type) && q.options.length < 2) fail(`«${q.text}»: kamida 2 ta variant`);
+    }
+    s.surveys ||= [];
+    const prev = survey.id && s.surveys.find((x) => x.id === survey.id);
+    const id = prev ? prev.id : nextId(s, 'sv');
+    const out = { id, name, trigger: survey.trigger, hrVisible: !!survey.hrVisible, active: survey.active !== false, questions: qs.map((q, i) => ({ ...q, id: q.id || `q${i + 1}` })), updatedAt: s.today, by: user.name };
+    if (prev) Object.assign(prev, out); else s.surveys.push(out);
+    log(s, user.name, prev ? 'So‘rovnoma o‘zgartirildi' : 'So‘rovnoma yaratildi', id, { after: `${name} · ${SURVEY_TRIGGERS[out.trigger]} · ${out.hrVisible ? 'ismli' : 'anonim'}` });
+  });
+}
+export const surveyFor = (s, trigger) => (s.surveys || []).find((x) => x.trigger === trigger && x.active !== false) || null;
+export const surveyLink = (sendId) => `regup.uz/s/${sendId}`;
+function sendSurvey(s, sv, { employeeId = null, to, about = null, onboardingId = null, link = false }) {
+  if (!sv) return null;
+  s.surveySends ||= [];
+  const key = `${sv.id}:${employeeId || to}:${about || ''}`;
+  if (s.surveySends.some((x) => x.key === key)) return null;
+  const id = nextId(s, 'ss');
+  s.surveySends.push({ id, key, surveyId: sv.id, employeeId, to, about, onboardingId, at: s.today, answeredAt: null, link });
+  onbNotify(s, `sv:${id}`, to, `So‘rovnoma: «${sv.name}». ${sv.hrVisible ? 'Javoblaringiz HR bo‘limiga ismingiz bilan ko‘rinadi.' : 'Javoblar anonim — faqat filial va lavozim kesimida ko‘rinadi.'} Havola: ${surveyLink(id)}${link ? ' (tizimga kirmasdan to‘ldiriladi)' : ''}`);
+  return id;
+}
+/** Doskadagi bosqichga yetgan, hali yuborilmagan onboarding so'rovnomalari. */
+export function dueSurveySends(s) {
+  const out = [];
+  for (const ob of (s.onboardings || []).filter((o) => o.status === 'active' && !o.leaving)) {
+    const col = boardColumn(s, ob);
+    const day = onbDay(s, ob);
+    const emp = getEmployee(s, ob.employeeId);
+    for (const [trig, ok] of [['d8', boardIdx(col) >= boardIdx('d8')], ['d30', boardIdx(col) >= boardIdx('d30')], ['d60', day >= 60]]) {
+      const sv = surveyFor(s, trig);
+      if (!ok || !sv) continue;
+      if ((s.surveySends || []).some((x) => x.surveyId === sv.id && x.employeeId === emp.id)) continue;
+      out.push({ ob, emp, sv });
+    }
+  }
+  return out;
+}
+export function sendDueSurveys(state, { actor = 'Tizim (so‘rovnomalar)' } = {}) {
+  return mutate(state, (s) => {
+    const list = dueSurveySends(s);
+    if (!list.length) fail('Yuboriladigan yangi so‘rovnoma yo‘q');
+    for (const { ob, emp, sv } of list) sendSurvey(s, sv, { employeeId: emp.id, to: emp.name, onboardingId: ob.id });
+    log(s, actor, 'Onboarding so‘rovnomalari yuborildi', s.today, { count: list.length });
+  });
+}
+export function sendManualSurvey(state, { surveyId, branchId = '', position = '', userId }) {
+  return mutate(state, (s) => {
+    const user = getStaff(s, userId);
+    if (!can(user, 'onb.surveys')) fail('«So‘rovnomalarni boshqarish» huquqi kerak');
+    const sv = (s.surveys || []).find((x) => x.id === surveyId);
+    if (!sv) fail('So‘rovnoma topilmadi');
+    const list = activeEmployees(s).filter((e) => inScope(s, user, e) && (!branchId || e.branchId === branchId) && (!position || e.position === position));
+    let n = 0;
+    for (const e of list) if (sendSurvey(s, sv, { employeeId: e.id, to: e.name })) n += 1;
+    if (!n) fail('Yangi qabul qiluvchi yo‘q (filtr yoki avval yuborilgan)');
+    log(s, user.name, 'So‘rovnoma qo‘lda yuborildi', sv.id, { count: n });
+  });
+}
+/** Javob: anonim so'rovnomada xodim javobga bog'lanmaydi. Salbiy javoblar → doska vazifasi va (ismli bo'lsa) xavf guruhi. */
+export function answerSurvey(state, { sendId, answers }) {
+  return mutate(state, (s) => {
+    const send = (s.surveySends || []).find((x) => x.id === sendId);
+    if (!send) fail('Havola noto‘g‘ri');
+    if (send.answeredAt) fail('Bu so‘rovnomaga javob berilgan');
+    const sv = (s.surveys || []).find((x) => x.id === send.surveyId);
+    for (const q of sv.questions) if (q.type !== 'text' && (answers?.[q.id] === undefined || answers[q.id] === '' || (Array.isArray(answers[q.id]) && !answers[q.id].length))) fail(`Savolga javob bering: «${q.text}»`);
+    const emp = getEmployee(s, send.about || send.employeeId);
+    const branchId = emp?.branchId || null;
+    const position = emp?.position || null;
+    send.answeredAt = s.today;
+    s.surveyResponses ||= [];
+    s.surveyResponses.push({ id: nextId(s, 'sr'), surveyId: sv.id, employeeId: sv.hrVisible ? send.employeeId : null, about: sv.hrVisible ? send.about : null, branchId, position, at: s.today, answers: { ...answers } });
+    const negatives = sv.questions.filter((q) => isNegative(q, answers[q.id]));
+    if (sv.hrVisible && send.employeeId) {
+      const respondent = getEmployee(s, send.employeeId);
+      for (const q of negatives.filter((x) => x.standard !== null && x.standard !== undefined)) {
+        const head = branchHead(s, respondent.branchId);
+        addBoardTask(s, { key: `std:${send.id}:${q.id}`, title: `${respondent.name}: «${CHECKLIST_ITEMS[q.standard][1]}» — bajarilmagan`, source: 'survey', branchId: respondent.branchId, employeeId: respondent.id, assignee: head?.name || 'HR', standard: q.standard });
+      }
+      const ob = onboardingOf(s, respondent.id);
+      if (ob && ob.status === 'active' && negatives.length) ob.surveyFlags = [...(ob.surveyFlags || []), { at: s.today, survey: sv.name, items: negatives.map((q) => q.text) }];
+    } else if (branchId) {
+      // Anonim: filial bo'yicha nomsiz vazifa, faqat filialda shu so'rovnomaga kamida 5 ta javob bo'lsa.
+      const rs = s.surveyResponses.filter((r) => r.surveyId === sv.id && r.branchId === branchId);
+      if (rs.length >= ANON_MIN) {
+        for (const q of sv.questions.filter((x) => x.type === 'yesno' && x.standard !== null && x.standard !== undefined)) {
+          const no = rs.filter((r) => r.answers[q.id] === 'no').length;
+          if (!no) continue;
+          const head = branchHead(s, branchId);
+          addBoardTask(s, { key: `std:${sv.id}:${branchId}:${q.id}`, title: `${getBranch(s, branchId)?.name}: «${CHECKLIST_ITEMS[q.standard][1]}» — ${no} ta yangi xodim «Yo‘q» dedi (${rs.length} ta javob)`, source: 'survey', branchId, assignee: head?.name || 'HR', standard: q.standard });
+        }
+      }
+    }
+    log(s, sv.hrVisible ? (emp?.name || send.to) : 'Anonim respondent', 'So‘rovnomaga javob', sv.id);
+  });
+}
+/** Natijalar: anonim so'rovnoma faqat agregat va kamida 5 ta javob bo'lsa; ismli — ism bilan (huquq bilan). */
+export function surveyResults(s, surveyId, user, { branchId = '', position = '' } = {}) {
+  const sv = (s.surveys || []).find((x) => x.id === surveyId);
+  const br = user ? scopeBranches(s, user) : null;
+  const rs = (s.surveyResponses || []).filter((r) => r.surveyId === surveyId && (br === null || br.has(r.branchId)) && (!branchId || r.branchId === branchId) && (!position || r.position === position));
+  const sent = (s.surveySends || []).filter((x) => x.surveyId === surveyId).length;
+  const few = !sv.hrVisible && rs.length < ANON_MIN;
+  const questions = sv.questions.map((q) => {
+    const vals = rs.map((r) => r.answers[q.id]).filter((v) => v !== undefined && v !== '');
+    let summary = null;
+    if (q.type === 'yesno') summary = { yes: vals.length ? (100 * vals.filter((v) => v === 'yes').length) / vals.length : null };
+    if (q.type === 'scale5') summary = { avg: vals.length ? avg(vals.map(Number)) : null };
+    if (q.type === 'nps') { const n = vals.map(Number); summary = { nps: n.length ? (100 * (n.filter((v) => v >= 9).length - n.filter((v) => v <= 6).length)) / n.length : null }; }
+    if (q.type === 'single' || q.type === 'multi') { const flat = vals.flatMap((v) => (Array.isArray(v) ? v : [v])); summary = { counts: q.options.map((o) => [o, flat.filter((v) => v === o).length]) }; }
+    if (q.type === 'text') summary = { texts: vals };
+    return { q, n: vals.length, summary };
+  });
+  return { sv, n: rs.length, sent, few, questions, named: sv.hrVisible ? rs : [] };
+}
+/** Ketish yo'nalishi: Fail Case yoki exit-intervyu havolasi, L&D vazifasi, rahbar so'rovnomasi. */
+function exitFollowUps(s, emp, plan) {
+  for (const t of (s.boardTasks || []).filter((x) => x.key === `archive:${emp.id}` && x.status === 'new')) Object.assign(t, { status: 'done', doneAt: s.today, doneBy: 'EduTizim arxiv signali' });
+  if (plan.type === 'returns' || plan.type === 'duplicate' || plan.late) return;
+  const trig = plan.survey === 'Fail Case 30-day' ? 'fail' : plan.type === 'fired' ? 'exit-fired' : 'exit-self';
+  sendSurvey(s, surveyFor(s, trig), { employeeId: emp.id, to: emp.name, link: true });
+  if (trig !== 'fail') {
+    const ld = s.staff.find((u) => u.role === 'lda') || s.staff.find((u) => u.role === 'hr');
+    addBoardTask(s, { key: `exit:${emp.id}`, title: `${emp.name}: xayrlashish va exit-intervyuni yuborish (${EXIT_TYPES[plan.type]})`, source: 'offboarding', branchId: emp.branchId, about: emp.id, assignee: ld?.name || 'L&D' });
+  }
+  const head = branchHead(s, emp.branchId);
+  if (head) sendSurvey(s, surveyFor(s, 'manager-exit'), { to: head.name, about: emp.id, link: true });
+}
+
+// ---------------------------------------------------------------------------
+// Uchrashuvlar: istalgan xodim taklif qiladi, HR'dagi admin tasdiqlaydi, xodimlar o'zi yoziladi (qaror №62).
+// ---------------------------------------------------------------------------
+export function proposeMeeting(state, { employeeId, title, about = '', date, time, format, link, place }) {
+  return mutate(state, (s) => {
+    const emp = getEmployee(s, employeeId);
+    if (!emp || emp.status === 'archived') fail('Xodim topilmadi');
+    if (!String(title || '').trim()) fail('Mavzuni yozing');
+    if (!date || date <= s.today) fail('Sana bugundan keyin bo‘lsin');
+    if (format === 'online' && !String(link || '').trim()) fail('Onlayn uchrashuv uchun havola kerak');
+    if (format === 'offline' && !String(place || '').trim()) fail('Joyini yozing');
+    const id = nextId(s, 'mt');
+    s.meetings.push({ id, title: title.trim(), about: about.trim(), kind: 'share', status: 'proposed', proposerId: emp.id, date, time: time || '15:00', format, link: format === 'online' ? link.trim() : '', place: format === 'offline' ? place.trim() : '', organizer: emp.name, invited: [], attended: [], selfSignup: true });
+    for (const u of s.staff.filter((x) => x.role !== 'super' && can(x, 'onb.meetApprove'))) onbNotify(s, `mtp:${id}:${u.id}`, u.name, `${emp.name} uchrashuv taklif qildi: «${title.trim()}» (${date}). Tasdiqlang yoki rad eting.`);
+    log(s, emp.name, 'Uchrashuv taklif qilindi', id, { after: title.trim() });
+  });
+}
+export function reviewMeeting(state, { id, decision, note = '', userId }) {
+  return mutate(state, (s) => {
+    const m = s.meetings.find((x) => x.id === id);
+    const user = getStaff(s, userId);
+    if (!m || m.status !== 'proposed') fail('Tasdiq kutayotgan uchrashuv topilmadi');
+    if (!can(user, 'onb.meetApprove')) fail('Uchrashuvni «Uchrashuvlarni tasdiqlash» huquqi bor admin (HR) tasdiqlaydi');
+    if (decision === 'rejected' && !String(note).trim()) fail('Rad etish sababini yozing');
+    m.status = decision === 'approved' ? 'approved' : 'rejected';
+    m.review = { by: user.name, at: s.today, note };
+    const emp = getEmployee(s, m.proposerId);
+    if (emp) onbNotify(s, `mtr:${id}`, emp.name, m.status === 'approved' ? `«${m.title}» tasdiqlandi — xodimlar endi unga yozila oladi.` : `«${m.title}» rad etildi: ${note}`);
+    log(s, user.name, m.status === 'approved' ? 'Uchrashuv tasdiqlandi' : 'Uchrashuv rad etildi', id, { reason: note || undefined });
+  });
+}
+export function joinMeeting(state, { id, employeeId, leave = false }) {
+  return mutate(state, (s) => {
+    const m = s.meetings.find((x) => x.id === id);
+    if (!m || (m.status && m.status !== 'approved') || !m.selfSignup) fail('Yozilish ochiq uchrashuv topilmadi');
+    if (m.date < s.today) fail('Uchrashuv o‘tib ketgan');
+    if (m.proposerId === employeeId) fail('Siz tashkilotchisiz');
+    m.invited = m.invited.filter((x) => x !== employeeId);
+    if (!leave) m.invited.push(employeeId);
+    log(s, getEmployee(s, employeeId).name, leave ? 'Uchrashuvdan chiqdi' : 'Uchrashuvga yozildi', id);
+  });
+}
+export const meetingVisible = (m) => !m.status || m.status === 'approved';
+
+// ---------------------------------------------------------------------------
+// Qo'lda xabar (qaror №63): doiradagi xodimlarga filtr bilan, platforma va Telegram, bir tomonlama.
+// ---------------------------------------------------------------------------
+export function messageRecipients(s, user, { branchId = '', position = '', departmentId = '' } = {}) {
+  return activeEmployees(s).filter((e) => inScope(s, user, e) && (!branchId || e.branchId === branchId) && (!position || e.position === position) && (!departmentId || e.departmentId === departmentId));
+}
+export function sendMessage(state, { userId, text, branchId = '', position = '', departmentId = '' }) {
+  return mutate(state, (s) => {
+    const user = getStaff(s, userId);
+    if (!can(user, 'people.message')) fail('Xabar uchun «Xabar yuborish» huquqi kerak');
+    if (!String(text || '').trim()) fail('Xabar matnini yozing');
+    const list = messageRecipients(s, user, { branchId, position, departmentId });
+    if (!list.length) fail('Filtrga mos xodim yo‘q');
+    const id = nextId(s, 'msg');
+    for (const e of list) onbNotify(s, `${id}:${e.id}`, e.name, `${user.name}: ${text.trim()}`);
+    s.messages ||= [];
+    s.messages.unshift({ id, by: user.name, at: s.today, text: text.trim(), filter: { branchId, position, departmentId }, n: list.length });
+    log(s, user.name, 'Xabar yuborildi', id, { count: list.length, after: text.trim() });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// O'z-o'zini baholash (qaror №60): baholovchiga ko'rinadi, daraja va «2 manba» qoidasiga kirmaydi.
+// ---------------------------------------------------------------------------
+export function setSelfScore(state, { cardId, employeeId, code, level, note = '' }) {
+  return mutate(state, (s) => {
+    const card = getCard(s, cardId);
+    if (!card || card.employeeId !== employeeId) fail('Karta topilmadi');
+    if (card.stage === 'published' || card.stage === 'closed') fail('E’lon qilingan kartada o‘zini baholab bo‘lmaydi');
+    const model = getModel(s, card.modelVersionId);
+    if (!model.competencies.some((c) => c.code === code)) fail('Kompetensiya topilmadi');
+    const lv = Number(level);
+    if (!(Number.isInteger(lv) && lv >= 1 && lv <= scaleMax(model))) fail(`Daraja 1–${scaleMax(model)}`);
+    card.selfScores = { ...(card.selfScores || {}), [code]: { level: lv, note: String(note).trim(), at: s.today } };
+    log(s, getEmployee(s, employeeId).name, 'O‘zini baholadi', `${cardId} · ${code}`, { after: String(lv) });
+  });
 }

@@ -22,12 +22,15 @@ const fem = new Set(['Aziza', 'Charos', 'Feruza', 'Hilola', 'Jasmina', 'Laziza',
 const BR = ['b-chil', 'b-yunus', 'b-serg', 'b-yangi', 'b-mirz', 'b-olm', 'b-samq'];
 const GE_MENTOR = { 'b-chil': 'Gulbahor Rasulova', 'b-yunus': 'Sherzod Ismoilov', 'b-serg': 'Muhayyo Karimova', 'b-yangi': 'Doniyor Aliyev', 'b-mirz': 'Sevara Yo‘ldosheva', 'b-olm': 'Kamron Usmonov', 'b-samq': 'Aziz Raximov' };
 const MENTOR_EFFECT = { 'Sherzod Ismoilov': 0.35, 'Gulbahor Rasulova': 0.2, 'Muhayyo Karimova': -0.55, 'Kamron Usmonov': -0.15 };
-const REASONS = ['Ish yuklamasi kutilganidan ko‘p', 'Maosh kutilganidan past', 'Jamoaga moslasha olmadi', 'O‘qish yoki boshqa shaharga ko‘chish', 'Boshqa ish taklifi'];
+// Rasmiy sabab (EduTizim katalogidan) va xodim so'rovnomada aytgan sabab ko'pincha farq qiladi (TZ 13-bo'lim).
+const REASONS = ['Juda katta ish hajmi', 'Oylik maosh', 'Jamoaga moslasha olmaslik', 'Shaxsiy sabablar (rejalar o‘zgarishi, sog‘liq, ko‘chib ketish, oilaviy vaziyat)', 'Boshqa joydan yaxshiroq taklif'];
+const STATED = ['Rahbar bilan murakkab munosabatlar', 'Jarayonlar tushunarli emas edi', 'O‘sish va rivojlanish sharoitlari qoniqarli emasligi', 'Ish grafigi'];
 const PROGRAM = { GE: ['CRS-ON-CORP', 'CRS-ON-GE'], FIN: ['CRS-ON-CORP', 'CRS-ON-FIN'], FR: ['CRS-ON-CORP'] };
 const DIFFICULTY = { 'CRS-ON-CORP': 0.4, 'CRS-ON-GE': -0.35, 'CRS-ON-FIN': -0.1 };
 
 export function createOnbHistory(today) {
   const rand = rng(20261110);
+  const randS = rng(20261124); // alohida oqim: mavjud tarix sonlari o'zgarmaydi
   const norm = () => (rand() + rand() + rand() - 1.5) * 1.15; // ~N(0, 0.55)
   const months = ['2026-05', '2026-06', '2026-07', '2026-08', '2026-09', '2026-10'];
   const rows = [];
@@ -52,6 +55,7 @@ export function createOnbHistory(today) {
     let leftAt = leftDay !== null ? addDays(startedAt, leftDay) : null;
     if (leftAt && leftAt > today) { leftAt = null; leftDay = null; }
     const reason = leftAt ? REASONS[Math.floor(rand() * (q < -0.4 ? 3 : REASONS.length))] : null;
+    const stated = leftAt ? (randS() < 0.45 ? reason : STATED[Math.floor(randS() * STATED.length)]) : null;
     const finished = !leftAt || leftDay >= 30;
     const courses = PROGRAM[position].map((courseId) => {
       const k = 0.6 * q + DIFFICULTY[courseId] + norm() * 1.1;
@@ -78,7 +82,7 @@ export function createOnbHistory(today) {
     } : null;
     const reached = kpi2 ? (kpi2.retention >= 90 ? 2 : q > 0.1 ? 3 : q > -0.4 ? 4 : null) : null;
     rows.push({
-      id: `h-${i + 1}`, name, position, branchId, mentor, source, startedAt, leftAt, leftDay, reason,
+      id: `h-${i + 1}`, name, position, branchId, mentor, source, startedAt, leftAt, leftDay, reason, stated,
       survey: { d8: leftDay !== null && leftDay < 8 ? null : d8, d30: finished ? r1(clamp(d8 + norm() * 0.3, 2.4, 5)) : null },
       courses, parts, score, kpi2, kpiReachedMonth: reached, passed: score !== null && finished && vals.every((v) => v >= 3),
     });

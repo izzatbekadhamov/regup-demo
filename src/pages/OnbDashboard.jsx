@@ -60,10 +60,16 @@ export default function OnbDashboard({ user }) {
   const [f, setF] = useState({ branch: '', position: '', source: '', from: '', to: '' });
   const [dim, setDim] = useState('mentor');
   const [metric, setMetric] = useState('retention');
+  const [customDays, setCustomDays] = useState('45');
   const rows = A.onbRows(s, f, scope);
   const histN = rows.filter((r) => !r.live).length;
   const r30 = A.retention(rows, s.today, 30);
   const r60 = A.retention(rows, s.today, 60);
+  const r90 = A.retention(rows, s.today, 90);
+  const r180 = A.retention(rows, s.today, 180);
+  const rCustom = A.retention(rows, s.today, Number(customDays) || 0);
+  const timely = D.checkTimeliness(s, scope);
+  const canRisk = D.can(user, 'onb.risk');
   const coh = A.cohorts(rows, s.today);
   const leave = A.leaveStages(rows, s.today);
   const proc = A.processByBranch(s, scope).filter((r) => !f.branch || r.branchId === f.branch);
@@ -111,6 +117,10 @@ export default function OnbDashboard({ user }) {
       <div className="grid g3">
         <Stat k="1 oylik retention" v={P(r30.pct)} s={`${r30.kept} / ${r30.n} xodim 30-kunda ishlayapti`} icon="users" tone={r30.pct !== null && r30.pct < 75 ? 'bad' : ''} />
         <Stat k="2 oylik retention" v={P(r60.pct)} s={`${r60.kept} / ${r60.n} xodim 60-kunda ishlayapti`} icon="users" tone={r60.pct !== null && r60.pct < 70 ? 'bad' : ''} />
+        <Stat k="3 oylik retention" v={P(r90.pct)} s={`${r90.kept} / ${r90.n} xodim 90-kunda ishlayapti`} icon="users" />
+        <Stat k="6 oylik retention" v={P(r180.pct)} s={r180.n ? `${r180.kept} / ${r180.n} xodim 180-kunda ishlayapti` : '180 kuni to‘lgan kogorta hali yo‘q'} icon="users" />
+        <div className="panel stat"><div className="top"><div className="k">Tanlangan davr retention</div><input className="i compact" style={{ width: 72 }} type="number" min="1" max="365" value={customDays} onChange={(e) => setCustomDays(e.target.value)} title="Kunlar soni" /></div><div className="v">{P(rCustom.pct)}</div><div className="s">{rCustom.kept} / {rCustom.n} xodim {customDays}-kunda ishlayapti</div></div>
+        <Stat k="D8/D30 tekshiruvi o‘z vaqtida" v={P(timely.pct)} s={`${timely.n} ta tekshiruv · ${D.CHECK_LATE_DAYS} kundan kech emas`} icon="check" tone={timely.pct !== null && timely.pct < 80 ? 'warn' : ''} />
         <Stat k="Hozir moslashuvda" v={active.length} s={`${stCount.find(([k]) => k === 'ontrack')[1]} tasi reja bo‘yicha · ${risk.length} tasi xavf guruhida`} icon="route" tone={risk.length ? 'warn' : ''} />
         <Stat k="Kurslar bajarilishi" v={P(mast.pct)} s={`o‘rtacha kurs bahosi ${N1(mast.grade)} · muddatida ${P(mast.onTime)}`} icon="cards" />
         <Stat k="O‘rtacha onboarding natijasi" v={N1(completed.length ? completed.reduce((a, r) => a + r.score, 0) / completed.length : null)} s={`${completed.length} ta yakunlangan · muvaffaqiyatli ${P(100 * completed.filter((r) => r.passed).length / (completed.length || 1))}`} icon="check" />
@@ -141,8 +151,12 @@ export default function OnbDashboard({ user }) {
         <Panel title={<div><h2>Qaysi bosqichda ketishadi</h2><div className="muted small">Birinchi 60 kunda ketganlar: {leave.total} ta</div></div>}>
           <div className="stack">
             {leave.stages.map((x) => <div key={x.key}><div className="small">{x.label}</div><HBar v={x.n} max={Math.max(1, ...leave.stages.map((y) => y.n))} label={`${x.n} ta`} /></div>)}
-            <div className="small"><b>Ketish sabablari (Edu):</b> {leave.reasons.map(([r, n]) => `${r} — ${n}`).join(' · ') || '—'}</div>
-            <div className="callout small"><b>30 kun ichida ketganlar:</b> {leave.early.n} ta ({P(leave.early.pct)}). Sabablari: {leave.early.reasons.map(([r, n]) => `${r} — ${n}`).join(' · ') || '—'}. Ularga Jobster orqali Fail Case so‘rovnomasi avtomatik boradi.</div>
+            <div className="grid g2" style={{ gap: 10 }}>
+              <div><div className="small"><b>Rasmiy sabab</b> <span className="muted">(EduTizim, HR kiritadi)</span></div>{leave.reasons.map(([r, n]) => <div key={r} className="small">{r} — <b>{n}</b></div>)}</div>
+              <div><div className="small"><b>Xodim aytgan sabab</b> <span className="muted">(Fail Case, exit-intervyu)</span></div>{leave.stated.map(([r, n]) => <div key={r} className="small">{r} — <b>{n}</b></div>)}</div>
+            </div>
+            {leave.mismatch.of > 0 && <div className="callout small"><b>Farq:</b> {leave.mismatch.n} / {leave.mismatch.of} holatda ({P(leave.mismatch.pct)}) xodim aytgan sabab rasmiy sababdan boshqacha — ko‘pincha eng foydali ma’lumot.</div>}
+            <div className="callout small"><b>30 kun ichida ketganlar:</b> {leave.early.n} ta ({P(leave.early.pct)}). Sabablari: {leave.early.reasons.map(([r, n]) => `${r} — ${n}`).join(' · ') || '—'}. Ularga RegUP havolasi bilan Fail Case so‘rovnomasi boradi (tizimga kirmasdan).</div>
           </div>
         </Panel>
       </div>
@@ -165,7 +179,7 @@ export default function OnbDashboard({ user }) {
           ) : <Empty>Moslashuvda xodim yo‘q.</Empty>}
         </Panel>
 
-        <Panel title={<div><h2>Xavf guruhi — oldindan ogohlantirish</h2><div className="muted small">Ortda qolish, boshlamaslik, kech kiritilish, kuzatuv yo‘qligi. So‘rovnomalar anonim, shuning uchun bu yerda ishlatilmaydi.</div></div>}>
+        {canRisk && <Panel title={<div><h2>Xavf guruhi — oldindan ogohlantirish</h2><div className="muted small">Ortda qolish, boshlamaslik, muddat o‘tishi, kech kiritilish, kuzatuv yo‘qligi, mentor yo‘qligi, tekshiruv kechikishi, ismli so‘rovnomadagi salbiy javob. Anonim so‘rovnoma xodimni guruhga qo‘ymaydi.</div></div>}>
           {risk.length ? <div className="grid g2">{risk.map(({ ob, emp, p, reasons }) => {
             const sent = (ob.riskFlags || []).some((x) => x.at === s.today);
             const mentor = emp.supervisorId ? D.getEmployee(s, emp.supervisorId)?.name : null;
@@ -178,7 +192,7 @@ export default function OnbDashboard({ user }) {
               </div>
             );
           })}</div> : <Empty icon="check">Xavf belgisi bor xodim yo‘q.</Empty>}
-        </Panel>
+        </Panel>}
       </div>
 
       <Panel title={<div><h2>Onboarding jarayoni filiallar kesimida</h2><div className="muted small">Anonim so‘rovnomalar (Google Forms → Sheets) va Jobster/EduTizim jamlanmasi · {D.monthName(s.surveyStats.period)} · DEMO raqamlar</div></div>}

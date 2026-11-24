@@ -449,11 +449,11 @@ export default function CardDetail({ id, user }) {
           }>
             <table>
               <thead>
-                <tr><th>Kompetensiya</th><th className="num">Maqsad</th><th className="num">Baho</th><th className="num" title="Maqsaddan necha ball kam">Tafovut</th><th className="num">Dalillar</th></tr>
+                <tr><th>Kompetensiya</th><th className="num">Maqsad</th><th className="num">Baho</th><th className="num" title="Maqsaddan necha ball kam">Tafovut</th><th className="num" title="Xodim o‘zini baholadi — daraja hisobiga va «2 manba» qoidasiga kirmaydi">O‘zi</th><th className="num">Dalillar</th></tr>
               </thead>
               <tbody>
                 {layers.map((layer) => [
-                  <tr key={layer} className="group-row"><td colSpan={5}>{layer}</td></tr>,
+                  <tr key={layer} className="group-row"><td colSpan={6}>{layer}</td></tr>,
                   ...model.competencies.filter((c) => c.layer === layer && profileTo.targets[c.code] !== undefined && (!onlyOpen || attention.includes(c.code) || open === c.code)).map((c) => {
                     const it = d.match.items.find((x) => x.code === c.code);
                     const isOpen = open === c.code;
@@ -465,10 +465,11 @@ export default function CardDetail({ id, user }) {
                         <td className="num">{it.target}</td>
                         <td className="num">{it.state === 'unrated' ? <span className="pill muted">baholanmagan</span> : <ScoreChip v={it.score} target={it.target} />}</td>
                         <td className="num">{it.gap === null ? <span className="muted">—</span> : it.gap > 0 ? <span style={{ color: it.gap > 1 ? 'var(--bad)' : 'var(--warn)', fontWeight: 700 }}>−{it.gap}</span> : <span className="muted">0</span>}</td>
+                        <td className="num" title={card.selfScores?.[c.code]?.note || ''}>{card.selfScores?.[c.code] ? <span className="muted">{card.selfScores[c.code].level}</span> : <span className="muted">—</span>}</td>
                         <td className="num">{evCount || <span className="muted">—</span>}{evCount > 0 && !c.composite && <div className="muted small">{evM} usul</div>}</td>
                       </tr>,
                       isOpen && (
-                        <tr key={`${c.code}-x`}><td colSpan={5} style={{ padding: 0 }}><CompetencyEditor key={`${c.code}-${card.revision}`} card={card} model={model} comp={c} target={it.target} editable={editable} /></td></tr>
+                        <tr key={`${c.code}-x`}><td colSpan={6} style={{ padding: 0 }}><CompetencyEditor key={`${c.code}-${card.revision}`} card={card} model={model} comp={c} target={it.target} editable={editable} /></td></tr>
                       ),
                     ];
                   }),

@@ -610,3 +610,19 @@ ol.crit { margin: 6px 0 2px 18px; padding: 0; color: var(--ink-2); display: grid
 /* Kirish ekrani */
 .login-wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--bg, #f6f7f9); }
 .login-card { width: min(420px, 100%); }
+
+/* Onboarding doskasi (kanban) va topshiriqlar doskasi */
+.kanban { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; align-items: flex-start; }
+.kcol { flex: 0 0 250px; background: var(--muted-soft); border-radius: var(--radius); padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+.kcol-head { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px 6px; border-bottom: 3px solid var(--brand); }
+.kcol-head.check { border-color: var(--warn); }
+.kcol-head small { color: var(--ink-3); }
+.kcard { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 9px 10px; font-size: 12.5px; display: flex; flex-direction: column; gap: 4px; box-shadow: var(--shadow); }
+.kcard.late { border-left: 3px solid var(--bad); }
+.kcard.leaving { opacity: 0.65; border-style: dashed; }
+.kcard .kmeta { color: var(--ink-2); }
+.kcard .kact { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.qrow { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px; display: grid; gap: 6px; }
+.opt-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.opt-row label { border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; cursor: pointer; font-size: 13px; }
+.opt-row label.on { background: var(--brand-soft); border-color: var(--brand); color: var(--brand); }

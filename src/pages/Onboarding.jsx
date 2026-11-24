@@ -43,7 +43,7 @@ export function OnbTags({ s, ob }) {
 
 function reviewerText(s, enr) {
   const r = D.taskReviewer(s, enr);
-  return r.kind === 'curator' ? `kurator ${r.user.name}` : r.kind === 'mentor' ? `mentor ${r.user.name}` : 'HR';
+  return `${D.REVIEWER_KIND[r.kind]}${r.user ? ` ${r.user.name}` : ''}`;
 }
 
 const progressText = (r) => [`kurslar ${r.coursesDone}/${r.courses}`, r.card.tasks.length ? `topshiriqlar ${r.tasksDone}/${r.card.tasks.length}` : null, r.need ? `${r.card.practice === 'lesson' ? 'dars kuzatuvi' : 'ish kuzatuvi'} ${r.checks}/${r.need}` : null].filter(Boolean).join(', ');

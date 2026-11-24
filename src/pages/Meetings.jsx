@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAppState, run } from '../state/store.js';
-import { Panel, Pill, Person, Empty, fmtDate } from '../ui/common.jsx';
+import { Panel, Pill, Person, Empty, fmtDate, ask } from '../ui/common.jsx';
 import * as D from '../core/domain.js';
 
 function NewMeeting({ user, onDone }) {
@@ -60,7 +60,7 @@ function MeetingCard({ s, m, user }) {
   const past = m.date <= s.today;
   const canEdit = (D.can(user, 'onb.meetings') && D.scopeEmployees(s, user) === null) || m.organizer?.startsWith(user.name);
   return (
-    <Panel title={<div><div className="row"><h2>{m.title}</h2>{m.kind === 'ceo' ? <Pill tone="brand">CEO va HRD</Pill> : <Pill tone="teal">bilim almashish</Pill>}{past ? <Pill tone="muted">o‘tgan</Pill> : <Pill tone="good">rejada</Pill>}</div>
+    <Panel title={<div><div className="row"><h2>{m.title}</h2>{m.kind === 'ceo' ? <Pill tone="brand">CEO va HRD</Pill> : <Pill tone="teal">bilim almashish</Pill>}{m.selfSignup && <Pill tone="muted">o‘zi yoziladi</Pill>}{past ? <Pill tone="muted">o‘tgan</Pill> : <Pill tone="good">rejada</Pill>}</div>
       <div className="muted small">{fmtDate(m.date)}, {m.time} · {m.format === 'online' ? <>onlayn · <span className="code">{m.link}</span></> : `oflayn · ${m.place}`} · tashkilotchi: {m.organizer}</div></div>}
       actions={<button className="btn sm" onClick={() => setOpen(!open)}>{open ? 'Yopish' : 'Ochish'}</button>}>
       <div className="small">Taklif qilingan: <b>{m.invited.length}</b>{past && <> · qatnashdi: <b>{m.attended.length}</b></>}</div>
@@ -89,10 +89,24 @@ function MeetingCard({ s, m, user }) {
   );
 }
 
+function Proposals({ s, user }) {
+  const list = s.meetings.filter((m) => m.status === 'proposed');
+  if (!list.length) return null;
+  const approve = D.can(user, 'onb.meetApprove');
+  return (
+    <Panel title={<div><h2>Xodimlar taklif qilgan uchrashuvlar</h2><div className="muted small">Istalgan xodim taklif qiladi; «Uchrashuvlarni tasdiqlash» huquqi bor admin (HR) tasdiqlaydi, keyin xodimlar o‘zi yoziladi.</div></div>}>
+      <table className="small"><tbody>{list.map((m) => (
+        <tr key={m.id}><td><b>{m.title}</b><div className="muted">{m.about}</div></td><td className="muted">{fmtDate(m.date)}, {m.time} · {m.format === 'online' ? m.link : m.place}<div>taklif qildi: {m.organizer}</div></td>
+          <td className="num">{approve ? <span className="row" style={{ gap: 6 }}><button className="btn sm primary" onClick={() => run(D.reviewMeeting, { id: m.id, decision: 'approved', userId: user.id }, 'Uchrashuv tasdiqlandi')}>Tasdiqlash</button><button className="btn sm danger" onClick={() => ask('Rad etish sababi', (note) => run(D.reviewMeeting, { id: m.id, decision: 'rejected', note, userId: user.id }, 'Rad etildi'), { input: true, ok: 'Rad etish' })}>Rad etish</button></span> : <Pill tone="warn">tasdiq kutilmoqda</Pill>}</td></tr>
+      ))}</tbody></table>
+    </Panel>
+  );
+}
+
 export default function Meetings({ user }) {
   const s = useAppState();
   const [creating, setCreating] = useState(false);
-  const list = [...s.meetings].sort((a, b) => (a.date < b.date ? 1 : -1));
+  const list = [...s.meetings].filter(D.meetingVisible).sort((a, b) => (a.date < b.date ? 1 : -1));
   return (
     <>
       <div className="page-head">
@@ -103,6 +117,7 @@ export default function Meetings({ user }) {
         {!creating && <button className="btn primary" onClick={() => setCreating(true)}>+ Uchrashuv</button>}
       </div>
       {creating && <NewMeeting user={user} onDone={() => setCreating(false)} />}
+      <Proposals s={s} user={user} />
       {list.length ? list.map((m) => <MeetingCard key={m.id} s={s} m={m} user={user} />) : <Empty>Uchrashuv yo‘q.</Empty>}
     </>
   );

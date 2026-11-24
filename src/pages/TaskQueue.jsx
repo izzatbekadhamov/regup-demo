@@ -19,7 +19,7 @@ function Item({ s, e, cid, p, user }) {
     <div className="idp-row">
       <div className="row between">
         <Person name={emp.name} sub={`${course.title} · yuborilgan ${fmtDate(p.submittedAt)}`} />
-        <div className="row">{course.onboarding && <Pill tone="brand">moslashuv kursi</Pill>}<Pill tone="muted">tekshiradi: {who.kind === 'curator' ? `kurator ${who.user.name}` : who.kind === 'mentor' ? `mentor ${who.user.name}` : 'HR'}</Pill></div>
+        <div className="row">{course.onboarding && <Pill tone="brand">moslashuv kursi</Pill>}<Pill tone="muted">tekshiradi: {D.REVIEWER_KIND[who.kind]}{who.user ? ` ${who.user.name}` : ''}</Pill></div>
       </div>
       <div className="small"><b>{comp.title}.</b> <span className="ink2">Mezon: {comp.criteria}</span></div>
       <div className="callout small"><b>Xodim yuborgan natija:</b> {p.text}{p.link && <div className="code" style={{ marginTop: 4 }}>{p.link}</div>}</div>

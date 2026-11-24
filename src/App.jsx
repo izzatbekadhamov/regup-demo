@@ -41,6 +41,13 @@ import Gamification from './pages/Gamification.jsx';
 import Login from './pages/Login.jsx';
 import Colleagues from './pages/Colleagues.jsx';
 import MyRating from './pages/MyRating.jsx';
+import OnbBoard from './pages/OnbBoard.jsx';
+import Surveys from './pages/Surveys.jsx';
+import TaskBoard from './pages/TaskBoard.jsx';
+import Messages from './pages/Messages.jsx';
+import MySurveys from './pages/MySurveys.jsx';
+import MyMeetings from './pages/MyMeetings.jsx';
+import SurveyLink from './pages/SurveyLink.jsx';
 import { kpiValue, kpiResult, kpiMonths } from './core/domain.js';
 import * as D from './core/domain.js';
 import { OTHER_POSITIONS } from './core/modelKit.js';
@@ -58,11 +65,14 @@ const ADMIN_NAV = [
   ]],
   ['Moslashuv (onboarding)', [
     ['onb-dashboard', 'Onboarding dashboard', null, 'chart'],
+    ['board', 'Onboarding doskasi', (s, sess) => { const u = D.getStaff(s, sess.userId); return D.boardItems(s, u).filter((o) => D.checkLate(s, o) > 0).length; }, 'layers'],
     ['onboarding', 'Moslashuv — 60 kun', (s, sess) => { const sc = D.scopeEmployees(s, D.getStaff(s, sess.userId)); return s.onboardings.filter((o) => o.status === 'active' && (!sc || sc.has(o.employeeId)) && (D.onboardingScore(s, o).ready || D.onbDay(s, o) >= D.obDays(s, o))).length; }, 'user'],
     ['integration', 'Integratsiya navbati', (s) => s.hrInbox.length, 'upload'],
     ['tasks', 'Topshiriqlarni tekshirish', (s, sess) => { const u = D.getStaff(s, sess.userId); return s.enrollments.reduce((a, e) => a + (D.canReviewTask(s, u, e) && e.status !== 'archived' ? Object.values(e.progress).filter((p) => p.status === 'pending').length : 0), 0); }, 'check'],
     ['observations', 'Dars kuzatuvi', (s, sess) => { const sc = D.scopeEmployees(s, D.getStaff(s, sess.userId)); return s.onboardings.filter((o) => o.status === 'active' && (!sc || sc.has(o.employeeId)) && D.onbObservations(s, o).length < (D.onbProgram(s, D.getEmployee(s, o.employeeId))?.observations || 0)).length; }, 'target'],
-    ['meetings', 'Uchrashuvlar', null, 'users'],
+    ['surveys', 'So‘rovnomalar', (s, sess) => D.dueSurveySends(s).length + (s.surveySends || []).filter((x) => x.to === D.getStaff(s, sess.userId)?.name && !x.answeredAt).length, 'list'],
+    ['taskboard', 'Topshiriqlar doskasi', (s, sess) => { const u = D.getStaff(s, sess.userId); return (s.boardTasks || []).filter((t) => t.status === 'new' && D.canSeeTask(s, u, t)).length; }, 'inbox'],
+    ['meetings', 'Uchrashuvlar', (s) => s.meetings.filter((m) => m.status === 'proposed').length, 'users'],
     ['reminders', 'Eslatmalar', (s) => D.dueReminders(s).filter((r) => !s.notifications.some((n) => n.key.startsWith(r.key))).length, 'bell'],
   ]],
   ['O‘qitish', [
@@ -70,9 +80,10 @@ const ADMIN_NAV = [
     ['courses', 'Kurslar va Learning Path', (s) => (s.enrollments || []).filter((e) => !D.getCourse(s, e.courseId)?.onboarding).reduce((a, e) => a + Object.values(e.progress).filter((p) => p.status === 'pending').length, 0), 'layers'],
   ]],
   ['Sozlamalar', [
-    ['models', 'Lavozim modellari', null, 'layers'],
+    ['models', 'Kompetensiya modellari', null, 'layers'],
     ['kpi', 'Yangi filial KPI', null, 'chart'],
     ['people', 'Umumiy jamoa a’zolari', null, 'users'],
+    ['messages', 'Xabar yuborish', null, 'bell'],
     ['gamification', 'Gamifikatsiya', null, 'target'],
     ['team', 'Adminlar', null, 'user'],
   ]],
@@ -88,7 +99,8 @@ const ROUTE_RIGHTS = {
   '': ['cards.publish'], cards: ['cards.assign', 'cards.assess', 'cards.publish'], stretch: ['cards.publish'], evidence: ['cards.publish'],
   idp: ['talent.view'], candidates: ['talent.view'], succession: ['talent.view'], skills: ['talent.view'], teachers: ['kpi.view'], kpi: ['kpi.view'],
   'onb-dashboard': ['onb.view'], onboarding: ['onb.view'], integration: ['onb.integration'], tasks: ['courses.review', 'courses.manage'],
-  observations: ['onb.observe'], meetings: ['onb.meetings'], reminders: ['onb.reminders'],
+  observations: ['onb.observe'], meetings: ['onb.meetings', 'onb.meetApprove'], reminders: ['onb.reminders'],
+  board: ['onb.view', 'onb.board', 'onb.checkin'], surveys: ['onb.surveys'], taskboard: ['onb.tasks'], messages: ['people.message'],
   courses: ['courses.view', 'courses.manage'], paths: ['courses.view', 'courses.manage'], models: ['models.manage'], team: ['team.manage'], people: ['people.view', 'org.manage'], gamification: ['gami.manage'],
   audit: ['audit.view'], import: ['system.import'], uat: ['system.import'],
 };
@@ -105,6 +117,8 @@ const EMP_NAV = [
     ['career', 'Karyera yo‘lim', null, 'trend'],
     ['kpi', 'KPI ko‘rsatkichlari', null, 'chart', (s, sess) => { const e = s.employees.find((x) => x.id === sess.employeeId); return e && (s.kpiRules.some((r) => r.position === e.position) || s.employees.some((x) => x.supervisorId === e.id)); }],
     ['stretch', 'Stretch vazifam', null, 'target'],
+    ['surveys', 'So‘rovnomalarim', (s, sess) => (s.surveySends || []).filter((x) => x.employeeId === sess.employeeId && !x.answeredAt).length + (s.boardTasks || []).filter((t) => t.employeeId === sess.employeeId && t.status === 'confirm').length, 'list'],
+    ['meetings', 'Uchrashuvlar', null, 'users'],
     ['colleagues', 'Jamoadoshlar', null, 'users'],
     ['rating', 'Reyting va yutuqlar', null, 'trend'],
     ['inbox', 'Bildirishnomalar', (s, sess) => s.notifications.filter((n) => n.to === s.employees.find((e) => e.id === sess.employeeId)?.name && !n.read).length, 'bell'],
@@ -142,11 +156,12 @@ export default function App() {
   const user = D.getStaff(state, session.userId) || D.getStaff(state, 'u-super');
   const actives = D.activeEmployees(state);
   const emp = actives.find((e) => e.id === session.employeeId) || actives[0];
+  if (p0 === 's' && p1) return <><SurveyLink id={p1} /><Toasts /><DialogHost /></>;
   if (session.loggedOut) return <><Login /><Toasts /></>;
 
   let page;
   if (admin && !allowed(user, p0 || '')) {
-    page = <div className="panel panel-body"><b>{user.name}</b>da bu bo‘lim uchun huquq yo‘q. Huquqlarni «Adminlar» bo‘limida Super Admin beradi. <a href={`#/${firstRoute(user)}`}>Mening bo‘limlarim</a></div>;
+    page = <div className="panel panel-body"><b>{user.name}</b>da bu bo‘lim uchun huquq yo‘q. Huquqni «Adminlar» bo‘limida «Adminlik berish» huquqi bor admin beradi. <a href={`#/${firstRoute(user)}`}>Mening bo‘limlarim</a></div>;
   } else if (admin) {
     if (!p0) page = <Dashboard />;
     else if (p0 === 'team') page = <Team user={user} focus={p1} />;
@@ -156,6 +171,10 @@ export default function App() {
     else if (p0 === 'onboarding') page = <Onboarding key={user.id} user={user} focus={p1} />;
     else if (p0 === 'integration') page = <Integration user={user} />;
     else if (p0 === 'meetings') page = <Meetings key={user.id} user={user} />;
+    else if (p0 === 'board') page = <OnbBoard key={user.id} user={user} />;
+    else if (p0 === 'surveys') page = <Surveys key={user.id} user={user} />;
+    else if (p0 === 'taskboard') page = <TaskBoard key={user.id} user={user} />;
+    else if (p0 === 'messages') page = <Messages key={user.id} user={user} />;
     else if (p0 === 'reminders') page = <Reminders user={user} />;
     else if (p0 === 'tasks') page = <TaskQueue key={user.id} user={user} />;
     else if (p0 === 'observations') page = <ObservationPage key={user.id} user={user} focus={p1} />;
@@ -190,6 +209,8 @@ export default function App() {
     else if (p0 === 'inbox') page = <Notifications key={emp.id} emp={emp} />;
     else if (p0 === 'colleagues') page = <Colleagues key={emp.id} emp={emp} focus={p1} />;
     else if (p0 === 'rating') page = <MyRating key={emp.id} emp={emp} />;
+    else if (p0 === 'surveys') page = <MySurveys key={emp.id} emp={emp} />;
+    else if (p0 === 'meetings') page = <MyMeetings key={emp.id} emp={emp} />;
   }
   if (!page) page = <div className="panel panel-body">Sahifa topilmadi. <a href="#/">Bosh sahifa</a></div>;
 

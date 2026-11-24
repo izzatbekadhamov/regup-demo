@@ -63,7 +63,11 @@ export function leaveStages(rows, today) {
   const el = rows.filter((r) => D.addDays(r.startedAt, 30) <= today);
   const early = el.filter((r) => r.leftDay !== null && r.leftDay < 30);
   const earlyReasons = Object.entries(early.reduce((m, r) => ({ ...m, [r.reason]: (m[r.reason] || 0) + 1 }), {})).sort((a, b) => b[1] - a[1]);
-  return { total: left.length, stages, reasons, early: { n: early.length, of: el.length, pct: pct(early.length, el.length), reasons: earlyReasons } };
+  // Ikki manba yonma-yon (qaror №54): rasmiy sabab — EduTizim (HR kiritadi), xodim aytgani — Fail Case / exit-intervyu.
+  const stated = Object.entries(left.filter((r) => r.stated).reduce((m, r) => ({ ...m, [r.stated]: (m[r.stated] || 0) + 1 }), {})).sort((a, b) => b[1] - a[1]);
+  const both = left.filter((r) => r.reason && r.stated);
+  const mismatch = both.filter((r) => r.reason !== r.stated).length;
+  return { total: left.length, stages, reasons, stated, mismatch: { n: mismatch, of: both.length, pct: pct(mismatch, both.length) }, early: { n: early.length, of: el.length, pct: pct(early.length, el.length), reasons: earlyReasons } };
 }
 
 /** Jonli xodimning bajarilish indeksi: bajarilgan qism ÷ shu kungacha rejadagi qism. */
@@ -99,6 +103,12 @@ export function riskList(s, scope = null) {
     if (D.onbLateDays(ob) >= s.onboardingConfig.lateDays) reasons.push(`kech kiritilgan (${D.onbLateDays(ob)} kun)`);
     const r = D.onboardingScore(s, ob);
     if (r.needObs && p.day >= 15 && r.obs === 0) reasons.push('dars kuzatuvi yo‘q');
+    // Qaror №55: mentor yo'q (3 kundan ortiq), ismli so'rovnomada salbiy javob. Anonim so'rovnoma xodimni guruhga qo'ymaydi.
+    const emp = D.getEmployee(s, ob.employeeId);
+    if (!emp.supervisorId && p.day > 3) reasons.push('mentor biriktirilmagan');
+    if ((ob.surveyFlags || []).length) reasons.push(`so‘rovnomada salbiy javob (${ob.surveyFlags.at(-1).survey})`);
+    if (D.checkLate(s, ob) > D.CHECK_LATE_DAYS) reasons.push(`tekshiruv kechikmoqda (${D.checkLate(s, ob)} kun)`);
+    if (ob.leaving) reasons.push('«Ketdi» deb belgilangan');
     return { ob, emp: D.getEmployee(s, ob.employeeId), p, reasons };
   }).filter((x) => x.reasons.length).sort((a, b) => b.reasons.length - a.reasons.length);
 }
