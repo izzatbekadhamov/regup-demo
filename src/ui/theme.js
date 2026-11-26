@@ -6,7 +6,7 @@ export const currentTheme = () => stored() || system();
 export function applyTheme(t = currentTheme()) {
   document.documentElement.dataset.theme = t;
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', t === 'dark' ? '#070c1d' : '#0e1733');
+  if (meta) meta.setAttribute('content', t === 'dark' ? '#12201b' : '#eef3f0');
   return t;
 }
 export function setTheme(t) {

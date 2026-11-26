@@ -3,6 +3,7 @@ import App from './App.jsx';
 import { initTheme } from './ui/theme.js';
 import './styles.css';
 import './ds.css';
+import './zumrad.css';
 
 initTheme();
 createRoot(document.getElementById('root')).render(<App />);

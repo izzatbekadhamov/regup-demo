@@ -1,0 +1,254 @@
+/* RegUP — «Zumrad» uslubi (yakuniy, 2026-11-26).
+   Koshin (B) bazasi ustiga yagona qatlam: och menyu, to'q zumrad + yalpiz, katta zich sarlavhalar,
+   pill tugmalar, oq kartalar, Bugun ekranida to'q yashil asosiy blok.
+   Qaytarish: main.jsx'dan './zumrad.css' importini olib tashlang (Koshin qaytadi).
+   1-qism — yumshatish (avvalgi «Havo»), 2-qism — Zumrad palitrasi va shakllari, 3-qism — yakuniy tuzatishlar. */
+
+/* ===================== 1-qism: yumshatish ===================== */
+
+:root {
+  /* Fon va sirtlar */
+  --bg: #f5f7fa; --panel: #ffffff; --surface: #ffffff;
+  --sunken: #f7f9fc; --surface-sunken: #eef2f7; --muted-soft: #eef2f7; --hover: #f2f5fb;
+  /* Matn */
+  --ink: #1c2540; --ink-2: #465068; --ink-3: #5a647c;
+  --ink-muted: #465068; --ink-subtle: #5a647c;
+  /* Chiziqlar */
+  --line: #dfe4ec; --line-2: #e8ecf2; --line-strong: #97a0b4;
+  /* Asosiy rang — so'nik lojuvard */
+  --brand: #3651b8; --brand-2: #2c449e; --brand-soft: #e7ecfb; --brand-line: #c9d3f2; --callout-ink: #3a4f99;
+  --primary: #3651b8; --primary-hover: #2c449e; --primary-soft: #e7ecfb; --primary-text: #3651b8; --focus: #3651b8;
+  /* Yordamchi — yumshoq feruza */
+  --teal: #2f857b; --teal-soft: #e5f3f1; --teal-line: #b5ddd7;
+  --accent: #3fa89c; --accent-text: #2f7d73; --accent-soft: #e5f3f1; --accent-on-brand: #2f7d73;
+  --reward: #e3a945;
+  /* Holat ranglari — biroz yumshatilgan */
+  --good: #2f7a52; --good-soft: #e8f4ed; --good-line: #c4e2d0; --success: #2f7a52; --success-soft: #e8f4ed;
+  --warn: #93600f; --warn-soft: #fbf1df; --warn-line: #efd8ac; --warning: #93600f; --warning-soft: #fbf1df;
+  --bad: #b8433f; --bad-soft: #fbecea; --bad-line: #efc9c6; --danger: #b8433f; --danger-soft: #fbecea;
+  /* Menyu — och */
+  --side: #eaeff6; --side-2: #ffffff; --side-ink: #3f4a63; --side-mute: #7a849b;
+  --nav-bg: #eaeff6; --nav-ink: #3f4a63; --nav-muted: #7a849b;
+  --surface-brand: #e3e9fa; --ink-on-brand: #ffffff;
+  /* Soya — deyarli sezilmaydi */
+  --shadow: 0 1px 2px rgba(28, 37, 64, 0.04);
+  --shadow-md: 0 8px 24px rgba(38, 48, 74, 0.08);
+  --shadow-lg: 0 16px 40px rgba(38, 48, 74, 0.12);
+  --ring: 0 0 0 3px rgba(74, 98, 184, 0.16);
+  --topbar-bg: rgba(245, 247, 250, 0.88);
+  font-size: 14.5px;
+}
+
+:root[data-theme='dark'] {
+  --bg: #12161f; --panel: #1a1f2b; --surface: #1a1f2b;
+  --sunken: #161b25; --surface-sunken: #222836; --muted-soft: #222836; --hover: #212839;
+  --ink: #e4e8f0; --ink-2: #aab2c3; --ink-3: #8f98ab; --ink-muted: #aab2c3; --ink-subtle: #8f98ab;
+  --line: #2a3141; --line-2: #222836; --line-strong: #586176;
+  --brand: #9fb1ec; --brand-2: #bccaf3; --brand-soft: #242d47; --brand-line: #3b4a78; --callout-ink: #bccaf3;
+  --primary: #6a80d0; --primary-hover: #5a71c4; --primary-soft: #242d47; --primary-text: #9fb1ec; --focus: #9fb1ec;
+  --teal: #7fcfc4; --teal-soft: #1b3234; --accent: #3fa89c; --accent-text: #8fd3c9; --accent-soft: #1b3234; --accent-on-brand: #8fd3c9;
+  --good: #7cc79c; --good-soft: #1c3127; --success: #7cc79c; --success-soft: #1c3127;
+  --warn: #e7c07a; --warn-soft: #362b17; --warning: #e7c07a; --warning-soft: #362b17;
+  --bad: #ef8f88; --bad-soft: #3a2223; --danger: #ef8f88; --danger-soft: #3a2223;
+  --side: #161b25; --side-2: #1a1f2b; --side-ink: #aab2c3; --side-mute: #7d869a;
+  --nav-bg: #161b25; --nav-ink: #aab2c3; --nav-muted: #7d869a;
+  --surface-brand: #1f2740;
+  --shadow: none; --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --topbar-bg: rgba(18, 22, 31, 0.88); --fill-ink: #12161f;
+}
+
+/* ---------- Tipografika: yengilroq ---------- */
+h1 { font-weight: 800; font-size: 25px; letter-spacing: -0.01em; }
+h2 { font-weight: 700; font-size: 16px; letter-spacing: 0; }
+h3 { font-weight: 600; font-size: 14px; }
+.stat .v, .ru-stat__value, .ru-ring__value { font-weight: 700; letter-spacing: -0.015em; }
+.big-pct, .gauge-c b { font-weight: 700; }
+td > b, td b, .person .nm { font-weight: 600; }
+
+/* ---------- Yon menyu: och, tinch ---------- */
+.side { background: var(--side); border-right: 1px solid var(--line); }
+.brand-mark { background: var(--brand); box-shadow: none; }
+.side-brand b { color: var(--ink); }
+.side-brand small { color: var(--side-mute); }
+.nav-group { text-transform: none; letter-spacing: 0; font-size: 12.5px; font-weight: 500; color: var(--side-mute); }
+.nav a { color: var(--side-ink); }
+.nav a .ico { opacity: 0.75; }
+.nav a:hover { background: rgba(74, 98, 184, 0.06); color: var(--ink); }
+.nav a.active { background: var(--side-2); color: var(--brand); font-weight: 600; box-shadow: 0 1px 2px rgba(28, 37, 64, 0.06); }
+.nav a.active .ico { opacity: 1; color: var(--brand); }
+.nav a.active::before { display: none; }
+.nav .count { background: var(--accent-soft); color: var(--accent-text); }
+.side-foot { border-top-color: var(--line); }
+.side-foot button { background: var(--side-2); border-color: var(--line); color: var(--side-ink); }
+.side-foot button:hover { background: var(--side-2); border-color: var(--line-strong); color: var(--ink); }
+:root[data-theme='dark'] .nav a:hover { background: rgba(255, 255, 255, 0.04); }
+
+/* Dizayn tizimidagi yon menyu komponenti ham shunday */
+.ru-side { border-right: 1px solid var(--line); }
+.ru-side__name b { color: var(--ink); }
+.ru-side__brand .ru-side__name b { font-weight: 700; }
+.ru-side__item:hover { background: rgba(74, 98, 184, 0.06); color: var(--ink); }
+.ru-side__item.is-active { background: var(--surface); color: var(--primary-text); }
+.ru-side__item.is-active .ru-icon { color: var(--primary-text); }
+.ru-side__item:focus-visible { outline-color: var(--focus); }
+.ru-side__count { background: var(--accent-soft); color: var(--accent-text); }
+.ru-side__user { border-top-color: var(--line); }
+
+/* ---------- Yuqori panel ---------- */
+.topbar { border-bottom-color: transparent; }
+
+/* ---------- Kartalar: chegara yengil, soya yo'q ---------- */
+.panel { border-color: var(--line); box-shadow: var(--shadow); }
+.panel-head { border-bottom-color: var(--line-2); }
+.today-card, .ru-stat, .ru-table-wrap { border-color: var(--line); box-shadow: var(--shadow); }
+th { background: transparent; color: var(--ink-3); font-weight: 500; }
+.group-row td { text-transform: none; letter-spacing: 0; font-size: 12.5px; font-weight: 600; }
+
+/* ---------- Tugmalar: tekis, soyasiz ---------- */
+.btn { box-shadow: none; font-weight: 600; }
+.btn.primary { box-shadow: none; }
+.ru-btn { font-weight: 600; }
+.hub-tabs a.on, .work-tabs button.on { font-weight: 600; }
+.hub-tabs { border-color: var(--line); }
+
+/* ---------- «Bugun» bloki: to'q emas, yumshoq havo rangi ---------- */
+.today-hero { background: var(--surface-brand); color: var(--ink); }
+.today-hello h1 { color: var(--ink); font-weight: 800; }
+.today-hello p { color: var(--ink-2); }
+.today-hello p b { color: var(--accent-text); }
+.ru-ring--on-brand .ru-ring__track { stroke: rgba(54, 81, 184, 0.16); }
+.ru-ring--on-brand .ru-ring__value { color: var(--ink); }
+.ru-ring--on-brand .ru-ring__sub { color: var(--ink-3); }
+.ru-reward--on-brand { background: var(--surface); color: var(--ink); }
+.ru-reward--on-brand.ru-reward--points .ru-icon { color: var(--accent-text); }
+.ru-reward--on-brand.ru-reward--badge .ru-icon { color: var(--ink-3); }
+:root[data-theme='dark'] .ru-ring--on-brand .ru-ring__track { stroke: rgba(255, 255, 255, 0.1); }
+
+/* ---------- Mayda detallar ---------- */
+.toast::before { background: var(--accent); color: #fff; }
+.cmd-overlay, .app.adm.menu-open .menu-backdrop { background: rgba(38, 48, 74, 0.28); }
+
+/* ===================== 2-qism: Zumrad ===================== */
+
+:root {
+  --bg: #eef3f0; --panel: #ffffff; --surface: #ffffff;
+  --sunken: #f4f7f5; --surface-sunken: #e8efeb; --muted-soft: #e8efeb; --hover: #f0f6f2;
+  --ink: #10241c; --ink-2: #44554d; --ink-3: #5c6c64; --ink-muted: #44554d; --ink-subtle: #5c6c64;
+  --line: #dde6e1; --line-2: #e7eee9; --line-strong: #7f9188;
+  --brand: #1d6b4f; --brand-2: #175a42; --brand-soft: #dcefe5; --brand-line: #b6dcc8; --callout-ink: #175a42;
+  --primary: #1d5c45; --primary-hover: #164a37; --primary-soft: #dcefe5; --primary-text: #1d6b4f; --focus: #1d6b4f;
+  --teal: #1f7a55; --teal-soft: #dcefe5; --teal-line: #b6dcc8;
+  --accent: #3fae7f; --accent-text: #1f7a55; --accent-soft: #dcefe5; --accent-on-brand: #a6ebc6;
+  --reward: #e0a23c;
+  --good: #1f7a4d; --good-soft: #e2f2e8; --success: #1f7a4d; --success-soft: #e2f2e8;
+  --warn: #8a5a12; --warn-soft: #fbefd6; --warning: #8a5a12; --warning-soft: #fbefd6;
+  --side: #e6eee9; --side-2: #d5ede0; --side-ink: #3c4d45; --side-mute: #6b7a72;
+  --nav-bg: #e6eee9; --nav-ink: #3c4d45; --nav-muted: #6b7a72;
+  --hero-from: #22684e; --hero-to: #123f30; --hero-ink: #ffffff; --hero-sub: #cfe5da; --mint: #a6ebc6;
+  --shadow: 0 1px 2px rgba(16, 36, 28, 0.04);
+  --shadow-md: 0 10px 30px rgba(16, 36, 28, 0.10);
+  --ring: 0 0 0 3px rgba(29, 107, 79, 0.18);
+  --topbar-bg: rgba(238, 243, 240, 0.88);
+  --radius: 20px; --radius-lg: 20px; --radius-xl: 24px;
+}
+
+:root[data-theme='dark'] {
+  --bg: #12201b; --panel: #1a2a24; --surface: #1a2a24;
+  --sunken: #162520; --surface-sunken: #22352d; --muted-soft: #22352d; --hover: #20332b;
+  --ink: #e9f2ed; --ink-2: #a9bbb1; --ink-3: #8ea198; --ink-muted: #a9bbb1; --ink-subtle: #8ea198;
+  --line: #2a3d35; --line-2: #22352d; --line-strong: #5c7268;
+  --brand: #9ee0bd; --brand-2: #c0eed5; --brand-soft: #24443a; --brand-line: #35604f; --callout-ink: #c0eed5;
+  --primary: #2f7d5f; --primary-hover: #389070; --primary-soft: #24443a; --primary-text: #9ee0bd; --focus: #9ee0bd;
+  --teal: #9ee0bd; --teal-soft: #1f3a31; --accent: #6fd2a2; --accent-text: #9ee0bd; --accent-soft: #1f3a31; --accent-on-brand: #a6ebc6;
+  --good: #8fd6ad; --good-soft: #1d3528; --success: #8fd6ad; --success-soft: #1d3528;
+  --side: #15241e; --side-2: #24443a; --side-ink: #a9bbb1; --side-mute: #7d9087;
+  --nav-bg: #15241e; --nav-ink: #a9bbb1; --nav-muted: #7d9087;
+  --hero-from: #1f5a45; --hero-to: #143a2e;
+  --shadow: none; --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --topbar-bg: rgba(18, 32, 27, 0.88); --fill-ink: #12201b;
+}
+
+/* ---------- Tipografika: iOS'dagi kabi katta, zich sarlavhalar ---------- */
+h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; }
+h2 { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; }
+h3 { font-weight: 700; letter-spacing: -0.01em; }
+.stat .v, .ru-stat__value { font-weight: 800; letter-spacing: -0.03em; }
+
+/* ---------- Yon menyu: faol band yalpiz rangli pill ---------- */
+.side { border-right-color: transparent; }
+.brand-mark { background: linear-gradient(150deg, #3a8a68 0%, #165a42 100%); border-radius: 11px; }
+.side-brand b { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.03em; font-size: 18px; }
+.nav a { border-radius: 999px; padding: 9px 14px; }
+.nav a.active { background: var(--side-2); color: var(--primary-text); box-shadow: none; }
+.nav a.active .ico { color: var(--primary-text); }
+.nav a:hover { background: rgba(29, 92, 69, 0.06); }
+.ru-side__item { border-radius: 999px; }
+.ru-side__item.is-active { background: var(--side-2); }
+:root[data-theme='dark'] .nav a.active { color: var(--mint); }
+
+/* ---------- Kartalar: oq, katta radius, nozik chegara ---------- */
+.panel, .today-card, .ru-stat, .ru-table-wrap { border-color: var(--line); border-radius: 20px; box-shadow: var(--shadow); }
+.today-links a { border-radius: 18px; min-height: 52px; }
+.hub-tabs { border-radius: 999px; }
+.hub-tabs a, .work-tabs button { border-radius: 999px; }
+.stat .ico-box { border-radius: 10px; }
+
+/* ---------- Tugmalar: pill ---------- */
+.btn, .ru-btn, .theme-btn, .menu-btn, .cmd-open, .mode-switch, .mode-switch button { border-radius: 999px; }
+.btn { padding: 7px 15px; }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn.primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+.mode-switch button.on { color: var(--primary-text); background: var(--side-2); box-shadow: none; }
+:root[data-theme='dark'] .mode-switch button.on { color: var(--mint); }
+
+/* ---------- «Bugun» asosiy bloki: to'q zumrad, yalpiz halqa ---------- */
+.today-hero {
+  position: relative; overflow: hidden; color: var(--hero-ink); border-radius: 24px; padding: 22px;
+  background:
+    radial-gradient(circle at 92% 115%, transparent 0 34%, rgba(255, 255, 255, 0.05) 34% 46%, transparent 46%),
+    radial-gradient(circle at 70% -30%, transparent 0 38%, rgba(255, 255, 255, 0.05) 38% 47%, transparent 47%),
+    linear-gradient(135deg, var(--hero-from) 0%, var(--hero-to) 100%);
+  box-shadow: 0 14px 34px rgba(18, 63, 48, 0.22);
+}
+.today-hello h1 { color: var(--hero-ink); font-size: 30px; letter-spacing: -0.035em; }
+.today-hello p { color: var(--hero-sub); }
+.today-hello p b { color: var(--mint); }
+.today-hero .ru-ring__track { stroke: rgba(255, 255, 255, 0.14); }
+.today-hero .ru-ring__fill { stroke: var(--mint); }
+.today-hero .ru-ring__value { color: var(--hero-ink); font-weight: 800; letter-spacing: -0.03em; }
+.today-hero .ru-ring__sub { color: var(--hero-sub); }
+.today-hero .ru-reward { background: rgba(255, 255, 255, 0.10); color: var(--hero-ink); border-radius: 999px; }
+.today-hero .ru-reward--points .ru-icon { color: var(--mint); }
+.today-hero .ru-reward--badge .ru-icon { color: var(--hero-sub); }
+.today-hero .ru-reward--streak .ru-icon { color: var(--reward); }
+.today-mentor { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; }
+.today-mentor .ru-avatar { background: var(--primary-soft); color: var(--primary-text); }
+.ru-step__node--current { background: var(--primary); box-shadow: 0 0 0 6px var(--primary-soft); }
+
+/* ---------- Telefon pastki menyusi ---------- */
+.ru-tabbar { border-radius: 28px; }
+.ru-tabbar__item { border-radius: 20px; }
+.ru-tabbar__item.is-active { background: var(--side-2); color: var(--primary-text); }
+:root[data-theme='dark'] .ru-tabbar__item.is-active { color: var(--mint); }
+
+/* ---------- Mayda ---------- */
+.cmd-overlay, .app.adm.menu-open .menu-backdrop { background: rgba(16, 36, 28, 0.32); }
+::selection { background: var(--brand-line); }
+
+/* ===================== 3-qism: yakuniy tuzatishlar ===================== */
+/* Muvaffaqiyat holati brenddan farq qilsin: zumrad emas, barg-yashil, va ✓ belgisi */
+:root {
+  --good: #3d7a1e; --good-soft: #ecf4de; --good-line: #cfe3ad; --good-tint: #f6faee;
+  --success: #3d7a1e; --success-soft: #ecf4de;
+}
+:root[data-theme='dark'] {
+  --good: #b5dc84; --good-soft: #27341b; --good-line: #44602a; --good-tint: #1d2a17;
+  --success: #b5dc84; --success-soft: #27341b;
+}
+.pill.good::before {
+  content: '✓'; width: auto; height: auto; border-radius: 0; background: none; opacity: 1;
+  font-size: 11px; font-weight: 800; line-height: 1;
+}
+
+/* Jadval va ish ro'yxatidagi tugmalar — kamroq yumaloq, zich qatorlarda tinch ko'rinadi */
+td .btn, .work-group .btn, .ru-table .ru-btn, .ru-task .ru-btn { border-radius: 10px; }
