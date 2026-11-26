@@ -8,9 +8,32 @@ RegUP LMS'ning ishlaydigan demo-prototipi. RegUP — ichki akademiya, ya'ni tizi
 cd app
 npm install
 npm run dev      # http://localhost:5180
-npm test         # 15 ta UAT + hisoblash, ish oqimi va onboarding tizimi testlari (56 ta)
+npm test         # 15 ta UAT + hisoblash, ish oqimi va onboarding tizimi testlari (79 ta)
 npm run build    # dist/ — statik sayt, istalgan hostingga qo'yiladi
 ```
+
+## Joylash va orqaga qaytarish
+
+Sayt uch joyda turadi: GitHub Pages (ochiq demo), `main` branch (manba kod) va Claude artifact. Har bir joylash versiya tegi oladi: `vYYYY.MM.DD-N` manba kodga, `pages-vYYYY.MM.DD-N` o'sha build'ga.
+
+```bash
+npm run check        # testlar + build + 89 ta sahifa holatini avtomatik tekshirish; hech narsa joylanmaydi
+npm run release      # check o'tsa: main'ga push, versiya tegi, build gh-pages'ga
+npm run rollback     # versiyalar ro'yxati
+npm run rollback -- v2026.11.26-1            # ochiq saytni shu versiyaga qaytarish
+npm run rollback -- v2026.11.26-1 --source   # manba kodni ham qaytarish
+```
+
+Tartib:
+
+1. O'zgarish qilinadi va commit qilinadi.
+2. `npm run check` ishga tushiriladi. Build alohida **sinov artifacti** («RegUP demo — sinov», faqat egasiga ko'rinadi) ga joylanadi va ko'rib chiqiladi.
+3. Tasdiqlangandan keyin `npm run release`, so'ng asosiy Claude artifact `dist/` bilan yangilanadi.
+4. Muammo chiqsa, `npm run rollback -- <oldingi versiya>`. Asosiy artifact `dist-rollback/` dagi fayllar bilan qaytariladi.
+
+Qaytarish hech narsani o'chirmaydi: tarixga yangi commit qo'shiladi, shuning uchun keyin yana oldinga o'tish mumkin. Biror tekshiruv xato bersa, `release` to'xtaydi va ochiq sayt eski holatda qoladi.
+
+Avtomatik tekshiruv (`scripts/smoke.mjs`) admin va xodimning asosiy sahifalarini yorug' va qorong'i temada, kompyuter va telefon o'lchamida ochadi. U JS xatolari, bo'sh sahifa, «Sahifa topilmadi» va ekrandan kengayib ketgan sahifani ushlaydi. Buning uchun Playwright kerak (`devDependencies` da bor, Chromium bir marta `npx playwright install chromium` bilan o'rnatiladi).
 
 ## Nimalar bor
 
