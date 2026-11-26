@@ -51,6 +51,7 @@ import SurveyLink from './pages/SurveyLink.jsx';
 import Today from './pages/Today.jsx';
 import { TabBar, CommandPalette, DsIcon } from './ui/ds.jsx';
 import { useEffect, useState } from 'react';
+import { currentTheme, setTheme } from './ui/theme.js';
 import { kpiValue, kpiResult, kpiMonths } from './core/domain.js';
 import * as D from './core/domain.js';
 import { OTHER_POSITIONS } from './core/modelKit.js';
@@ -236,8 +237,11 @@ export default function App() {
   const [p0, p1] = parts;
   const admin = session.mode === 'admin';
   const [cmd, setCmd] = useState(false);
+  const [theme, setThemeState] = useState(currentTheme);
+  const [menu, setMenu] = useState(false);
+  useEffect(() => { setMenu(false); }, [p0, p1]);
   useEffect(() => {
-    const onKey = (e) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setCmd((v) => !v); } };
+    const onKey = (e) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setCmd((v) => !v); } if (e.key === 'Escape') setMenu(false); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
@@ -323,8 +327,9 @@ export default function App() {
   const tabIdx = EMP_TABS.findIndex((t) => t.match.includes(p0 || ''));
 
   return (
-    <div className={`app ${admin ? 'adm' : 'emp'}`}>
-      <aside className="side">
+    <div className={`app ${admin ? 'adm' : 'emp'}${menu ? ' menu-open' : ''}`}>
+      {admin && menu && <div className="menu-backdrop" onClick={() => setMenu(false)} aria-hidden="true" />}
+      <aside className="side" id="admin-menu" aria-label="Admin menyusi">
         <div className="side-brand">
           <BrandMark />
           <div>
@@ -340,11 +345,21 @@ export default function App() {
       </aside>
       <div className="main">
         <header className="topbar">
+          {admin && (
+            <button className="menu-btn" onClick={() => setMenu((v) => !v)} aria-label={menu ? 'Menyuni yopish' : 'Menyuni ochish'} aria-expanded={menu} aria-controls="admin-menu">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">{menu ? <path d="M6 6l12 12M18 6 6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}</svg>
+            </button>
+          )}
           <div className="mode-switch">
             <button className={admin ? 'on' : ''} title="HR, baholovchi va rahbar uchun" onClick={() => { setSession({ mode: 'admin' }); go(`/${firstRoute(user)}`); }}>Admin</button>
             <button className={!admin ? 'on' : ''} title="Xodim o‘z kabinetini qanday ko‘radi" onClick={() => { setSession({ mode: 'employee' }); go('/'); }}>Xodim</button>
           </div>
           <button className="cmd-open" onClick={() => setCmd(true)} aria-label="Qidirish (⌘K)"><DsIcon name="search" size={16} /><span className="cmd-txt">Qidirish</span><kbd>⌘K</kbd></button>
+          <button className="theme-btn" onClick={() => setThemeState(setTheme(theme === 'dark' ? 'light' : 'dark'))} aria-label={theme === 'dark' ? 'Yorug‘ temaga o‘tish' : 'Qorong‘i temaga o‘tish'} title={theme === 'dark' ? 'Yorug‘ tema' : 'Qorong‘i tema'}>
+            {theme === 'dark'
+              ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+              : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>}
+          </button>
           <button className="btn sm" style={{ marginLeft: 'auto', order: 9 }} title="Kirish ekrani: Telegram, SMS kod yoki login va parol" onClick={() => setSession({ loggedOut: true })}>Chiqish</button>
           {admin ? (
             <label className="who" title="Har bir admin o‘ziga berilgan huquqlar va doira bo‘yicha ishlaydi">

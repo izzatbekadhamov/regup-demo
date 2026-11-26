@@ -202,3 +202,30 @@
 .work-group-head .c { color: var(--ink-subtle); }
 .count-pill { font-size: 12px; font-weight: 700; background: var(--accent-soft); color: var(--accent-text); border-radius: 999px; padding: 0 8px; line-height: 20px; }
 @media (max-width: 700px) { .cmd-open .cmd-txt, .cmd-open kbd { display: none; } .cmd-open { padding: 0 11px; } }
+
+/* ---------- Tema tugmasi va admin telefon menyusi ---------- */
+.theme-btn, .menu-btn { display: inline-grid; place-items: center; width: 38px; height: 38px; flex: none; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink-muted); cursor: pointer; }
+.theme-btn:hover, .menu-btn:hover { border-color: var(--line-strong); color: var(--ink); }
+.theme-btn:focus-visible, .menu-btn:focus-visible, .cmd-open:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.menu-btn { display: none; }
+.menu-backdrop { display: none; }
+@media (max-width: 700px) {
+  .menu-btn { display: inline-grid; }
+  .app.adm .side { display: none; }
+  .app.adm.menu-open .side {
+    display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; width: min(300px, 86vw); height: 100vh; z-index: 50;
+    padding: 18px 12px 14px; overflow-y: auto; box-shadow: var(--shadow-md);
+  }
+  .app.adm.menu-open .side .nav { display: block; overflow: visible; }
+  .app.adm.menu-open .side .nav > div { display: block; }
+  .app.adm.menu-open .side .nav a { padding: 10px; font-size: 15px; min-height: 44px; }
+  .app.adm.menu-open .side .nav-group { display: block; }
+  .app.adm.menu-open .side .side-brand small { display: block; }
+  .app.adm.menu-open .side .side-foot { display: grid; }
+  .app.adm.menu-open .menu-backdrop { display: block; position: fixed; inset: 0; z-index: 45; background: rgba(14, 23, 51, 0.45); }
+  .theme-btn, .menu-btn, .cmd-open { width: 40px; height: 40px; }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 700px) {
+  .app.adm.menu-open .side { animation: drawer-in 0.18s ease-out; }
+  @keyframes drawer-in { from { transform: translateX(-100%); } }
+}
