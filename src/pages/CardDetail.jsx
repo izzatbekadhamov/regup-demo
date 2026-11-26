@@ -479,7 +479,7 @@ export default function CardDetail({ id, user }) {
                     const evCount = c.composite ? Object.keys(card.hrScores).length : card.scores[c.code]?.evidences?.length || 0;
                     const evM = context.evidenceMethods?.[c.code]?.length || 0;
                     return [
-                      <tr key={c.code} id={`row-${c.code}`} className={`clickable ${isOpen ? 'open' : ''} ${it.state === 'unrated' ? 'todo' : ''}`} onClick={() => setOpen(isOpen ? null : c.code)}>
+                      <tr key={c.code} id={`row-${c.code}`} className={`clickable ${isOpen ? 'open' : ''} ${it.state === 'unrated' ? 'todo-row' : ''}`} onClick={() => setOpen(isOpen ? null : c.code)}>
                         <td><span className="chev">{isOpen ? '−' : '+'}</span> <span className="code">{c.code}</span> {c.name}{D.sharedLayers(model).includes(c.layer) && D.cardSections(s, card).length > 1 && <span className="pill teal" style={{ marginLeft: 6 }} title="Korporativ kompetensiya ikkala rol bo‘limida bir marta baholanadi">umumiy</span>}{c.composite && <div className="muted small" style={{ marginLeft: 18 }}>{compositeParts(model, c.code).length} qism · {Object.keys(card.hrScores).length} baho</div>}</td>
                         <td className="num">{it.target}</td>
                         <td className="num">{it.state === 'unrated' ? <span className="pill muted">baholanmagan</span> : <ScoreChip v={it.score} target={it.target} />}</td>

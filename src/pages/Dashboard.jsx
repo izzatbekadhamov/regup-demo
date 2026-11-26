@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import * as D from '../core/domain.js';
+import { DsButton, DsBadge } from '../ui/ds.jsx';
 import { useAppState } from '../state/store.js';
 import { Panel, Stat, Pill, Person, Meter, go, fmtDate } from '../ui/common.jsx';
 import { cardDecision, getEmployee, getModel, getBranch, monthName } from '../core/domain.js';
@@ -10,6 +12,7 @@ import { profileThreshold } from '../core/modelKit.js';
 
 export default function Dashboard() {
   const s = useAppState();
+  const [tab, setTab] = useState('all');
   const active = s.cards.filter((c) => c.stage !== 'closed');
   const published = active.filter((c) => c.stage === 'published');
   const decisions = active.map((c) => ({ c, d: cardDecision(s, c) }));
@@ -40,69 +43,87 @@ export default function Dashboard() {
   const todo = [];
   for (const { c, d } of decisions) {
     if (c.stage === 'published') {
-      if (c.panel?.decision === 'appoint' && !c.appointment) todo.push({ key: c.id, tone: 'warn', who: getEmployee(s, c.employeeId).name, what: 'Rasmiy tayinlash hujjatini kiriting', go: `/cards/${c.id}` });
+      if (c.panel?.decision === 'appoint' && !c.appointment) todo.push({ key: c.id, grp: 'decide', act: 'Hujjat kiritish', who: getEmployee(s, c.employeeId).name, what: 'Rasmiy tayinlash hujjatini kiriting', go: `/cards/${c.id}` });
       continue;
     }
     const e = getEmployee(s, c.employeeId).name;
     const late = c.deadline && c.deadline < s.today;
     const unrated = d.match.counts.unrated;
-    let what;
-    if (unrated) what = `${unrated} ta kompetensiya baholanmagan`;
-    else if (d.status === 'de') what = 'Dalil yetarli emas — qo‘shimcha dalil yig‘ing';
-    else if (c.stage === 'panel' && !c.panel) what = 'Panel protokolini kiriting';
-    else what = `Keyingi bosqichga o‘tkazing (${STAGE_LABELS[c.stage]})`;
-    todo.push({ key: c.id, tone: late ? 'bad' : 'brand', who: e, what, late, go: `/cards/${c.id}` });
+    let what; let act = 'Kartani ochish';
+    if (unrated) { what = `${unrated} ta kompetensiya baholanmagan`; act = 'Baholash'; }
+    else if (d.status === 'de') { what = 'Dalil yetarli emas — qo‘shimcha dalil yig‘ing'; act = 'Dalil so‘rash'; }
+    else if (c.stage === 'panel' && !c.panel) { what = 'Panel protokolini kiriting'; act = 'Protokol kiritish'; }
+    else { what = `Keyingi bosqichga o‘tkazing (${STAGE_LABELS[c.stage]})`; act = 'Bosqichni o‘tkazish'; }
+    todo.push({ key: c.id, grp: late ? 'late' : 'assess', act, who: e, what, late, go: `/cards/${c.id}` });
   }
-  for (const st of s.stretches.filter((x) => x.status === 'submitted')) todo.push({ key: st.id, tone: 'brand', who: getEmployee(s, st.employeeId).name, what: `Stretch dalilini ko‘rib chiqing: «${st.title}»`, go: `/stretch/${st.id}` });
+  for (const st of s.stretches.filter((x) => x.status === 'submitted')) todo.push({ key: st.id, grp: 'decide', act: 'Ko‘rib chiqish', who: getEmployee(s, st.employeeId).name, what: `Stretch dalilini ko‘rib chiqing: «${st.title}»`, go: `/stretch/${st.id}` });
   const idpNew = s.idp.filter((x) => x.status === 'proposed');
-  if (idpNew.length) todo.push({ key: 'idp-new', tone: 'brand', who: `${idpNew.length} ta vazifa`, what: 'Rivojlanish rejasi takliflarini tasdiqlang (tizim va xodim takliflari)', go: '/idp' });
+  if (idpNew.length) todo.push({ key: 'idp-new', grp: 'decide', act: 'Tasdiqlash', who: `${idpNew.length} ta vazifa`, what: 'Rivojlanish rejasi takliflarini tasdiqlang (tizim va xodim takliflari)', go: '/idp' });
   const idpRev = s.idp.filter((x) => x.status === 'review');
-  if (idpRev.length) todo.push({ key: 'idp-rev', tone: 'brand', who: `${idpRev.length} ta vazifa`, what: 'Xodimlar bajargan rivojlanish vazifalarini tekshiring', go: '/idp' });
+  if (idpRev.length) todo.push({ key: 'idp-rev', grp: 'decide', act: 'Tekshirish', who: `${idpRev.length} ta vazifa`, what: 'Xodimlar bajargan rivojlanish vazifalarini tekshiring', go: '/idp' });
   const taskRev = (s.enrollments || []).filter((e) => !D.getCourse(s, e.courseId)?.onboarding).reduce((a, e) => a + Object.values(e.progress).filter((p) => p.status === 'pending').length, 0);
-  if (taskRev) todo.push({ key: 'crs-rev', tone: 'brand', who: `${taskRev} ta topshiriq`, what: 'Kurslardagi amaliy topshiriqlarga mentor xulosasini bering', go: '/courses' });
+  if (taskRev) todo.push({ key: 'crs-rev', grp: 'assess', act: 'Baholash', who: `${taskRev} ta topshiriq`, what: 'Kurslardagi amaliy topshiriqlarga mentor xulosasini bering', go: '/courses' });
   const pendingEv = s.evidenceQueue.filter((x) => x.status === 'pending');
-  if (pendingEv.length) todo.push({ key: 'ev', tone: 'brand', who: `${pendingEv.length} ta dalil`, what: 'Xodimlar yuborgan qo‘shimcha dalillarni tekshiring', go: '/evidence' });
-  for (const [m, x] of Object.entries(s.kpiInbox || {})) todo.push({ key: `kpi-${m}`, tone: 'warn', who: `${x.rows.length} ustoz`, what: `${monthName(m)} KPI hisoboti tayyor — natijalarni oling, chegaradan pastlarga kurs biriktiriladi`, go: '/teachers' });
+  if (pendingEv.length) todo.push({ key: 'ev', grp: 'decide', act: 'Tekshirish', who: `${pendingEv.length} ta dalil`, what: 'Xodimlar yuborgan qo‘shimcha dalillarni tekshiring', go: '/evidence' });
+  for (const [m, x] of Object.entries(s.kpiInbox || {})) todo.push({ key: `kpi-${m}`, grp: 'decide', act: 'Natijani olish', who: `${x.rows.length} ustoz`, what: `${monthName(m)} KPI hisoboti tayyor — natijalarni oling, chegaradan pastlarga kurs biriktiriladi`, go: '/teachers' });
   const skillClaims = (s.empSkills || []).filter((x) => x.claim).length;
-  if (skillClaims) todo.push({ key: 'skills', tone: 'brand', who: `${skillClaims} ta ko‘nikma`, what: 'Xodimlar dalil bilan yuborgan ko‘nikmalarni tasdiqlang', go: '/skills' });
+  if (skillClaims) todo.push({ key: 'skills', grp: 'decide', act: 'Tasdiqlash', who: `${skillClaims} ta ko‘nikma`, what: 'Xodimlar dalil bilan yuborgan ko‘nikmalarni tasdiqlang', go: '/skills' });
   // Moslashuv (onboarding)
-  if (s.hrInbox?.length) todo.push({ key: 'hr-inbox', tone: 'warn', who: `${s.hrInbox.length} ta hodisa`, what: 'Jobster/Edu integratsiya navbati: yangi xodimlar, arxiv va qaytish', go: '/integration' });
-  for (const ob of (s.onboardings || []).filter((o) => o.status === 'active' && (D.onboardingScore(s, o).ready || D.onbDay(s, o) >= D.obDays(s, o)))) todo.push({ key: `onb-${ob.id}`, tone: 'brand', who: getEmployee(s, ob.employeeId).name, what: 'Moslashuv dasturi yakunlandi — onboarding bahosini tasdiqlang (filial rahbari)', go: `/onboarding/${ob.id}` });
+  if (s.hrInbox?.length) todo.push({ key: 'hr-inbox', grp: 'info', act: 'Navbatni ochish', who: `${s.hrInbox.length} ta hodisa`, what: 'Jobster/Edu integratsiya navbati: yangi xodimlar, arxiv va qaytish', go: '/integration' });
+  for (const ob of (s.onboardings || []).filter((o) => o.status === 'active' && (D.onboardingScore(s, o).ready || D.onbDay(s, o) >= D.obDays(s, o)))) todo.push({ key: `onb-${ob.id}`, grp: 'decide', act: 'Tasdiqlash', who: getEmployee(s, ob.employeeId).name, what: 'Moslashuv dasturi yakunlandi — onboarding bahosini tasdiqlang (filial rahbari)', go: `/onboarding/${ob.id}` });
   const onbTasks = (s.enrollments || []).filter((e) => D.getCourse(s, e.courseId)?.onboarding && e.status !== 'archived').reduce((a, e) => a + Object.values(e.progress).filter((p) => p.status === 'pending').length, 0);
-  if (onbTasks) todo.push({ key: 'onb-tasks', tone: 'brand', who: `${onbTasks} ta topshiriq`, what: 'Moslashuv kursidagi topshiriqni baholang (1–5) — mentor yoki kurator', go: '/tasks' });
+  if (onbTasks) todo.push({ key: 'onb-tasks', grp: 'assess', act: 'Baholash', who: `${onbTasks} ta topshiriq`, what: 'Moslashuv kursidagi topshiriqni baholang (1–5) — mentor yoki kurator', go: '/tasks' });
   const rem = D.dueReminders(s).filter((r) => !s.notifications.some((n) => n.key.startsWith(r.key)));
-  if (rem.length) todo.push({ key: 'rem', tone: 'warn', who: `${rem.length} ta xodim`, what: 'Bugungi kurs eslatmalari (platforma + Telegram) yuborilmagan', go: '/reminders' });
-  todo.sort((a, b) => (b.late ? 1 : 0) - (a.late ? 1 : 0));
+  if (rem.length) todo.push({ key: 'rem', grp: 'info', act: 'Yuborish', who: `${rem.length} ta xodim`, what: 'Bugungi kurs eslatmalari (platforma + Telegram) yuborilmagan', go: '/reminders' });
+  const GROUPS = [
+    ['late', 'Muddati o‘tgan', 'var(--danger)'],
+    ['decide', 'Qaroringiz kerak', 'var(--primary)'],
+    ['assess', 'Baholash kerak', 'var(--accent)'],
+    ['info', 'Ma’lumot uchun', 'var(--line-strong)'],
+  ].map(([k, title, color]) => ({ k, title, color, rows: todo.filter((t) => t.grp === k) })).filter((g) => g.rows.length);
+  const shownGroups = tab === 'all' ? GROUPS : GROUPS.filter((g) => g.k === tab);
+  const lateN = todo.filter((t) => t.grp === 'late').length;
+  const decideN = todo.filter((t) => t.grp === 'decide').length;
 
   return (
     <>
       <div className="page-head">
         <div>
-          <h1>Bosh panel</h1>
-          <p>2026 kuz sikli: kimni baholash kerak, kim qaysi bosqichda va kim keyingi darajaga tayyor.</p>
+          <h1>{todo.length ? `Bugun ${todo.length} ta ish sizni kutmoqda` : 'Bugun kutayotgan ish yo‘q'}</h1>
+          <p>{lateN ? `Shulardan ${lateN} tasining muddati o‘tgan` : 'Muddati o‘tgan ish yo‘q'}{decideN ? `, ${decideN} tasi sizning qaroringizni kutyapti.` : '.'} 2026 kuz sikli.</p>
         </div>
       </div>
-      <Panel title={<div className="row"><h2>Sizni kutayotgan ishlar</h2><Pill tone={todo.some((t) => t.late) ? 'bad' : 'brand'}>{todo.length}</Pill></div>} tight>
-        {todo.length ? (
-          <div className="todo-list">
-            {todo.map((t) => (
-              <button key={t.key} className="todo" onClick={() => go(t.go)}>
-                <span className={`dot-ic ${t.tone}`} />
-                <b>{t.who}</b>
-                <span className="ink2">{t.what}</span>
-                {t.late && <Pill tone="bad">muddati o‘tgan</Pill>}
-                <span className="todo-go">Ochish →</span>
-              </button>
-            ))}
-          </div>
-        ) : <div className="empty">Hozircha kutayotgan ish yo‘q.</div>}
-      </Panel>
       <div className="grid g4">
         <Stat k="Baholash yakunlangan" v={coverage === null ? '—' : fmtPct(coverage)} s={`${published.length} ta karta e’lon qilingan, jami ${active.length}`} icon="cards" />
         <Stat k="Maqsad darajasiga yetgan baholar" v={reachedPct === null ? '—' : fmtPct(reachedPct)} s={`${numeric} ta bahodan ${reached} tasi maqsadda`} icon="target" tone="teal" />
         <Stat k="Dalil yetarli bo‘lmagan kartalar" v={deCount} s="Qo‘shimcha dalil yig‘ish kerak" icon="alert" tone={deCount ? 'warn' : 'good'} />
         <Stat k="Muddati o‘tgan kartalar" v={overdue.length} s={idpDue ? `${idpDue} ta rivojlanish vazifasi muddati yaqin` : 'Rivojlanish vazifalari muddatida'} icon="clock" tone={overdue.length ? 'bad' : 'good'} />
       </div>
+      <section className="panel" aria-label="Sizni kutayotgan ishlar">
+        {todo.length ? (
+          <>
+            <div className="work-tabs" role="tablist">
+              {[{ k: 'all', title: 'Hammasi', rows: todo }, ...GROUPS].map((g) => (
+                <button key={g.k} role="tab" aria-selected={tab === g.k} className={tab === g.k ? 'on' : ''} onClick={() => setTab(g.k)}>{g.title} <span className="muted">{g.rows.length}</span></button>
+              ))}
+            </div>
+            {shownGroups.map((g) => (
+              <div key={g.k} className="work-group">
+                <div className="work-group-head"><span className="dot" style={{ background: g.color }} /><h3>{g.title}</h3><span className="c">{g.rows.length}</span></div>
+                {g.rows.map((t) => (
+                  <div key={t.key} className="ru-task">
+                    <span className="ru-avatar ru-avatar--sm" aria-hidden="true">{/^[0-9]/.test(t.who) ? t.who.split(' ')[0] : t.who.split(' ').map((w) => w[0]).join('').slice(0, 2)}</span>
+                    <b className="ru-task__who">{t.who}</b>
+                    <span className="ru-task__what">{t.what}</span>
+                    {t.late && <DsBadge tone="danger">Muddati o‘tgan</DsBadge>}
+                    <DsButton size="sm" variant={g.k === 'late' ? 'primary' : g.k === 'decide' ? 'secondary' : 'ghost'} onClick={() => go(t.go)}>{t.act}</DsButton>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </>
+        ) : <div className="empty">Hozircha kutayotgan ish yo‘q.</div>}
+      </section>
       <div className="grid g12">
         <Panel title="Kartalar bosqichlar bo‘yicha">
           <div className="bars">
