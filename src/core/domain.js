@@ -1,6 +1,7 @@
 // Domen amallari: har bir amal holatning nusxasini o'zgartirib qaytaradi va auditga yozadi.
 // Prototipda server o'rnida ishlaydi; ishchi tizimda shu qoidalar server tomonida bajariladi.
 import { computeNewBranchKpi, computeRScope, resolveScores, isNum, DE, NA, checkActivityCap, computeMatch } from './calc.js';
+import { LANGUAGES, COLOR_FIELDS, LOGO_TEXT_MAX, IMAGE_MAX_BYTES, isHex, prefsOf } from './brand.js';
 import { evaluateDecision, validateModel } from './rules.js';
 import { scaleMax, isLevel, methodKind, compMethods, profileConditions } from './modelKit.js';
 
@@ -2129,6 +2130,7 @@ export const RIGHTS = [
   ['Tizim', [
     ['audit.view', 'O‘zgarishlar jurnali', 'Kim nimani o‘zgartirganini ko‘radi'],
     ['system.import', 'Import va qabul sinovlari', 'Exceldan import, UAT'],
+    ['system.brand', 'Ko‘rinish va tilni boshqarish', 'Logotip, tema, brend ranglari va platforma tillari'],
   ]],
 ];
 export const ALL_RIGHTS = RIGHTS.flatMap(([, list]) => list.map(([k]) => k));
@@ -3222,5 +3224,39 @@ export function addStaff(state, { employeeId, role, title = '', byId, actor = 'S
     s.staff.push({ id, role, name: emp.name, title: String(title).trim() || `${ROLE_LABEL[role]} — ${getBranch(s, emp.branchId)?.name || ''}`, employeeId: emp.id,
       branchIds: scope.branchIds || [], rights: ALL_RIGHTS.filter((r) => ok.includes(r)), scope, active: true, changedAt: s.today });
     log(s, by?.name || actor, 'Admin qo‘shildi', `${emp.name} · ${ROLE_LABEL[role]}`, { after: `${ok.length} ta huquq, doira: ${scopeText(s, scope)}${skipped.length ? `; berilmadi: ${skipped.map((r) => RIGHT_LABEL[r]).join(', ')}` : ''}` });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Ko'rinish va til (Exode «Оформление и бренд»): logotip, temalar, 3 ta brend rangi, 4 ta til.
+// ---------------------------------------------------------------------------
+export function savePreferences(state, { prefs, actor = 'Admin' }) {
+  return mutate(state, (s) => {
+    const p = prefs || {};
+    if (!['text', 'image'].includes(p.logoMode)) fail('Logotip turi noto‘g‘ri');
+    const text = String(p.logoText || '').trim();
+    if (p.logoMode === 'text' && !text) fail('Logotip matnini kiriting');
+    if (text.length > LOGO_TEXT_MAX) fail(`Logotip matni ${LOGO_TEXT_MAX} belgidan oshmasin`);
+    if (p.logoMode === 'image' && !p.logoImage) fail('Logotip rasmini yuklang yoki «Matn» turini tanlang');
+    for (const img of [p.logoImage, p.icon]) if (img && (typeof img !== 'string' || !img.startsWith('data:image/') || img.length > IMAGE_MAX_BYTES * 1.4)) fail('Rasm formati yoki hajmi to‘g‘ri kelmaydi');
+    if (!['both', 'light', 'dark'].includes(p.themes)) fail('Mavjud temalar noto‘g‘ri');
+    if (!['system', 'light', 'dark'].includes(p.defaultTheme)) fail('Standart tema noto‘g‘ri');
+    for (const t of ['light', 'dark']) for (const [k, l] of COLOR_FIELDS) if (!isHex(p.colors?.[t]?.[k])) fail(`${l}: #RRGGBB ko‘rinishidagi rang kiriting`);
+    const codes = (p.languages || []).map((x) => x.code);
+    if (codes.length !== LANGUAGES.length || LANGUAGES.some((l) => !codes.includes(l.code))) fail('Tillar ro‘yxati to‘liq emas');
+    if (!p.languages[0].on) fail('Asosiy til (ro‘yxatda birinchi) yoqilgan bo‘lishi kerak');
+    const before = prefsOf(s);
+    s.preferences = {
+      logoMode: p.logoMode, logoText: text, logoImage: p.logoImage || null, icon: p.icon || null,
+      themes: p.themes, defaultTheme: p.themes === 'both' ? p.defaultTheme : p.themes,
+      colors: { light: { ...p.colors.light }, dark: { ...p.colors.dark } },
+      languages: p.languages.map((x) => ({ code: x.code, on: !!x.on })),
+    };
+    const changed = [];
+    if (before.logoMode !== p.logoMode || before.logoText !== text || before.logoImage !== (p.logoImage || null) || before.icon !== (p.icon || null)) changed.push('logotip');
+    if (before.themes !== p.themes || before.defaultTheme !== s.preferences.defaultTheme) changed.push('temalar');
+    if (JSON.stringify(before.colors) !== JSON.stringify(s.preferences.colors)) changed.push('ranglar');
+    if (JSON.stringify(before.languages) !== JSON.stringify(s.preferences.languages)) changed.push('tillar');
+    log(s, actor, 'Ko‘rinish va til', changed.join(', ') || 'o‘zgarishsiz', { after: s.preferences.languages.filter((x) => x.on).map((x) => x.code).join(', ') });
   });
 }

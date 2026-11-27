@@ -9,7 +9,7 @@ const PORT = 5190;
 let base = arg('--url');
 let server = null;
 
-const ADMIN = ['', 'cards', 'cards/c-110', 'onb-dashboard', 'board', 'onboarding', 'tasks', 'integration', 'idp', 'courses', 'teachers', 'models', 'people', 'gamification'];
+const ADMIN = ['', 'cards', 'cards/c-110', 'onb-dashboard', 'board', 'onboarding', 'tasks', 'integration', 'idp', 'courses', 'teachers', 'models', 'people', 'gamification', 'preferences'];
 const EMP = ['', 'results', 'onboarding', 'learning', 'idp', 'career', 'rating', 'more'];
 const VIEWS = [
   { name: 'kompyuter', width: 1440, height: 900 },

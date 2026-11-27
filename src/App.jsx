@@ -49,9 +49,12 @@ import MySurveys from './pages/MySurveys.jsx';
 import MyMeetings from './pages/MyMeetings.jsx';
 import SurveyLink from './pages/SurveyLink.jsx';
 import Today from './pages/Today.jsx';
+import Preferences from './pages/Preferences.jsx';
+import { prefsOf, brandCss, enabledLangs, defaultLang, LANG_LABEL } from './core/brand.js';
+import { toast } from './state/store.js';
 import { TabBar, CommandPalette, DsIcon } from './ui/ds.jsx';
 import { useEffect, useState } from 'react';
-import { currentTheme, setTheme } from './ui/theme.js';
+import { currentTheme, setTheme, applyBrand, canToggleTheme } from './ui/theme.js';
 import { kpiValue, kpiResult, kpiMonths } from './core/domain.js';
 import * as D from './core/domain.js';
 import { OTHER_POSITIONS } from './core/modelKit.js';
@@ -87,6 +90,7 @@ const ROUTES = {
   audit: ['O‘zgarishlar jurnali', null, 'list'],
   import: ['Exceldan import', null, 'upload'],
   uat: ['Qabul sinovlari', null, 'check'],
+  preferences: ['Ko‘rinish va til', null, 'palette'],
 };
 
 // Bir jarayonning ichki sahifalari menyuda emas, bitta band ostida tab bo'ladi (UX audit, 4-topilma).
@@ -94,7 +98,7 @@ const HUBS = {
   queues: { label: 'Navbatlar', icon: 'inbox', routes: ['integration', 'tasks', 'observations', 'surveys', 'taskboard', 'meetings', 'reminders'] },
   reviews: { label: 'Tasdiqlash', icon: 'check', routes: ['stretch', 'evidence', 'skills'] },
   talent: { label: 'Iste’dodlar', icon: 'trend', routes: ['candidates', 'succession'] },
-  settings: { label: 'Sozlamalar', icon: 'list', routes: ['models', 'kpi', 'people', 'messages', 'gamification', 'team', 'audit', 'import', 'uat'] },
+  settings: { label: 'Sozlamalar', icon: 'list', routes: ['models', 'kpi', 'people', 'messages', 'gamification', 'team', 'preferences', 'audit', 'import', 'uat'] },
 };
 const hubOf = (path) => Object.entries(HUBS).find(([, h]) => h.routes.includes(path))?.[0] || null;
 
@@ -114,7 +118,7 @@ const ROUTE_RIGHTS = {
   observations: ['onb.observe'], meetings: ['onb.meetings', 'onb.meetApprove'], reminders: ['onb.reminders'],
   board: ['onb.view', 'onb.board', 'onb.checkin'], surveys: ['onb.surveys'], taskboard: ['onb.tasks'], messages: ['people.message'],
   courses: ['courses.view', 'courses.manage'], paths: ['courses.view', 'courses.manage'], models: ['models.manage'], team: ['team.manage'], people: ['people.view', 'org.manage'], gamification: ['gami.manage'],
-  audit: ['audit.view'], import: ['system.import'], uat: ['system.import'],
+  audit: ['audit.view'], import: ['system.import'], uat: ['system.import'], preferences: ['system.brand'],
 };
 const allowed = (user, path) => user.role === 'super' || D.canAny(user, ROUTE_RIGHTS[path] || []);
 const firstRoute = (user) => Object.keys(ROUTES).find((p) => allowed(user, p)) ?? '';
@@ -245,6 +249,17 @@ export default function App() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+  const prefs = prefsOf(state);
+  const css = brandCss(prefs);
+  useEffect(() => {
+    setThemeState(applyBrand(prefs, css));
+    let link = document.querySelector('link[rel="icon"]');
+    if (prefs.icon) { if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); } link.href = prefs.icon; } else if (link?.dataset.brand) link.remove();
+    if (link && prefs.icon) link.dataset.brand = '1';
+  }, [css, prefs.themes, prefs.defaultTheme, prefs.icon]);
+  const langs = enabledLangs(prefs);
+  const lang = langs.includes(session.lang) ? session.lang : defaultLang(prefs);
+  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
   const user = D.getStaff(state, session.userId) || D.getStaff(state, 'u-super');
   const actives = D.activeEmployees(state);
   const emp = actives.find((e) => e.id === session.employeeId) || actives[0];
@@ -288,6 +303,7 @@ export default function App() {
     else if (p0 === 'idp') page = <Idp />;
     else if (p0 === 'audit') page = <Audit />;
     else if (p0 === 'uat') page = <Uat />;
+    else if (p0 === 'preferences') page = <Preferences key={user.id} user={user} />;
   } else {
     if (!p0) page = <Today key={emp.id} emp={emp} />;
     else if (p0 === 'results') page = <MyResults key={emp.id} emp={emp} />;
@@ -331,9 +347,9 @@ export default function App() {
       {admin && menu && <div className="menu-backdrop" onClick={() => setMenu(false)} aria-hidden="true" />}
       <aside className="side" id="admin-menu" aria-label="Admin menyusi">
         <div className="side-brand">
-          <BrandMark />
+          <BrandMark src={prefs.icon} />
           <div>
-            <b>RegUP</b>
+            {prefs.logoMode === 'image' && prefs.logoImage ? <img className="side-logo" src={prefs.logoImage} alt={prefs.logoText || 'Logotip'} /> : <b>{prefs.logoText || 'RegUP'}</b>}
             <small>LMS · kompetensiyalar</small>
           </div>
         </div>
@@ -355,11 +371,17 @@ export default function App() {
             <button className={!admin ? 'on' : ''} title="Xodim o‘z kabinetini qanday ko‘radi" onClick={() => { setSession({ mode: 'employee' }); go('/'); }}>Xodim</button>
           </div>
           <button className="cmd-open" onClick={() => setCmd(true)} aria-label="Qidirish (⌘K)"><DsIcon name="search" size={16} /><span className="cmd-txt">Qidirish</span><kbd>⌘K</kbd></button>
-          <button className="theme-btn" onClick={() => setThemeState(setTheme(theme === 'dark' ? 'light' : 'dark'))} aria-label={theme === 'dark' ? 'Yorug‘ temaga o‘tish' : 'Qorong‘i temaga o‘tish'} title={theme === 'dark' ? 'Yorug‘ tema' : 'Qorong‘i tema'}>
+          {langs.length > 1 && (
+            <select className="lang-pick" value={lang} aria-label="Interfeys tili" title="Interfeys tili"
+              onChange={(e) => { setSession({ lang: e.target.value }); if (e.target.value !== 'uz') toast(`${LANG_LABEL[e.target.value]}: tarjima 1-reliz ishlab chiqishida qo‘shiladi, hozircha matnlar o‘zbekcha`); }}>
+              {langs.map((c) => <option key={c} value={c}>{c === 'kaa' ? 'QQ' : c.toUpperCase()}</option>)}
+            </select>
+          )}
+          {canToggleTheme() && <button className="theme-btn" onClick={() => setThemeState(setTheme(theme === 'dark' ? 'light' : 'dark'))} aria-label={theme === 'dark' ? 'Yorug‘ temaga o‘tish' : 'Qorong‘i temaga o‘tish'} title={theme === 'dark' ? 'Yorug‘ tema' : 'Qorong‘i tema'}>
             {theme === 'dark'
               ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
               : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>}
-          </button>
+          </button>}
           <button className="btn sm" style={{ marginLeft: 'auto', order: 9 }} title="Kirish ekrani: Telegram, SMS kod yoki login va parol" onClick={() => setSession({ loggedOut: true })}>Chiqish</button>
           {admin ? (
             <label className="who" title="Har bir admin o‘ziga berilgan huquqlar va doira bo‘yicha ishlaydi">

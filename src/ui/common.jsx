@@ -40,6 +40,7 @@ export function Panel({ title, actions, children, tight, className = '' }) {
 
 const ICONS = {
   home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+  palette: 'M12 21a9 9 0 1 1 9-9c0 2-1.5 3-3.5 3H16a2 2 0 0 0-1.4 3.4A1.6 1.6 0 0 1 12 21zM7.5 11.5h.01M10 7.5h.01M15 7.5h.01M17.5 11h.01',
   cards: 'M9 3h6v3H9zM7 4.5H5V21h14V4.5h-2M9 13.5l2 2 4-4',
   target: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 12h.01',
   inbox: 'M3 13h5l2 3h4l2-3h5M5.5 5h13L21 13v6H3v-6z',
@@ -66,7 +67,8 @@ export function Icon({ name, size = 18 }) {
   );
 }
 
-export function BrandMark() {
+export function BrandMark({ src }) {
+  if (src) return <div className="brand-mark has-img"><img src={src} alt="" /></div>;
   return (
     <div className="brand-mark">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

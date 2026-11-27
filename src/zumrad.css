@@ -272,3 +272,85 @@ td .btn, .work-group .btn, .ru-table .ru-btn, .ru-task .ru-btn { border-radius: 
 /* Progress chizig'i: jarayonda — yashil, 100% bo'lganda — neytral to'q (tugadi) */
 .near-bar i, .bars .b.pub .t i { background: var(--accent); }
 .near-bar i[style*="width: 100%"] { background: var(--done-fill); }
+
+/* ===================== Ko'rinish va til sahifasi ===================== */
+.prefs { display: grid; gap: 18px; max-width: 980px; padding-bottom: 72px; }
+.pref-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+.pref-stack { display: grid; gap: 20px; }
+.pref-label { font-weight: 600; margin-bottom: 6px; }
+.pref-hint { color: var(--ink-3); font-size: 13px; margin: 4px 0 8px; }
+.pref-field { margin-top: 10px; display: grid; gap: 2px; }
+.pref-field .i { width: 100%; }
+.pref-seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 4px; border-radius: 999px; background: var(--surface-sunken); }
+.pref-seg button { border: 0; background: transparent; padding: 7px 14px; border-radius: 999px; cursor: pointer; font-weight: 500; color: var(--ink-2); min-height: 36px; }
+.pref-seg button.on { background: var(--surface); color: var(--primary-text); font-weight: 600; box-shadow: var(--shadow); }
+.pref-seg button:focus-visible, .pref-preset:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.pref-img { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.pref-img-box { width: 96px; height: 96px; border-radius: 20px; background: var(--surface-sunken); display: grid; place-items: center; overflow: hidden; }
+.pref-img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.pref-img-box .brand-mark { width: 56px; height: 56px; border-radius: 16px; }
+.pref-img-box .brand-mark svg { width: 30px; height: 30px; }
+.pref-img label.btn { cursor: pointer; }
+
+.pref-presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.pref-preset { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); cursor: pointer; text-align: left; color: var(--ink); }
+.pref-preset:hover { border-color: var(--line-strong); }
+.pref-preset.on { border-color: var(--primary-text); box-shadow: inset 0 0 0 1px var(--primary-text); }
+.pref-preset .sw { display: inline-flex; flex: none; }
+.pref-preset .sw i { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--surface); margin-left: -6px; }
+.pref-preset .sw i:first-child { margin-left: 0; }
+.pref-preset b { display: block; font-weight: 600; }
+.pref-preset small { color: var(--ink-3); font-size: 12px; }
+
+.pref-colors { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; align-items: start; }
+.pref-colors > * { min-width: 0; }
+.pref-color-list { display: grid; gap: 4px; }
+.pref-color { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line-2); }
+.pref-color:last-of-type { border-bottom: 0; }
+.pc-txt { display: grid; gap: 2px; min-width: 0; }
+.pc-txt b { font-weight: 600; }
+.pc-txt small { color: var(--ink-3); font-size: 12.5px; }
+.pc-in { display: inline-flex; align-items: center; gap: 8px; flex: none; }
+.pc-in input[type='color'] { width: 40px; height: 40px; padding: 0; border: 1px solid var(--line-strong); border-radius: 12px; background: none; cursor: pointer; }
+.pc-in input[type='color']::-webkit-color-swatch-wrapper { padding: 3px; }
+.pc-in input[type='color']::-webkit-color-swatch { border: 0; border-radius: 8px; }
+.pc-in .i { width: 92px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; text-transform: lowercase; }
+
+.pref-preview { border-radius: 20px; padding: 12px; display: grid; grid-template-columns: 84px 1fr; gap: 10px; border: 1px solid var(--line); font-size: 12px; }
+.pp-side { display: grid; gap: 4px; align-content: start; }
+.pp-nav { padding: 6px 10px; border-radius: 999px; font-weight: 600; }
+.pp-main { display: grid; gap: 8px; }
+.pp-hero { border-radius: 16px; padding: 12px; color: #fff; display: grid; gap: 2px; }
+.pp-hero b { font-family: var(--font-display); font-size: 15px; letter-spacing: -0.02em; }
+.pp-card { border-radius: 14px; padding: 10px; display: grid; gap: 6px; }
+.pp-btn { justify-self: start; padding: 6px 12px; border-radius: 999px; font-weight: 600; }
+
+.pref-langs { list-style: none; margin: 0; padding: 4px 16px; }
+.pref-langs li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line-2); }
+.pref-langs li:last-child { border-bottom: 0; }
+.pref-langs li.off .pl-name, .pref-langs li.off .pl-code { opacity: 0.55; }
+.pl-move { display: inline-flex; gap: 4px; }
+.pl-move .btn { width: 34px; justify-content: center; padding: 0; height: 34px; }
+.pl-code { width: 38px; height: 28px; border-radius: 8px; background: var(--surface-sunken); display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--ink-2); flex: none; }
+.pl-name { flex: 1; font-weight: 500; }
+.pl-on { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; color: var(--ink-2); font-size: 13px; }
+.pl-on input { width: 18px; height: 18px; accent-color: var(--primary); }
+
+.pref-bar { position: sticky; bottom: 12px; z-index: 4; display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; padding: 10px 12px 10px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; box-shadow: var(--shadow-md); }
+.pref-bar > span { margin-right: auto; }
+
+.side-logo { display: block; max-height: 28px; max-width: 150px; object-fit: contain; }
+.brand-mark.has-img { background: var(--surface); padding: 0; overflow: hidden; }
+.brand-mark.has-img img { width: 100%; height: 100%; object-fit: cover; }
+.lang-pick { height: 38px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink-2); padding: 0 10px; font-weight: 600; font-size: 13px; cursor: pointer; flex: none; }
+.lang-pick:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+@media (max-width: 760px) {
+  .pref-colors { grid-template-columns: 1fr; }
+  .pref-bar { border-radius: 20px; }
+  .pref-langs { padding: 4px 12px; }
+}
+/* Yuqori panel: til tanlovi qo'shilgach o'rta kenglikda sig'ishi uchun foydalanuvchi tanlovi torayadi */
+.topbar .who { flex: 0 1 260px; min-width: 0; }
+.topbar .who select { width: 100%; min-width: 0; }
+.pc-in input.i { width: 92px; }
