@@ -236,19 +236,39 @@ h3 { font-weight: 700; letter-spacing: -0.01em; }
 ::selection { background: var(--brand-line); }
 
 /* ===================== 3-qism: yakuniy tuzatishlar ===================== */
-/* Muvaffaqiyat holati brenddan farq qilsin: zumrad emas, barg-yashil, va ✓ belgisi */
+/* «Bajarildi / tasdiqlandi / 100%» — rangsiz, tinch (B varianti, 27.11.2026).
+   Yashil faqat harakat va jarayon uchun; tugagan ish neytral to'q rangda va doim ✓ bilan. */
 :root {
-  --good: #3d7a1e; --good-soft: #ecf4de; --good-line: #cfe3ad; --good-tint: #f6faee;
-  --success: #3d7a1e; --success-soft: #ecf4de;
+  --good: #33443c; --good-soft: #e9eeeb; --good-line: #c9d3ce; --good-tint: #f5f7f6;
+  --success: #33443c; --success-soft: #e9eeeb;
+  --done-fill: #10241c; --done-ink: #ffffff;
 }
 :root[data-theme='dark'] {
-  --good: #b5dc84; --good-soft: #27341b; --good-line: #44602a; --good-tint: #1d2a17;
-  --success: #b5dc84; --success-soft: #27341b;
+  --good: #cfdad4; --good-soft: #22352d; --good-line: #3a4e45; --good-tint: #1b2a24;
+  --success: #cfdad4; --success-soft: #22352d;
+  --done-fill: #e9f2ed; --done-ink: #12201b;
 }
+/* Holat belgisi: neytral fon, to'q matn + ✓ — «baholanmagan» (kulrang matn, nuqta) bilan adashmaydi */
+.pill.good, .ru-badge--success { background: var(--good-soft); color: var(--ink); }
+.pos-chip.ok { background: var(--surface); color: var(--ink); border-color: var(--line-strong); }
 .pill.good::before {
   content: '✓'; width: auto; height: auto; border-radius: 0; background: none; opacity: 1;
   font-size: 11px; font-weight: 800; line-height: 1;
 }
+.score.ok, .onb-score.good { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.ic.ok, .step.done .dot, .rd.ok .rd-n, .path-track li.done .pt-n, .learn-item.done .pt-n, .rubric .lvl.sel b { background: var(--done-fill); border-color: var(--done-fill); color: var(--done-ink); }
+:root[data-theme='dark'] .ic.ok, :root[data-theme='dark'] .step.done .dot, :root[data-theme='dark'] .rd.ok .rd-n,
+:root[data-theme='dark'] .path-track li.done .pt-n, :root[data-theme='dark'] .learn-item.done .pt-n,
+:root[data-theme='dark'] .rubric .lvl.sel b { color: var(--done-ink); }
+.callout.good { background: var(--good-tint); color: var(--ink); border-color: var(--good-line); }
+.stat.good .ico-box { background: var(--good-soft); color: var(--ink); }
 
 /* Jadval va ish ro'yxatidagi tugmalar — kamroq yumaloq, zich qatorlarda tinch ko'rinadi */
 td .btn, .work-group .btn, .ru-table .ru-btn, .ru-task .ru-btn { border-radius: 10px; }
+
+/* Xodim yo'lidagi tugagan qadam — neytral */
+.ru-step__node--done { background: var(--good-soft); color: var(--ink); }
+
+/* Progress chizig'i: jarayonda — yashil, 100% bo'lganda — neytral to'q (tugadi) */
+.near-bar i, .bars .b.pub .t i { background: var(--accent); }
+.near-bar i[style*="width: 100%"] { background: var(--done-fill); }
